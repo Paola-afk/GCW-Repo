@@ -1,0 +1,49 @@
+body {
+    background-image: url("../images/background.jpg");
+    background-size: cover; /* Ajusta el tamaño de la imagen para cubrir toda la ventana del navegador */
+    background-position: center top; /* Centra la imagen en el cuerpo */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Arial', sans-serif;
+}
+
+.menu-container {
+    text-align: center;
+}
+
+.logo {
+    max-width: 90%;
+    margin-bottom: 20px; /* Ajusta el espacio debajo del logo */
+}
+
+.button-container {
+    margin-bottom: 20px; /* Espacio entre el botón grande y los botones pequeños */
+    justify-content: center;
+
+}
+
+.button img {
+    max-width: 100%;
+    display: block;
+    transition: transform 0.3s, box-shadow 0.3s; 
+    margin: 0 auto;
+    transform: scale(0.8); /* Escala el botón al 80% de su tamaño original */
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Espacio entre los botones pequeños */
+    
+}
+
+.button:hover img {
+    transform: scale(1.05); 
+    /* box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);  */
+    border-radius: 10px; 
+
+}

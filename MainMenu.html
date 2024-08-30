@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeowMadness - Menú Inicial</title>
+    <link rel="stylesheet" href="front/css/MainMenu.css">
+    <!-- <script>
+
+        function verificarAudio() {
+        const audio = document.getElementById('background-music');
+    
+            // Verificar si el audio estaba reproduciéndose
+            const isPlaying = localStorage.getItem('isAudioPlaying');
+            if (isPlaying === 'true') {
+                audio.play();
+            }
+
+            // Verificar y aplicar volumen guardado
+            const savedVolume = localStorage.getItem('audioVolume');
+            audio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1.0; // Si no hay volumen guardado, usar el valor por defecto
+
+            // Guardar estado del audio en localStorage cuando se reproduce o pausa
+            audio.addEventListener('play', () => {
+                localStorage.setItem('isAudioPlaying', 'true');
+            });
+            audio.addEventListener('pause', () => {
+                localStorage.setItem('isAudioPlaying', 'false');
+            });
+
+            // Evento para verificar si el audio está listo para reproducirse y sin errores
+            audio.addEventListener('loadedmetadata', () => {
+                console.log('El audio se ha cargado correctamente y está listo para reproducirse.');
+            });
+
+            // Evento para manejar errores de carga de audio
+            audio.addEventListener('error', (e) => {
+                console.error('Error al cargar el audio:', e);
+            });
+        }
+
+        window.onload = verificarAudio;
+    </script> -->
+
+</head>
+<body>
+    <!-- <audio id="background-music" src="./assets/audio/fondo.mp3" autoplay loop>
+        Tu navegador no soporta el elemento de audio.
+    </audio> -->
+
+    <div id="menu" class="menu-container">
+        <div >
+            <img src="front/UI/Meow-madness-14-8-2024.png" alt="MeowMadness" class="logo">
+        </div>
+        
+        <div class="button-container">
+            <div class="button"><a href="Escenarios.html"><img src="front/UI/ButtonEscenarios.png" alt="Escenarios"></a></div>
+        </div>
+        <div class="buttons-container">
+            <div class="button"><a href="Configuracion.html" ><img src="front/UI/ConfigVerde.png" alt="Configuracion"></a></div>
+            <div class="button"><a href="Informacion.html" ><img src="front/UI/InfoRojo.png" alt="Puntuaciones"></a></div>
+        </div>
+    </div>
+
+</body>
+</html>
