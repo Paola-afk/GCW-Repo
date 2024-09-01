@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeowMadness - Menú Configuracion</title>
+    <link rel="stylesheet" href="/front/css/SettingsMenu.css">
+</head>
+<body>
+    <div id="settings-menu" class="hidden">
+        <div class="menu-background">
+            <img src="/front/UI/ConfigMenu.png" alt="Fondo configuración">
+        </div>
+        <div class="settings-container">
+            <div class="setting-item">
+                <label for="music-volume">Música</label>
+                <br>
+                <input type="range" id="music-volume" name="music-volume" min="0" max="100" value="50">
+            </div>
+            <div class="setting-item">
+                <label for="sound-volume">Sonido</label>
+                <input type="range" id="sound-volume" name="sound-volume" min="0" max="100" value="50">
+            </div>
+        </div>
+        <div class="close-button">
+            <img src="/front/UI/close_button.png" alt="Cerrar" id="close-settings">
+        </div>
+    </div>
+    
+</body>
+</html>
