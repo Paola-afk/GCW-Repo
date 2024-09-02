@@ -8,24 +8,6 @@ body {
     background-color: lavender;
 }
 
-.close-button {
-    position: absolute;
-    top: 110px;
-    left: 590px;
-    width: 80px;
-    height: 80px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.close-button img {
-    width: 80px;
-    height: 80px;
-}
-
-.close-button:hover{
-    transform: scale(1.2);
-}
 
 #pause-menu {
     position: relative;
@@ -37,18 +19,20 @@ body {
 }
 
 .menu-background img {
-    width: 900px;
+    width: 700px;
     height: auto;
 }
 
 .menu-buttons {
     position: absolute;
-    top: 55%;
+    top: 37%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    transform: scale(0.8); /* Escala el botón al 80% de su tamaño original */
+
 }
 
 .menu-button {
@@ -69,14 +53,14 @@ body {
 
 .menu-buttons2 {
     position: absolute;
-    top: 74%;
+    top: 70%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
     gap: 70px; /* Espacio entre los botones pequeños */
-    transform: scale(0.85); /* Escala el botón al 80% de su tamaño original */
+    transform: scale(0.65); /* Escala el botón al 80% de su tamaño original */
 
 
 }
