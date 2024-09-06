@@ -1,0 +1,115 @@
+/* Estilos generales de la página */
+body {
+    font-family: Arial, sans-serif;
+    background-image: url("../images/gatitos6.jpg");
+    background-size: cover;
+    background-position: center top;
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos del menú */
+.menu-container {
+    text-align: center;
+    padding: 20px;
+    background-color: #222;
+    color: white;
+}
+
+.logo {
+    max-width: 200px;
+}
+
+.button-container, .buttons-container {
+    margin-top: 20px;
+}
+
+.button {
+    margin: 10px;
+}
+
+.button img {
+    width: 150px;
+    cursor: pointer;
+}
+
+/* Estilos generales de la tabla */
+table {
+    width: 100%;               /* Hacer que la tabla ocupe el 100% del ancho del contenedor */
+    border-collapse: collapse;  /* Eliminar el espacio entre las celdas */
+    margin-top: 20px;           /* Agregar margen superior */
+    font-family: Arial, sans-serif; /* Fuente general */
+    background-color: #f9f9f9;  /* Fondo de la tabla */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Sombra alrededor de la tabla */
+}
+
+/* Estilos para las celdas de la tabla */
+td, th {
+    padding: 12px 15px;        /* Espaciado dentro de las celdas */
+    border: 1px solid #dddddd; /* Bordes ligeros entre celdas */
+    text-align: left;          /* Alinear el contenido a la izquierda */
+    font-size: 14px;           /* Tamaño de texto */
+    color: #333333;            /* Color de texto */
+}
+
+/* Estilo para las filas impares (efecto de zebra) */
+tr:nth-child(odd) {
+    background-color: #f1f1f1; /* Fondo gris claro para las filas impares */
+}
+
+/* Estilo para las filas al pasar el ratón */
+tr:hover {
+    background-color: #e0e0e0; /* Fondo más oscuro al hacer hover */
+}
+
+/* Estilos para el encabezado de la tabla */
+th {
+    background-color: #4CAF50;  /* Fondo verde para el encabezado */
+    color: white;               /* Texto blanco para el encabezado */
+    text-transform: uppercase;   /* Texto en mayúsculas */
+    letter-spacing: 0.1em;       /* Espaciado entre letras */
+}
+
+/* Ajuste adicional para pantallas pequeñas */
+@media screen and (max-width: 600px) {
+    table {
+        font-size: 12px;         /* Texto más pequeño en pantallas pequeñas */
+    }
+
+    td, th {
+        padding: 8px 10px;      /* Reducir el padding en pantallas pequeñas */
+    }
+}
+
+/* Estilos del input y botón para comentarios */
+.comment-section {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.comment-section label {
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.comment-section input[type="text"] {
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.comment-section button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.comment-section button:hover {
+    background-color: #45a049;
+}
