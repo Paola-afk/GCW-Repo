@@ -5,8 +5,12 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: lavender;
+    background-image: url('../images/juego.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
+
 
 #pause-menu {
     position: relative;
@@ -27,16 +31,16 @@ body {
 }
 
 .menu-buttons .menu-button {
-    position: absolute;
-    width: 50px; /* Ajusta el tamaño de los botones según sea necesario */
-    height: 50px; /* Ajusta el tamaño de los botones según sea necesario */
+    position: fixed; /* Coloca los botones en posiciones fijas */
+    width: 100px; /* Ajusta el tamaño de los botones según sea necesario */
+    height: 100px; /* Ajusta el tamaño de los botones según sea necesario */
     z-index: 2; /* Asegura que los botones están por encima de la imagen del juego */
 }
 
 #escenario-1 {
     width: 200px;
     height: auto;
-    top: 100px;
+    top: 50px;
     left: 50px;
     z-index: 2;
 }
@@ -44,7 +48,7 @@ body {
 #escenario-2 {
     width: 200px;
     height: auto;
-    bottom: 130px;
+    bottom: 50px;
     left: 50px;
     z-index: 2;
 }
@@ -52,25 +56,10 @@ body {
 #escenario-3 {
     width: 60px;
     height: auto;
-    top: 80px;
-    right: 70px;
+    top: 50px;
+    right: 50px;
     z-index: 2;
 }
-
-.juego-img {
-    position: absolute;
-    top: 47%;
-    left: 49%;
-    width: 800px !important; /* Forzar el tamaño de la imagen */
-    height: 500px !important; /* Mantener la proporción */
-    transform: translate(-50%, -50%);
-    border: 3px solid black;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-
-
 
 .game-base img:first-child {
     z-index: 0; /* El fondo está en la capa más baja */
