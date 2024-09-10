@@ -65,13 +65,13 @@
 
     <script>
         window.fbAsyncInit = function() {
-          FB.init({
+        FB.init({
             appId            : '1046131813667684',
             xfbml            : true,
             version          : 'v20.0'
-          });
+        });
 
-          FB.api(
+        FB.api(
             "404505349416260/feed", 
             "POST", 
             {
@@ -85,10 +85,10 @@
                     console.log("error");
                 }
             }
-          );
+        );
 
 
-          FB.api2(
+        FB.api2(
             "122101681190511430/posts", 
             "GET", 
             {
@@ -101,10 +101,10 @@
                     console.log("error");
                 }
             }
-          );
+        );
 
         };
-      </script>
-      <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+    </script>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 </body>
 </html>
