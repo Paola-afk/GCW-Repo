@@ -16,8 +16,8 @@ body {
     padding: 20px;
     background: url('front/UI/ConfigMenu2.png') no-repeat center;
     background-size: contain;
-    width: 320px; /* Ajustar el ancho según la imagen */
-    height: 450px; /* Ajustar el alto según la imagen */
+    width: 320px;
+    height: 450px; 
 }
 
 .menu-background img {
@@ -86,7 +86,7 @@ body {
     right: -15px;
     cursor: pointer;
     transition: transform 0.3s ease;
-    transform: scale(1.5); /* Escala el botón al 80% de su tamaño original */
+    transform: scale(1.5); 
 
 }
 

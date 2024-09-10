@@ -22,7 +22,7 @@ body {
 }
 
 .game-base {
-    position: relative; /* Contenedor relativo para posicionar los botones */
+    position: relative; 
 }
 
 .game-base img {
@@ -31,11 +31,20 @@ body {
 }
 
 .menu-buttons .menu-button {
-    position: fixed; /* Coloca los botones en posiciones fijas */
-    width: 100px; /* Ajusta el tamaño de los botones según sea necesario */
-    height: 100px; /* Ajusta el tamaño de los botones según sea necesario */
-    z-index: 2; /* Asegura que los botones están por encima de la imagen del juego */
+    position: fixed; 
+    width: 100px; 
+    height: 100px; 
+    z-index: 2; 
+    transition: transform 0.3s ease;
 }
+
+.menu-buttons .menu-button:hover {
+    transform: translateY(-5px);
+    /*width: 210px;
+    height: 210px;
+    */
+}
+
 
 #escenario-1 {
     width: 200px;
