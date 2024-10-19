@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modelos</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      #icon-container {
+        position: absolute;
+        top: 20px; /* Ajusta según tus necesidades */
+        left: 20px; /* Ajusta según tus necesidades */
+        z-index: 1; /* Asegúrate de que esté por encima de la escena */
+      }
+
+      .menu-button {
+        width: 50px; /* Ajusta según tus necesidades */
+        margin: 5px;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+        #pause-menu {
+      position: relative;
+      width: 80%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+        .menu-buttons .menu-button {
+        position: fixed; 
+        width: 100px; 
+        height: 100px; 
+        z-index: 2; 
+        transition: transform 0.3s ease;
+    }
+
+    .menu-buttons .menu-button:hover {
+        transform: translateY(-5px);
+        /*width: 210px;
+        height: 210px;
+        */
+    }
+
+
+    #escenario-1 {
+        width: 200px;
+        height: auto;
+        top: 50px;
+        left: 50px;
+        z-index: 2;
+    }
+
+    #escenario-2 {
+        width: 200px;
+        height: auto;
+        bottom: 50px;
+        left: 50px;
+        z-index: 2;
+    }
+
+    #escenario-3 {
+        width: 60px;
+        height: auto;
+        top: 50px;
+        right: 50px;
+        z-index: 2;
+    }
+    </style>
+  </head>
+  <body>
+
+    <div id="icon-container">
+      <img
+        src="front/UI/Points.png"
+        alt="Esc1"
+        class="menu-button"
+        id="escenario-1"
+      />
+      <img
+        src="front/UI/Power.png"
+        alt="Esc2"
+        class="menu-button"
+        id="escenario-2"
+      />
+      <a href="PauseMenu.html">
+        <img
+          src="front/UI/Pause_button.png"
+          alt="Pause"
+          class="menu-button"
+          id="escenario-3"
+        />
+      </a>
+    </div>
+
+    <script type="module">
+      import * as THREE from "./three.module.js";
+      import { OrbitControls } from "./OrbitControls.js";
+      import { STLLoader } from "./STLLoader.js";
+      import { GLTFLoader } from "./GLTFLoader.js";
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("#34495E");
+
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight
+      );
+
+      camera.position.set(0, 5, 20);
+
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
+
+      const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+      scene.add(hemisphereLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(1, 5, -1);
+      scene.add(directionalLight);
+
+      const cube1Geometry = new THREE.BoxGeometry(1, 1, 1);
+
+      const cube1Material = new THREE.MeshPhongMaterial({ color: "aqua" });
+      const cube1 = new THREE.Mesh(cube1Geometry, cube1Material);
+      cube1.castShadow = true;
+      cube1.position.set(3, 0, 0);
+
+      const planeGeometry = new THREE.PlaneGeometry(50, 50);
+      const planeMaterial = new THREE.MeshStandardMaterial({
+        color: "slategrey",
+      });
+      const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+      plane.rotateX(-Math.PI / 2);
+      plane.position.set(0, -0.5, 0);
+
+      document.onkeydown = function (e) {
+        if (e.keyCode == 37) {
+          cube2.position.x -= 1;
+        }
+
+        if (e.keyCode == 39) {
+          cube2.position.x += 1;
+        }
+
+        if (e.keyCode == 38) {
+          cube2.position.z -= 1;
+        }
+
+        if (e.keyCode == 40) {
+          cube2.position.z += 1;
+        }
+      };
+
+      scene.add(cube1, plane);
+
+
+      const loaderSTL = new STLLoader();
+      loaderSTL.load("deadMouse.stl", function (model) {
+        console.log(model);
+        const material = new THREE.MeshPhongMaterial({ color: "red" });
+        const mesh = new THREE.Mesh(model, material);
+        mesh.rotateX(-Math.PI / 2);
+        mesh.scale.set(0.03, 0.03, 0.03);
+        scene.add(mesh);
+        console.log(mesh);
+      });
+
+      const loaderGLTF = new GLTFLoader();
+      loaderGLTF.load(
+        "police_officer_redford_-_proto_series_-_free.glb",
+        function (model) {
+          const obj = model.scene;
+          obj.scale.set(0.03, 0.03, 0.03);
+          obj.position.set(6, 0, 0);
+          scene.add(obj);
+        }
+      );
+
+
+
+    const loaderGLB = new GLTFLoader();
+      loaderGLTF.load(
+        "/Modelos/Gatito-Grande.glb",
+        function (model) {
+          const obj = model.scene;
+          obj.scale.set(1.03, 1.03, 1.03);
+          obj.position.set(6, 0, 0);
+          scene.add(obj);
+        }
+      );
+
+      let mixer;
+      const kazurka = new GLTFLoader();
+      kazurka.load("./kazurka/scene.gltf", function (model) {
+        console.log(model);
+        const obj = model.scene;
+        obj.position.set(-6, 0, 0);
+        scene.add(obj);
+
+        mixer = new THREE.AnimationMixer(obj);
+        const action = mixer.clipAction(model.animations[1]);
+        action.play();
+      });
+
+      const cameraControl = new OrbitControls(camera, renderer.domElement);
+
+      function animate() {
+        if (mixer) {
+          mixer.update(0.01);
+        }
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
