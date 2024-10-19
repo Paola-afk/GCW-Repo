@@ -182,7 +182,7 @@
 
       const loaderGLTF = new GLTFLoader();
       loaderGLTF.load(
-        "police_officer_redford_-_proto_series_-_free.glb",
+        "/Modelos/Gatito-Grande.glb",
         function (model) {
           const obj = model.scene;
           obj.scale.set(0.03, 0.03, 0.03);
@@ -204,6 +204,31 @@
         }
       );
 
+
+      const loaderGLB1 = new GLTFLoader();
+      loaderGLTF.load(
+        "/Modelos/Lata-PIA.glb",
+        function (model) {
+          const obj = model.scene;
+          obj.scale.set(6.03, 6.03, 6.03);
+          obj.position.set(3, 4, 0);
+          scene.add(obj);
+        }
+      );
+
+
+      const loaderGLB2 = new GLTFLoader();
+      loaderGLTF.load(
+        "/Modelos/Manotas-PIA.glb",
+        function (model) {
+          const obj = model.scene;
+          obj.scale.set(1.03, 1.03, 1.03);
+          obj.position.set(0, 4, 0);
+          scene.add(obj);
+        }
+      );
+
+/*
       let mixer;
       const kazurka = new GLTFLoader();
       kazurka.load("./kazurka/scene.gltf", function (model) {
@@ -228,6 +253,7 @@
       }
 
       animate();
+      */
     </script>
   </body>
 </html>
