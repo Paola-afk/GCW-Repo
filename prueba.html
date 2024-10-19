@@ -121,6 +121,7 @@
     directionalLight.position.set(1, 5, -1);
     scene.add(directionalLight);
 
+    /*
     const planeGeometry = new THREE.PlaneGeometry(50, 50);
     const planeMaterial = new THREE.MeshStandardMaterial({
         color: "slategrey",
@@ -129,6 +130,7 @@
     plane.rotateX(-Math.PI / 2);
     plane.position.set(0, -0.5, 0);
     scene.add(plane);
+    */
 
       // Carga del modelo del gatito
     const loaderGLB = new GLTFLoader();
@@ -150,6 +152,17 @@
         const obj = model.scene;
         obj.scale.set(0.5, 0.5, 0.5);
         obj.position.set(3, 0, 0);
+        scene.add(obj);
+        }
+    );
+
+    const loaderGLB2 = new GLTFLoader();
+    loaderGLB2.load(
+        "/Modelos/Bosque-PIA.glb",
+        function (model) {
+        const obj = model.scene;
+        obj.scale.set(7.5, 7.5, 7.5);
+        obj.position.set(0, -0.5, 0);
         scene.add(obj);
         }
     );
