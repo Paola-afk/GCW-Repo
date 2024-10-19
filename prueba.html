@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MeowMadness - Game</title>
+    <style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: url('../front/images/juego.png') no-repeat center center fixed;
+        background-size: cover;
+    }
+
+    #icon-container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 1;
+    }
+
+    .menu-button {
+        width: 50px;
+        margin: 5px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .menu-buttons .menu-button {
+        position: fixed;
+        width: 100px;
+        height: 100px;
+        z-index: 2;
+        transition: transform 0.3s ease;
+    }
+
+    .menu-buttons .menu-button:hover {
+        transform: translateY(-5px);
+    }
+
+    #escenario-1 {
+        width: 200px;
+        height: auto;
+        top: 50px;
+        left: 50px;
+        z-index: 2;
+    }
+
+    #escenario-2 {
+        width: 200px;
+        height: auto;
+        bottom: 50px;
+        left: 50px;
+        z-index: 2;
+    }
+
+    #escenario-3 {
+        width: 60px;
+        height: auto;
+        top: 50px;
+        right: 50px;
+        z-index: 2;
+    }
+    </style>
+
+</head>
+<body>
+    <div id="icon-container">
+    <img
+        src="front/UI/Points.png"
+        alt="Esc1"
+        class="menu-button"
+        id="escenario-1"
+    />
+    <img
+        src="front/UI/Power.png"
+        alt="Esc2"
+        class="menu-button"
+        id="escenario-2"
+    />
+    <a href="PauseMenu.html">
+        <img
+        src="front/UI/Pause_button.png"
+        alt="Pause"
+        class="menu-button"
+        id="escenario-3"
+        />
+    </a>
+    </div>
+
+    <script type="module">
+        import * as THREE from "./three.module.js";
+        import { OrbitControls } from "./OrbitControls.js";
+        import { GLTFLoader } from "./GLTFLoader.js";
+
+        const scene = new THREE.Scene();  
+        scene.background = new THREE.Color("#34495E");
+
+        const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight
+        );
+
+    camera.position.set(0, 5, 20);
+
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+    scene.add(hemisphereLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(1, 5, -1);
+    scene.add(directionalLight);
+
+    const planeGeometry = new THREE.PlaneGeometry(50, 50);
+    const planeMaterial = new THREE.MeshStandardMaterial({
+        color: "slategrey",
+    });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.rotateX(-Math.PI / 2);
+    plane.position.set(0, -0.5, 0);
+    scene.add(plane);
+
+      // Carga del modelo del gatito
+    const loaderGLB = new GLTFLoader();
+    loaderGLB.load(
+        "/Modelos/Gatito-Grande.glb",
+        function (model) {
+        const obj = model.scene;
+        obj.scale.set(0.9, 0.9, 0.9);
+        obj.position.set(6, 3, 0);
+        scene.add(obj);
+        }
+    );
+
+      // Carga del modelo de la lata
+    const loaderGLB1 = new GLTFLoader();
+    loaderGLB1.load(
+        "/Modelos/Lata-PIA.glb",
+        function (model) {
+        const obj = model.scene;
+        obj.scale.set(0.5, 0.5, 0.5);
+        obj.position.set(3, 0, 0);
+        scene.add(obj);
+        }
+    );
+
+    const cameraControl = new OrbitControls(camera, renderer.domElement);
+
+    function animate() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+    </script>
+</body>
+</html>
