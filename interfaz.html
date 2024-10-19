@@ -191,20 +191,6 @@
         }
       );
 
-
-
-    const loaderGLB = new GLTFLoader();
-      loaderGLTF.load(
-        "/Modelos/Gatito-Grande.glb",
-        function (model) {
-          const obj = model.scene;
-          obj.scale.set(1.03, 1.03, 1.03);
-          obj.position.set(6, 0, 0);
-          scene.add(obj);
-        }
-      );
-
-
       const loaderGLB1 = new GLTFLoader();
       loaderGLTF.load(
         "/Modelos/Lata-PIA.glb",
@@ -228,7 +214,7 @@
         }
       );
 
-/*
+
       let mixer;
       const kazurka = new GLTFLoader();
       kazurka.load("./kazurka/scene.gltf", function (model) {
@@ -253,7 +239,6 @@
       }
 
       animate();
-      */
     </script>
   </body>
 </html>
