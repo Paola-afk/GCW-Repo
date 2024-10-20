@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Modelos</title>
+    <title>Galaxia</title>
     <style>
         body {
             margin: 0;
@@ -14,6 +14,7 @@
             height: 100vh;
             position: relative;
         }
+
 
         #icon-container {
             position: absolute;
@@ -34,27 +35,41 @@
             display: none;
         }
 
+    .menu-button:hover {
+        position: fixed; 
+        z-index: 2; 
+        transition: transform 0.3s ease;
+    }
+
+    .menu-button:hover {
+        transform: translateY(-5px);
+        /*width: 210px;
+        height: 210px;
+          */
+    }
+
+
         /* Estilos para cada botón en sus esquinas */
-        #escenario-1 {
-            width: 200px;
-            height: 60px;
-            top: 25px;
-            left: 50px;
-        }
+    #escenario-1 {
+        width: 200px;
+        height: auto;
+        top: 25px;
+        left: 50px;
+    }
 
-        #escenario-2 {
-            width: 150px;
-            height: 150px;
-            bottom: 20px;
-            left: 20px;
-        }
+    #escenario-2 {
+        width: 200px;
+        height: 200px;
+        bottom: 20px;
+        left: 20px;
+    }
 
-        #escenario-3 {
-            width: 150px;
-            height: 150px;
-            top: 20px;
-            right: 20px;
-        }
+    #escenario-3 {
+        width: 60px;
+        height: 60px;
+        top: 20px;
+        right: 20px;
+    }
     </style>
 </head>
 <body>
@@ -228,24 +243,24 @@
 
 
         const keysPressed = {};
-      const arrowKeysPressed = {};
+        const arrowKeysPressed = {};
 
       // Escuchar cuando una tecla es presionada
-      document.addEventListener("keydown", (e) => {
+        document.addEventListener("keydown", (e) => {
         keysPressed[e.key] = true; // primer gatito
-        if (e.key.startsWith("Arrow")) {
-          arrowKeysPressed[e.key] = true; // segundo gatito
-        }
-      });
+            if (e.key.startsWith("Arrow")) {
+            arrowKeysPressed[e.key] = true; // segundo gatito
+            }
+        });
 
-      document.addEventListener("keyup", (e) => {
+        document.addEventListener("keyup", (e) => {
         keysPressed[e.key] = false; 
-        if (e.key.startsWith("Arrow")) {
-          arrowKeysPressed[e.key] = false;
-        }
-      });
+            if (e.key.startsWith("Arrow")) {
+                arrowKeysPressed[e.key] = false;
+            }
+        });
 
-      function updateMovement() {
+        function updateMovement() {
             const moveSpeed = 0.2; // Ajusta la velocidad de movimiento
             const rotationSpeed = 0.1; // Velocidad de rotación
 
@@ -301,6 +316,20 @@
                 catModel2.rotation.y += (secondRotationY - catModel2.rotation.y) * rotationSpeed;
             }
         }
+
+
+         // Skybox
+        const loader = new THREE.CubeTextureLoader();
+        const skyboxTextures = loader.load([
+            "/front/images/galaxy.png", 
+            "/front/images/galaxy.png", 
+            "/front/images/galaxy.png", 
+            "/front/images/galaxy.png", 
+            "/front/images/galaxy.png", 
+            "/front/images/galaxy.png", 
+        ]);
+
+      scene.background = skyboxTextures;
 
 
         const cameraControl = new OrbitControls(camera, renderer.domElement);

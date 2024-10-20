@@ -34,24 +34,38 @@
             display: none;
         }
 
+        .menu-button:hover {
+          position: fixed; 
+          z-index: 2; 
+          transition: transform 0.3s ease;
+      }
+
+      .menu-button:hover {
+          transform: translateY(-5px);
+          /*width: 210px;
+          height: 210px;
+          */
+      }
+
+
         /* Estilos para cada botón en sus esquinas */
         #escenario-1 {
             width: 200px;
-            height: 60px;
+            height: auto;
             top: 25px;
             left: 50px;
         }
 
         #escenario-2 {
-            width: 150px;
-            height: 150px;
+            width: 200px;
+            height: 200px;
             bottom: 20px;
             left: 20px;
         }
 
         #escenario-3 {
-            width: 150px;
-            height: 150px;
+            width: 60px;
+            height: 60px;
             top: 20px;
             right: 20px;
         }
