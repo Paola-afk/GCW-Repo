@@ -5,78 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modelos</title>
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
 
-      #icon-container {
-        position: absolute;
-        top: 20px; 
-        left: 20px;
-        z-index: 1; 
-      }
+        #icon-container {
+            position: absolute;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
 
-      .menu-button {
-        width: 50px;
-        margin: 5px;
-      }
+        .menu-button {
+            width: 60px;
+            height: 60px;
+            position: absolute;
+            pointer-events: auto;
+        }
 
-      .hidden {
-        display: none;
-      }
+        .hidden {
+            display: none;
+        }
 
-      #pause-menu {
-        position: relative;
-        width: 80%;
-        max-width: 500px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
+        /* Estilos para cada botón en sus esquinas */
+        #escenario-1 {
+            width: 200px;
+            height: 60px;
+            top: 25px;
+            left: 50px;
+        }
 
-      .menu-button {
-        position: fixed;
-        width: 100px;
-        height: 100px;
-        z-index: 2;
-        transition: transform 0.3s ease;
-      }
+        #escenario-2 {
+            width: 150px;
+            height: 150px;
+            bottom: 20px;
+            left: 20px;
+        }
 
-      .menu-button:hover {
-        transform: translateY(-5px);
-      }
-
-      #escenario-1 {
-        position: absolute;
-        width: 230px;
-        height: auto;
-        top: 10px;
-        left: 50px;
-        z-index: 2;
-      }
-
-      #escenario-2 {
-        position: absolute;
-        width: 230px;
-        height: auto;
-        top: 450px;
-        left: 40px;
-        z-index: 2;
-      }
-
-      #escenario-3 {
-        position: absolute;
-        width: 60px;
-        height: auto;
-        top: 10px;
-        left: 1400px;
-        z-index: 2;
-      }
+        #escenario-3 {
+            width: 150px;
+            height: 150px;
+            top: 20px;
+            right: 20px;
+        }
     </style>
   </head>
   <body>
@@ -131,23 +109,29 @@
       directionalLight.position.set(1, 5, -1);
       scene.add(directionalLight);
 
+
+      let catModel1, catModel2;
+      const latas = [];
+      const manotas = [];
+      const estambres = [];
+      const colisiones = [];
+
+
       // Gatito 1
-      let catModel;
       const loaderGLTF = new GLTFLoader();
       loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-        catModel = model.scene;
-        catModel.scale.set(0.4, 0.4, 0.4);
-        catModel.position.set(10, 1.3, 5);
-        scene.add(catModel);
+        catModel1 = model.scene;
+        catModel1.scale.set(0.7, 0.7, 0.7);
+        catModel1.position.set(10, 2, 5);
+        scene.add(catModel1);
       });
 
       // Gatito 2
-      let catModel2;
       const loaderGLTF2 = new GLTFLoader();
       loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
         catModel2 = model.scene;
-        catModel2.scale.set(0.4, 0.4, 0.4);
-        catModel2.position.set(4, 1.3, 5);
+        catModel2.scale.set(0.7, 0.7, 0.7);
+        catModel2.position.set(4, 2, 5);
         scene.add(catModel2);
       });
 
@@ -155,10 +139,165 @@
       const loaderForest = new GLTFLoader();
       loaderForest.load("/Modelos/Bosque-PIA.glb", function (model) {
         const forestModel = model.scene;
-        forestModel.scale.set(7, 7, 7);
+        forestModel.scale.set(20, 20, 20);
         forestModel.position.set(0, -0.5, 0);
         scene.add(forestModel);
       });
+
+
+
+      const loaderCan = new GLTFLoader();
+        function cargarLata(x, y, z) {
+            loaderCan.load("/Modelos/Lata-PIA.glb", function (model) {
+                const canModel = model.scene;
+                canModel.name = "Lata"; // Establecer nombre para identificar
+                canModel.scale.set(1, 1, 1);
+                canModel.position.set(x, y, z);
+                scene.add(canModel);
+                latas.push(canModel);
+            });
+        }
+
+        cargarLata(25, 0, 50);
+        cargarLata(15, 0, -30);
+
+        function cargarManotas(x, y, z) {
+            loaderCan.load("/Modelos/Manotas-PIA.glb", function (model) {
+                const manotasModel = model.scene;
+                manotasModel.name = "Manotas"; // Establecer nombre para identificar
+                manotasModel.scale.set(1, 1, 1);
+                manotasModel.position.set(x, y, z);
+                scene.add(manotasModel);
+                manotas.push(manotasModel);
+            });
+        }
+
+        cargarManotas(-50, 2, -55);
+        cargarManotas(-19, 2, 20);
+
+        function cargarEstambre(x, y, z) {
+            loaderCan.load("/Modelos/Bola-Estambre.glb", function (model) {
+                const estambreModel = model.scene;
+                estambreModel.name = "Estambre"; // Establecer nombre para identificar
+                estambreModel.scale.set(1, 1, 1);
+                estambreModel.position.set(x, y, z);
+                scene.add(estambreModel);
+                estambres.push(estambreModel);
+            });
+        }
+
+        cargarEstambre(62, 0.5, -34);
+        cargarEstambre(-46, 0.5, 27);
+
+        let gatitoManotasModel; // Declaración global
+        // Carga del modelo GatitoManotas
+        loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
+            gatitoManotasModel = model.scene;
+            gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
+            console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
+        });
+
+
+
+        // Esta función crea un objeto de colisión
+        function crearColision(x, y, z, width, height, depth) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+            const collisionBox = new THREE.Mesh(geometry, material);
+            collisionBox.position.set(x, y, z);
+            scene.add(collisionBox);
+            colisiones.push(collisionBox);
+        }
+
+        // Llama a crearColision para cada objeto que desees que tenga colisión
+        crearColision(-9, 0, 28, 6, 10, 6); // Lata 1
+        crearColision(-20, 0, 68, 6, 10, 6); // Lata 1
+        crearColision(-38, 0, 75, 6, 10, 6); // Lata 1
+        crearColision(-36, 0, 41, 6, 10, 6); // Lata 1
+        crearColision(11, 0, 75, 6, 10, 6); // Lata 1
+        crearColision(-72, 0, 39, 6, 10, 6); // Lata 1
+        crearColision(-68, 0, 26, 6, 10, 6); // Lata aaa
+        crearColision(-64, 0, 58, 6, 10, 6); // Lata 1
+        crearColision(-66, 0, 72, 6, 10, 6); // Lata 1
+        crearColision(77, 0, 72, 6, 10, 6); // Lata 1
+        crearColision(78, 0, 41, 6, 10, 6); // Lata 1
+        crearColision(75, 0, 15, 6, 10, 6); // Lata 1
+        crearColision(75, 0, -11, 6, 10, 6); // Lata 1
+        crearColision(68, 0, -34, 6, 10, 6); // Lata 1
+        crearColision(72, 0, -50, 6, 10, 6); // Lata 1
+        crearColision(68, 0, -77, 6, 10, 6); // Lata 1
+        crearColision(41, 0, -76, 6, 10, 6); // Lata 1
+        crearColision(17, 0, -76, 6, 10, 6); // Lata bbbbbb
+        crearColision(20, 0, -36, 6, 10, 6); // Lata 1
+        crearColision(33, 0, -51, 6, 10, 6); // Lata 1
+        crearColision(46, 0, -40, 6, 10, 6); // Lata 1
+        crearColision(-14, 0, -74, 6, 10, 6); // Lata 1
+        crearColision(-35, 0, -73, 6, 10, 6); // Lata 1
+        crearColision(-53, 0, -75, 6, 10, 6); // Lata 1
+        crearColision(-74, 0, -73, 6, 10, 6); // Lata aaaaaa
+        crearColision(-54, 0, -55, 6, 10, 6); // Lata 1
+        crearColision(-24, 0, -55, 6, 10, 6); // Lata 1
+        crearColision(-45, 0, -32, 6, 10, 6); // Lata 1
+        crearColision(-47, 0, -1, 6, 10, 6); // Lata 1
+        crearColision(-74, 0, -44, 6, 10, 6); // Lata 1
+        crearColision(-74, 0, -26, 6, 10, 6); // Lata 1
+        crearColision(-70, 0, -4, 6, 10, 6); // Lata 1
+        crearColision(43, 0, 49, 12, 10, 8); // Lata 1
+        crearColision(3, 0, -13, 9, 10, 33); // Lata 1
+
+
+
+
+        // Modificar la función detectarColision
+        function detectarColision(gatito) {
+            const objetosInteractivos = [...latas, ...manotas, ...estambres];
+            const objetosAEliminar = [];
+
+            objetosInteractivos.forEach((objeto) => {
+                const distancia = gatito.position.distanceTo(objeto.position);
+                if (distancia < 2.5) {
+                    objetosAEliminar.push(objeto);
+                }
+            });
+
+            objetosAEliminar.forEach((objeto) => {
+                console.log(`Colisión detectada con: ${objeto.name}`);
+                scene.remove(objeto);
+
+                const indexLatas = latas.indexOf(objeto);
+                if (indexLatas !== -1) {
+                    latas.splice(indexLatas, 1);
+                    console.log(`Lata eliminada. Quedan: ${latas.length}`);
+                }
+
+                const indexManotas = manotas.indexOf(objeto);
+                if (indexManotas !== -1) {
+                    manotas.splice(indexManotas, 1);
+                    console.log(`Manota eliminada. Quedan: ${manotas.length}`);
+
+                    if (gatito === catModel1) {
+                        scene.remove(catModel1);
+                        catModel1 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
+                        catModel1.position.copy(gatito.position);
+                        scene.add(catModel1);
+                        console.log("GatitoManotas añadido en la posición:", catModel1.position); // Verifica la posición
+                    } else if (gatito === catModel2) {
+                        scene.remove(catModel2);
+                        catModel2 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
+                        catModel2.position.copy(gatito.position);
+                        scene.add(catModel2);
+                        console.log("GatitoManotas añadido en la posición:", catModel2.position); // Verifica la posición
+                    }
+                }
+
+                const indexEstambres = estambres.indexOf(objeto);
+                if (indexEstambres !== -1) {
+                    estambres.splice(indexEstambres, 1);
+                    console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
+                }
+            });
+        }
+
 
       const keysPressed = {};
       const arrowKeysPressed = {};
@@ -179,31 +318,31 @@
       });
 
       function updateMovement() {
-        const moveSpeed = 0.05; // Ajusta la velocidad de movimiento
+        const moveSpeed = 0.2; // Ajusta la velocidad de movimiento
 
         // Movimiento del primer gatito
-        if (!catModel) return; 
-        let rotationY = catModel.rotation.y;
+        if (!catModel1) return; 
+        let rotationY = catModel1.rotation.y;
 
         if (keysPressed["s"]) {
-          catModel.position.z -= moveSpeed;
+          catModel1.position.z += moveSpeed;
           rotationY = 0;
         }
         if (keysPressed["w"]) {
-          catModel.position.z += moveSpeed;
+          catModel1.position.z -= moveSpeed;
           rotationY = Math.PI;
         }
         if (keysPressed["a"]) {
-          catModel.position.x -= moveSpeed;
+          catModel1.position.x -= moveSpeed;
           rotationY = -Math.PI / 2;
         }
         if (keysPressed["d"]) {
-          catModel.position.x += moveSpeed;
+          catModel1.position.x += moveSpeed;
           rotationY = Math.PI / 2;
         }
         
         if (keysPressed["w"] || keysPressed["s"] || keysPressed["a"] || keysPressed["d"]) {
-          catModel.rotation.y = rotationY;
+          catModel1.rotation.y = rotationY;
         }
 
         // Movimiento del segundo gatito
@@ -211,11 +350,11 @@
         let secondRotationY = catModel2.rotation.y;
 
         if (arrowKeysPressed["ArrowDown"]) {
-          catModel2.position.z -= moveSpeed;
+          catModel2.position.z += moveSpeed;
           secondRotationY = 0;
         }
         if (arrowKeysPressed["ArrowUp"]) {
-          catModel2.position.z += moveSpeed;
+          catModel2.position.z -= moveSpeed;
           secondRotationY = Math.PI;
         }
         if (arrowKeysPressed["ArrowLeft"]) {
@@ -251,6 +390,10 @@
 
       function animate() {
         updateMovement();
+
+        if (catModel1) detectarColision(catModel1);
+        if (catModel2) detectarColision(catModel2);
+
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
       }

@@ -163,105 +163,151 @@
             });
         }
 
-        cargarEstambre(62, 2, -34);
-        cargarEstambre(-46, 2, 27);
+        cargarEstambre(62, 0.5, -34);
+        cargarEstambre(-46, 0.5, 27);
 
         let gatitoManotasModel; // Declaración global
-// Carga del modelo GatitoManotas
-loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
-    gatitoManotasModel = model.scene;
-    gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
-    console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
-});
+        // Carga del modelo GatitoManotas
+        loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
+            gatitoManotasModel = model.scene;
+            gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
+            console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
+        });
 
-// Modificar la función detectarColision
-function detectarColision(gatito) {
-    const objetosInteractivos = [...latas, ...manotas, ...estambres];
-    const objetosAEliminar = [];
+        // Modificar la función detectarColision
+        function detectarColision(gatito) {
+            const objetosInteractivos = [...latas, ...manotas, ...estambres];
+            const objetosAEliminar = [];
 
-    objetosInteractivos.forEach((objeto) => {
-        const distancia = gatito.position.distanceTo(objeto.position);
-        if (distancia < 2.5) {
-            objetosAEliminar.push(objeto);
+            objetosInteractivos.forEach((objeto) => {
+                const distancia = gatito.position.distanceTo(objeto.position);
+                if (distancia < 2.5) {
+                    objetosAEliminar.push(objeto);
+                }
+            });
+
+            objetosAEliminar.forEach((objeto) => {
+                console.log(`Colisión detectada con: ${objeto.name}`);
+                scene.remove(objeto);
+
+                const indexLatas = latas.indexOf(objeto);
+                if (indexLatas !== -1) {
+                    latas.splice(indexLatas, 1);
+                    console.log(`Lata eliminada. Quedan: ${latas.length}`);
+                }
+
+                const indexManotas = manotas.indexOf(objeto);
+                if (indexManotas !== -1) {
+                    manotas.splice(indexManotas, 1);
+                    console.log(`Manota eliminada. Quedan: ${manotas.length}`);
+
+                    if (gatito === catModel1) {
+                        scene.remove(catModel1);
+                        catModel1 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
+                        catModel1.position.copy(gatito.position);
+                        scene.add(catModel1);
+                        console.log("GatitoManotas añadido en la posición:", catModel1.position); // Verifica la posición
+                    } else if (gatito === catModel2) {
+                        scene.remove(catModel2);
+                        catModel2 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
+                        catModel2.position.copy(gatito.position);
+                        scene.add(catModel2);
+                        console.log("GatitoManotas añadido en la posición:", catModel2.position); // Verifica la posición
+                    }
+                }
+
+                const indexEstambres = estambres.indexOf(objeto);
+                if (indexEstambres !== -1) {
+                    estambres.splice(indexEstambres, 1);
+                    console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
+                }
+            });
         }
-    });
 
-    objetosAEliminar.forEach((objeto) => {
-        console.log(`Colisión detectada con: ${objeto.name}`);
-        scene.remove(objeto);
 
-        const indexLatas = latas.indexOf(objeto);
-        if (indexLatas !== -1) {
-            latas.splice(indexLatas, 1);
-            console.log(`Lata eliminada. Quedan: ${latas.length}`);
+
+
+        const keysPressed = {};
+      const arrowKeysPressed = {};
+
+      // Escuchar cuando una tecla es presionada
+      document.addEventListener("keydown", (e) => {
+        keysPressed[e.key] = true; // primer gatito
+        if (e.key.startsWith("Arrow")) {
+          arrowKeysPressed[e.key] = true; // segundo gatito
         }
+      });
 
-        const indexManotas = manotas.indexOf(objeto);
-        if (indexManotas !== -1) {
-            manotas.splice(indexManotas, 1);
-            console.log(`Manota eliminada. Quedan: ${manotas.length}`);
+      document.addEventListener("keyup", (e) => {
+        keysPressed[e.key] = false; 
+        if (e.key.startsWith("Arrow")) {
+          arrowKeysPressed[e.key] = false;
+        }
+      });
 
-            if (gatito === catModel1) {
-                scene.remove(catModel1);
-                catModel1 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
-                catModel1.position.copy(gatito.position);
-                scene.add(catModel1);
-                console.log("GatitoManotas añadido en la posición:", catModel1.position); // Verifica la posición
-            } else if (gatito === catModel2) {
-                scene.remove(catModel2);
-                catModel2 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
-                catModel2.position.copy(gatito.position);
-                scene.add(catModel2);
-                console.log("GatitoManotas añadido en la posición:", catModel2.position); // Verifica la posición
+      function updateMovement() {
+            const moveSpeed = 0.2; // Ajusta la velocidad de movimiento
+            const rotationSpeed = 0.1; // Velocidad de rotación
+
+            // Movimiento del primer gatito
+            if (!catModel1) return; 
+            let rotationY = catModel1.rotation.y;
+
+            if (keysPressed["s"]) {
+                catModel1.position.z += moveSpeed;
+                rotationY = 0;
+            }
+            if (keysPressed["w"]) {
+                catModel1.position.z -= moveSpeed;
+                rotationY = Math.PI;
+            }
+            if (keysPressed["a"]) {
+                catModel1.position.x -= moveSpeed;
+                rotationY = -Math.PI / 2;
+            }
+            if (keysPressed["d"]) {
+                catModel1.position.x += moveSpeed;
+                rotationY = Math.PI / 2;
+            }
+
+            if (keysPressed["w"] || keysPressed["s"] || keysPressed["a"] || keysPressed["d"]) {
+                // Lógica para suavizar la rotación
+                catModel1.rotation.y += (rotationY - catModel1.rotation.y) * rotationSpeed;
+            }
+
+            // Movimiento del segundo gatito
+            if (!catModel2) return;
+            let secondRotationY = catModel2.rotation.y;
+
+            if (arrowKeysPressed["ArrowDown"]) {
+                catModel2.position.z += moveSpeed;
+                secondRotationY = 0;
+            }
+            if (arrowKeysPressed["ArrowUp"]) {
+                catModel2.position.z -= moveSpeed;
+                secondRotationY = Math.PI;
+            }
+            if (arrowKeysPressed["ArrowLeft"]) {
+                catModel2.position.x -= moveSpeed;
+                secondRotationY = -Math.PI / 2;
+            }
+            if (arrowKeysPressed["ArrowRight"]) {
+                catModel2.position.x += moveSpeed;
+                secondRotationY = Math.PI / 2;
+            }
+
+            if (arrowKeysPressed["ArrowUp"] || arrowKeysPressed["ArrowDown"] || arrowKeysPressed["ArrowLeft"] || arrowKeysPressed["ArrowRight"]) {
+                // Lógica para suavizar la rotación
+                catModel2.rotation.y += (secondRotationY - catModel2.rotation.y) * rotationSpeed;
             }
         }
 
-        const indexEstambres = estambres.indexOf(objeto);
-        if (indexEstambres !== -1) {
-            estambres.splice(indexEstambres, 1);
-            console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
-        }
-    });
-}
-
-
-
-
-document.onkeydown = function (e) {
-            if (!catModel1 || !catModel2) return;
-
-            const moveSpeed = 0.1;
-            switch (e.key) {
-                case "w":
-                    catModel1.position.z -= moveSpeed;
-                    break;
-                case "s":
-                    catModel1.position.z += moveSpeed;
-                    break;
-                case "a":
-                    catModel1.position.x -= moveSpeed;
-                    break;
-                case "d":
-                    catModel1.position.x += moveSpeed;
-                    break;
-                case "ArrowUp":
-                    catModel2.position.z -= moveSpeed;
-                    break;
-                case "ArrowDown":
-                    catModel2.position.z += moveSpeed;
-                    break;
-                case "ArrowLeft":
-                    catModel2.position.x -= moveSpeed;
-                    break;
-                case "ArrowRight":
-                    catModel2.position.x += moveSpeed;
-                    break;
-            }
-        };
 
         const cameraControl = new OrbitControls(camera, renderer.domElement);
 
         function animate() {
+            updateMovement();
+
             if (catModel1) detectarColision(catModel1);
             if (catModel2) detectarColision(catModel2);
 
