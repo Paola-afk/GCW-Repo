@@ -5,61 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modelos</title>
     <style>
-body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    position: relative;
-}
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
 
-#icon-container {
-    position: absolute;
-    z-index: 10;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-}
+        #icon-container {
+            position: absolute;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
 
-.menu-button {
-    width: 60px;
-    height: 60px;
-    position: absolute;
-    pointer-events: auto;
-}
+        .menu-button {
+            width: 60px;
+            height: 60px;
+            position: absolute;
+            pointer-events: auto;
+        }
 
-.hidden {
-    display: none;
-}
+        .hidden {
+            display: none;
+        }
 
-/* Estilos para cada botón en sus esquinas */
-#escenario-1 {
-    width: 200px; /* Hacer el botón de puntaje más largo */
-    height: 60px; /* Mantener la altura */
-    top: 25px;
-    left: 50px;
-}
+        /* Estilos para cada botón en sus esquinas */
+        #escenario-1 {
+            width: 200px;
+            height: 60px;
+            top: 25px;
+            left: 50px;
+        }
 
-#escenario-2 {
-    width: 150px; /* Hacer el botón de puntaje más largo */
-    height: 150px; /* Mantener la altura */
-    bottom: 20px;
-    left: 20px;
-}
+        #escenario-2 {
+            width: 150px;
+            height: 150px;
+            bottom: 20px;
+            left: 20px;
+        }
 
-#escenario-3 {
-    width: 150px; /* Hacer el botón de puntaje más largo */
-    height: 150px; /* Mantener la altura */
-    top: 20px;
-    right: 20px;
-}
-
-/* #escenario-4 {
-    bottom: 20px;
-    right: 20px;
-} */
+        #escenario-3 {
+            width: 150px;
+            height: 150px;
+            top: 20px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
@@ -69,7 +64,6 @@ body {
         <a href="PauseMenu.html">
             <img src="front/UI/Pause_button.png" alt="Pause" class="menu-button" id="escenario-3" />
         </a>
-        <!-- <img src="front/UI/Another_Button.png" alt="Esc4" class="menu-button" id="escenario-4" /> Nuevo botón en la esquina inferior derecha -->
     </div>
 
     <script type="module">
@@ -99,95 +93,178 @@ body {
         directionalLight.position.set(1, 5, -1);
         scene.add(directionalLight);
 
-        let catModel1; // Variable para almacenar el modelo del primer gato
-        let catModel2; // Variable para almacenar el modelo del segundo gato
+        let catModel1, catModel2;
+        const latas = [];
+        const manotas = [];
+        const estambres = [];
 
-        // Cargar el modelo del primer gato
         const loaderGLTF = new GLTFLoader();
+
         loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-            catModel1 = model.scene; // Almacenar el modelo
-            catModel1.scale.set(0.7, 0.7, 0.7); // Aumenta la escala del gato
-            catModel1.position.set(6, 2.5, 0);
+            catModel1 = model.scene;
+            catModel1.scale.set(0.7, 0.7, 0.7);
+            catModel1.position.set(6, 2, 0);
             scene.add(catModel1);
         });
 
-        // Cargar el modelo del segundo gato
         loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-            catModel2 = model.scene; // Almacenar el modelo
-            catModel2.scale.set(0.7, 0.7, 0.7); // Aumenta la escala del gato
-            catModel2.position.set(-6, 2.5, 0); // Posición inicial del segundo gato
+            catModel2 = model.scene;
+            catModel2.scale.set(0.7, 0.7, 0.7);
+            catModel2.position.set(-6, 2, 0);
             scene.add(catModel2);
         });
 
-        // Cargar el modelo del piso (Galaxy-PIA.glb)
         const loaderGalaxy = new GLTFLoader();
         loaderGalaxy.load("/Modelos/Galaxy-PIA.glb", function (model) {
             const galaxyModel = model.scene;
-            galaxyModel.scale.set(5, 5, 5); // Ajusta la escala del modelo de la galaxia
-            galaxyModel.position.set(0, -0.5, 0); // Ajusta la posición si es necesario
+            galaxyModel.scale.set(10, 10, 10);
+            galaxyModel.position.set(0, -0.5, 0);
             scene.add(galaxyModel);
         });
 
-        // Cargar el modelo de la lata
         const loaderCan = new GLTFLoader();
-        loaderCan.load("/Modelos/Lata.glb", function (model) {
-            const canModel = model.scene;
-            canModel.scale.set(1, 1, 1); // Ajusta la escala de la lata
-            canModel.position.set(0, 10, 5); // Posición de la lata en el mapa
-            scene.add(canModel);
-        });
+        function cargarLata(x, y, z) {
+            loaderCan.load("/Modelos/Lata-PIA.glb", function (model) {
+                const canModel = model.scene;
+                canModel.name = "Lata"; // Establecer nombre para identificar
+                canModel.scale.set(1, 1, 1);
+                canModel.position.set(x, y, z);
+                scene.add(canModel);
+                latas.push(canModel);
+            });
+        }
 
-        // Manejar el movimiento de los gatos con las teclas
-        document.onkeydown = function (e) {
-            if (!catModel1 || !catModel2) return; // Esperar a que ambos modelos estén cargados
+        cargarLata(50, 0, 50);
+        cargarLata(19, 0, -15);
+        cargarLata(-23, 0, 60);
 
-            const moveSpeed = 0.1; // Ajusta la velocidad de movimiento
+        function cargarManotas(x, y, z) {
+            loaderCan.load("/Modelos/Manotas-PIA.glb", function (model) {
+                const manotasModel = model.scene;
+                manotasModel.name = "Manotas"; // Establecer nombre para identificar
+                manotasModel.scale.set(1, 1, 1);
+                manotasModel.position.set(x, y, z);
+                scene.add(manotasModel);
+                manotas.push(manotasModel);
+            });
+        }
+
+        cargarManotas(-50, 2, -50);
+        cargarManotas(-19, 2, 15);
+
+        function cargarEstambre(x, y, z) {
+            loaderCan.load("/Modelos/Bola-Estambre.glb", function (model) {
+                const estambreModel = model.scene;
+                estambreModel.name = "Estambre"; // Establecer nombre para identificar
+                estambreModel.scale.set(1, 1, 1);
+                estambreModel.position.set(x, y, z);
+                scene.add(estambreModel);
+                estambres.push(estambreModel);
+            });
+        }
+
+        cargarEstambre(62, 2, -34);
+        cargarEstambre(-46, 2, 27);
+
+        let gatitoManotasModel; // Declaración global
+// Carga del modelo GatitoManotas
+loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
+    gatitoManotasModel = model.scene;
+    gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
+    console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
+});
+
+// Modificar la función detectarColision
+function detectarColision(gatito) {
+    const objetosInteractivos = [...latas, ...manotas, ...estambres];
+    const objetosAEliminar = [];
+
+    objetosInteractivos.forEach((objeto) => {
+        const distancia = gatito.position.distanceTo(objeto.position);
+        if (distancia < 2.5) {
+            objetosAEliminar.push(objeto);
+        }
+    });
+
+    objetosAEliminar.forEach((objeto) => {
+        console.log(`Colisión detectada con: ${objeto.name}`);
+        scene.remove(objeto);
+
+        const indexLatas = latas.indexOf(objeto);
+        if (indexLatas !== -1) {
+            latas.splice(indexLatas, 1);
+            console.log(`Lata eliminada. Quedan: ${latas.length}`);
+        }
+
+        const indexManotas = manotas.indexOf(objeto);
+        if (indexManotas !== -1) {
+            manotas.splice(indexManotas, 1);
+            console.log(`Manota eliminada. Quedan: ${manotas.length}`);
+
+            if (gatito === catModel1) {
+                scene.remove(catModel1);
+                catModel1 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
+                catModel1.position.copy(gatito.position);
+                scene.add(catModel1);
+                console.log("GatitoManotas añadido en la posición:", catModel1.position); // Verifica la posición
+            } else if (gatito === catModel2) {
+                scene.remove(catModel2);
+                catModel2 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
+                catModel2.position.copy(gatito.position);
+                scene.add(catModel2);
+                console.log("GatitoManotas añadido en la posición:", catModel2.position); // Verifica la posición
+            }
+        }
+
+        const indexEstambres = estambres.indexOf(objeto);
+        if (indexEstambres !== -1) {
+            estambres.splice(indexEstambres, 1);
+            console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
+        }
+    });
+}
+
+
+
+
+document.onkeydown = function (e) {
+            if (!catModel1 || !catModel2) return;
+
+            const moveSpeed = 0.1;
             switch (e.key) {
-                case "w": // W - mover el primer gato hacia arriba
+                case "w":
                     catModel1.position.z -= moveSpeed;
                     break;
-                case "s": // S - mover el primer gato hacia abajo
+                case "s":
                     catModel1.position.z += moveSpeed;
                     break;
-                case "a": // A - mover el primer gato hacia la izquierda
+                case "a":
                     catModel1.position.x -= moveSpeed;
                     break;
-                case "d": // D - mover el primer gato hacia la derecha
+                case "d":
                     catModel1.position.x += moveSpeed;
                     break;
-                case "ArrowUp": // Flecha arriba - mover el segundo gato hacia arriba
+                case "ArrowUp":
                     catModel2.position.z -= moveSpeed;
                     break;
-                case "ArrowDown": // Flecha abajo - mover el segundo gato hacia abajo
+                case "ArrowDown":
                     catModel2.position.z += moveSpeed;
                     break;
-                case "ArrowLeft": // Flecha izquierda - mover el segundo gato hacia la izquierda
+                case "ArrowLeft":
                     catModel2.position.x -= moveSpeed;
                     break;
-                case "ArrowRight": // Flecha derecha - mover el segundo gato hacia la derecha
+                case "ArrowRight":
                     catModel2.position.x += moveSpeed;
                     break;
             }
         };
 
-        let mixer;
-        // const kazurka = new GLTFLoader();
-        // kazurka.load("./kazurka/scene.gltf", function (model) {
-        //     const obj = model.scene;
-        //     obj.position.set(-6, 0, 0);
-        //     scene.add(obj);
-
-        //     mixer = new THREE.AnimationMixer(obj);
-        //     const action = mixer.clipAction(model.animations[1]);
-        //     action.play();
-        // });
-
         const cameraControl = new OrbitControls(camera, renderer.domElement);
 
         function animate() {
-            if (mixer) {
-                mixer.update(0.01);
-            }
+            if (catModel1) detectarColision(catModel1);
+            if (catModel2) detectarColision(catModel2);
+
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
