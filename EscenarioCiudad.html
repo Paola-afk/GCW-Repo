@@ -267,7 +267,7 @@
          // Esta función crea un objeto de colisión
         function crearColision(x, y, z, width, height, depth) {
             const geometry = new THREE.BoxGeometry(width, height, depth);
-            const material = new THREE.MeshBasicMaterial({ visible: true, color: 0xff0000}); // Hacer que la caja de colisión sea completamente invisible
+            const material = new THREE.MeshBasicMaterial({ visible: false, color: 0xff0000}); // Hacer que la caja de colisión sea completamente invisible
             const collisionBox = new THREE.Mesh(geometry, material);
             collisionBox.position.set(x, y, z);
             scene.add(collisionBox);
@@ -281,6 +281,14 @@
         crearColision(-11.8, 0, -30.4, 29.6, 20, 12); // Edificio
         crearColision(22.4, 0, 42, 12.7, 20, 25); // Edificio
         crearColision(62, 0, 34, 26, 20, 11); // Edificio
+
+        crearColision(73.7, 0, 0, 15, 20, 150); // Edificio
+        crearColision(-57, 0, 0, 15, 20, 150); // Edificio
+
+        crearColision(0, 0, 65.7, 150, 20, 15); // Edificio
+        crearColision(0, 0, -64.7, 150, 20, 15); // Edificio
+
+        
         
 
 
