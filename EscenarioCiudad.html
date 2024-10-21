@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ciudad</title>
+    <title>Meow Madness - Ciudad</title>
     <style>
         body {
             margin: 0;
@@ -14,7 +14,6 @@
             height: 100vh;
             position: relative;
         }
-
 
         #icon-container {
             position: absolute;
@@ -201,6 +200,29 @@
                 }
             });
 
+
+            // Detectar colisión con las cajas invisibles
+        colisiones.forEach((caja) => {
+        caja.geometry.computeBoundingBox(); // Calcular boundingBox si no está calculada
+
+            const cajaMin = caja.geometry.boundingBox.min.clone().add(caja.position);
+            const cajaMax = caja.geometry.boundingBox.max.clone().add(caja.position);
+
+            if (
+                gatito.position.x > cajaMin.x &&
+                gatito.position.x < cajaMax.x &&
+                gatito.position.z > cajaMin.z &&
+                gatito.position.z < cajaMax.z &&
+                gatito.position.y > cajaMin.y &&
+                gatito.position.y < cajaMax.y
+                ) {
+                    // Empujar hacia atrás cuando colisiona con la caja, solo en los ejes X y Z
+                    const direccionEmpuje = new THREE.Vector3().subVectors(gatito.position, caja.position).normalize();
+                    direccionEmpuje.y = 0; // No modificar la posición en Y
+                    gatito.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para el empuje
+                }
+        });
+
             objetosAEliminar.forEach((objeto) => {
                 console.log(`Colisión detectada con: ${objeto.name}`);
                 scene.remove(objeto);
@@ -238,6 +260,29 @@
                 }
             });
         }
+
+        const colisiones = [];
+
+
+         // Esta función crea un objeto de colisión
+        function crearColision(x, y, z, width, height, depth) {
+            const geometry = new THREE.BoxGeometry(width, height, depth);
+            const material = new THREE.MeshBasicMaterial({ visible: true, color: 0xff0000}); // Hacer que la caja de colisión sea completamente invisible
+            const collisionBox = new THREE.Mesh(geometry, material);
+            collisionBox.position.set(x, y, z);
+            scene.add(collisionBox);
+            colisiones.push(collisionBox);
+        }
+
+        // Llama a crearColision para cada objeto que desees que tenga colisión
+        crearColision(-28.5, 0, 3.5, 30.5, 20, 11); // Edificio
+        crearColision(26.2, 0, 3.3, 37.6, 20, 11); // Edificio
+        crearColision(34.5, 0, -30.5, 26, 20, 13); // Edificio
+        crearColision(-11.8, 0, -30.4, 29.6, 20, 12); // Edificio
+        crearColision(22.4, 0, 42, 12.7, 20, 25); // Edificio
+        crearColision(62, 0, 34, 26, 20, 11); // Edificio
+        
+
 
 
 
