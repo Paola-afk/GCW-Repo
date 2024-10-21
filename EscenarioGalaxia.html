@@ -188,7 +188,7 @@
         // Esta función crea un objeto de colisión
         function crearColision(x, y, z, width, height, depth) {
             const geometry = new THREE.BoxGeometry(width, height, depth);
-            const material = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.0 }); // Opacidad a 0 para hacerlo invisible
+            const material = new THREE.MeshBasicMaterial({ visible: false }); // Hacer que la caja de colisión sea completamente invisible
             const collisionBox = new THREE.Mesh(geometry, material);
             collisionBox.position.set(x, y, z);
             scene.add(collisionBox);
@@ -197,6 +197,10 @@
 
         // Llama a crearColision para cada objeto que desees que tenga colisión
         crearColision(-95, 0, -93, 60, 10, 60); // Lata 1
+        crearColision(0, 0, -138, 300, 10, 10); // Lata 1
+        crearColision(0, 0, 138, 300, 10, 10); // Lata 1
+        crearColision(138, 0, 0, 10, 10, 300); // Lata 1
+        crearColision(-138, 0, 0, 10, 10, 300); // Lata 1
 
 
 
@@ -294,79 +298,76 @@
 
 
         const keysPressed = {};
-        const arrowKeysPressed = {};
+      const arrowKeysPressed = {};
 
       // Escuchar cuando una tecla es presionada
-        document.addEventListener("keydown", (e) => {
+      document.addEventListener("keydown", (e) => {
         keysPressed[e.key] = true; // primer gatito
-            if (e.key.startsWith("Arrow")) {
-            arrowKeysPressed[e.key] = true; // segundo gatito
-            }
-        });
-
-        document.addEventListener("keyup", (e) => {
-        keysPressed[e.key] = false; 
-            if (e.key.startsWith("Arrow")) {
-                arrowKeysPressed[e.key] = false;
-            }
-        });
-
-        function updateMovement() {
-            const moveSpeed = 0.2; // Ajusta la velocidad de movimiento
-            const rotationSpeed = 0.1; // Velocidad de rotación
-
-            // Movimiento del primer gatito
-            if (!catModel1) return; 
-            let rotationY = catModel1.rotation.y;
-
-            if (keysPressed["s"]) {
-                catModel1.position.z += moveSpeed;
-                rotationY = 0;
-            }
-            if (keysPressed["w"]) {
-                catModel1.position.z -= moveSpeed;
-                rotationY = Math.PI;
-            }
-            if (keysPressed["a"]) {
-                catModel1.position.x -= moveSpeed;
-                rotationY = -Math.PI / 2;
-            }
-            if (keysPressed["d"]) {
-                catModel1.position.x += moveSpeed;
-                rotationY = Math.PI / 2;
-            }
-
-            if (keysPressed["w"] || keysPressed["s"] || keysPressed["a"] || keysPressed["d"]) {
-                // Lógica para suavizar la rotación
-                catModel1.rotation.y += (rotationY - catModel1.rotation.y) * rotationSpeed;
-            }
-
-            // Movimiento del segundo gatito
-            if (!catModel2) return;
-            let secondRotationY = catModel2.rotation.y;
-
-            if (arrowKeysPressed["ArrowDown"]) {
-                catModel2.position.z += moveSpeed;
-                secondRotationY = 0;
-            }
-            if (arrowKeysPressed["ArrowUp"]) {
-                catModel2.position.z -= moveSpeed;
-                secondRotationY = Math.PI;
-            }
-            if (arrowKeysPressed["ArrowLeft"]) {
-                catModel2.position.x -= moveSpeed;
-                secondRotationY = -Math.PI / 2;
-            }
-            if (arrowKeysPressed["ArrowRight"]) {
-                catModel2.position.x += moveSpeed;
-                secondRotationY = Math.PI / 2;
-            }
-
-            if (arrowKeysPressed["ArrowUp"] || arrowKeysPressed["ArrowDown"] || arrowKeysPressed["ArrowLeft"] || arrowKeysPressed["ArrowRight"]) {
-                // Lógica para suavizar la rotación
-                catModel2.rotation.y += (secondRotationY - catModel2.rotation.y) * rotationSpeed;
-            }
+        if (e.key.startsWith("Arrow")) {
+          arrowKeysPressed[e.key] = true; // segundo gatito
         }
+      });
+
+      document.addEventListener("keyup", (e) => {
+        keysPressed[e.key] = false; 
+        if (e.key.startsWith("Arrow")) {
+          arrowKeysPressed[e.key] = false;
+        }
+      });
+
+      function updateMovement() {
+        const moveSpeed = 0.2; // Ajusta la velocidad de movimiento
+
+        // Movimiento del primer gatito
+        if (!catModel1) return; 
+        let rotationY = catModel1.rotation.y;
+
+        if (keysPressed["s"]) {
+          catModel1.position.z += moveSpeed;
+          rotationY = 0;
+        }
+        if (keysPressed["w"]) {
+          catModel1.position.z -= moveSpeed;
+          rotationY = Math.PI;
+        }
+        if (keysPressed["a"]) {
+          catModel1.position.x -= moveSpeed;
+          rotationY = -Math.PI / 2;
+        }
+        if (keysPressed["d"]) {
+          catModel1.position.x += moveSpeed;
+          rotationY = Math.PI / 2;
+        }
+        
+        if (keysPressed["w"] || keysPressed["s"] || keysPressed["a"] || keysPressed["d"]) {
+          catModel1.rotation.y = rotationY;
+        }
+
+        // Movimiento del segundo gatito
+        if (!catModel2) return;
+        let secondRotationY = catModel2.rotation.y;
+
+        if (arrowKeysPressed["ArrowDown"]) {
+          catModel2.position.z += moveSpeed;
+          secondRotationY = 0;
+        }
+        if (arrowKeysPressed["ArrowUp"]) {
+          catModel2.position.z -= moveSpeed;
+          secondRotationY = Math.PI;
+        }
+        if (arrowKeysPressed["ArrowLeft"]) {
+          catModel2.position.x -= moveSpeed;
+          secondRotationY = -Math.PI / 2;
+        }
+        if (arrowKeysPressed["ArrowRight"]) {
+          catModel2.position.x += moveSpeed;
+          secondRotationY = Math.PI / 2;
+        }
+        
+        if (arrowKeysPressed["ArrowUp"] || arrowKeysPressed["ArrowDown"] || arrowKeysPressed["ArrowLeft"] || arrowKeysPressed["ArrowRight"]) {
+          catModel2.rotation.y = secondRotationY;
+        }
+      }
 
 
          // Skybox
