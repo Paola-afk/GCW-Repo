@@ -5,6 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeowMadness - Menú Escenarios</title>
     <link rel="stylesheet" href="front/css/ScenariosMenu.css">
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
+            authDomain: "coordenadas-251ea.firebaseapp.com",
+            databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
+            projectId: "coordenadas-251ea",
+            storageBucket: "coordenadas-251ea.firebasestorage.app",
+            messagingSenderId: "31232618102",
+            appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getDatabase();
+        const provider = new GoogleAuthProvider();
+
+        // Función para iniciar sesión con Google y guardar la información del usuario
+        async function iniciarSesionConGoogle(escenario) {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Mostrar un indicador de carga antes de redirigir
+                document.getElementById("loading").style.display = "block"; // Mostrar el spinner
+
+                // Guardar la información del usuario en la base de datos en tiempo real
+                const userRef = ref(db, "usuarios/" + user.uid);
+                await set(userRef, {
+                    nombre: user.displayName,
+                    email: user.email,
+                    foto: user.photoURL,
+                    escenarioSeleccionado: escenario,
+                    ultimaSesion: new Date().toISOString()
+                });
+
+                // Redirigir al escenario seleccionado
+                window.location.href = `/Escenario${escenario}.html`;
+            } catch (error) {
+                console.error("Error al iniciar sesión:", error);
+                alert("No se pudo iniciar sesión. Intenta de nuevo.");
+            } finally {
+                // Ocultar el indicador de carga
+                document.getElementById("loading").style.display = "none"; // Ocultar el spinner
+            }
+        }
+
+        // Configurar los eventos de clic para cada escenario
+        window.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("escenario-1").addEventListener("click", () => iniciarSesionConGoogle("Bosque"));
+            document.getElementById("escenario-2").addEventListener("click", () => iniciarSesionConGoogle("Ciudad"));
+            document.getElementById("escenario-3").addEventListener("click", () => iniciarSesionConGoogle("Galaxia"));
+        });
+    </script>
 </head>
 <body>
     <div id="pause-menu" class="hidden">
@@ -13,26 +74,30 @@
         </div>
 
         <div class="menu-buttons">
-            <a href="/EscenarioBosque.html">
-                <img src="front/UI/boton_esc1.png" alt="Esc1" class="menu-button" id="escenario-1">
-            </a>
-            <a href="/EscenarioCiudad.html">
-                <img src="front/UI/boton_esc2.png" alt="Esc2" class="menu-button" id="escenario-2">
-            </a>
-            <a href="/EscenarioGalaxia.html">
-                <img src="front/UI/boton_esc3.png" alt="Esc3" class="menu-button" id="escenario-3">
-            </a>
+            <button id="escenario-1">
+                <img src="front/UI/boton_esc1.png" alt="Escenario Bosque" class="menu-button">
+            </button>
+            <button id="escenario-2">
+                <img src="front/UI/boton_esc2.png" alt="Escenario Ciudad" class="menu-button">
+            </button>
+            <button id="escenario-3">
+                <img src="front/UI/boton_esc3.png" alt="Escenario Galaxia" class="menu-button">
+            </button>
         </div>
 
         <div class="menu-buttons2">
             <a href="/MainMenu.html">
-            <img src="front/UI/boton_regreso.png" alt="Esc1" class="menu-button" id="escenario-1">
+                <img src="front/UI/boton_regreso.png" alt="Regresar al menú principal" class="menu-button">
             </a>
             <a href="/SettingsMenu.html">
-            <img src="front/UI/ConfigAzul.png" alt="Esc2" class="menu-button" id="escenario-2">
+                <img src="front/UI/ConfigAzul.png" alt="Configuración" class="menu-button">
             </a>
         </div>
+    </div>
 
+    <!-- Indicador de carga -->
+    <div id="loading" style="display: none;">
+        <p>Cargando...</p> <!-- Puedes agregar un spinner aquí -->
     </div>
 </body>
 </html>
