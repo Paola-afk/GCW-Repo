@@ -31,34 +31,43 @@
 
         // Función para iniciar sesión con Google y guardar la información del usuario
         async function iniciarSesionConGoogle(escenario) {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
 
-                // Mostrar un indicador de carga antes de redirigir
-                document.getElementById("loading").style.display = "block"; // Mostrar el spinner
+            // Mostrar un indicador de carga antes de redirigir
+            document.getElementById("loading").style.display = "block"; // Mostrar el spinner
 
-                // Guardar la información del usuario en la base de datos en tiempo real
-                const userRef = ref(db, "usuarios/" + user.uid);
-                await set(userRef, {
-                    nombre: user.displayName,
-                    email: user.email,
-                    foto: user.photoURL,
-                    escenarioSeleccionado: escenario,
-                    ultimaSesion: new Date().toISOString()
-                });
+            // Guardar la información del usuario en la base de datos en tiempo real
+            const userRef = ref(db, "usuarios/" + user.uid);
+            await set(userRef, {
+                nombre: user.displayName,
+                email: user.email,
+                foto: user.photoURL,
+                escenarioSeleccionado: escenario,
+                ultimaSesion: new Date().toISOString(),
+                posicion: { x: 0, y: 0, z: 0 }  // Agregar la posición
+            });
 
-                // Redirigir al escenario seleccionado
-                window.location.href = `/Escenario${escenario}.html`;
-            } catch (error) {
-                console.error("Error al iniciar sesión:", error);
-                alert("No se pudo iniciar sesión. Intenta de nuevo.");
-            } finally {
-                // Ocultar el indicador de carga
-                document.getElementById("loading").style.display = "none"; // Ocultar el spinner
-            }
+            // Guardar la información del usuario en localStorage
+            localStorage.setItem('usuario', JSON.stringify({
+                nombre: user.displayName,
+                email: user.email,
+                foto: user.photoURL,
+                escenarioSeleccionado: escenario,
+                posicion: { x: 0, y: 0, z: 0 }  // Agregar la posición
+            }));
+
+            // Redirigir al escenario seleccionado
+            window.location.href = `/Escenario${escenario}.html`;
+        } catch (error) {
+            console.error("Error al iniciar sesión:", error);
+            alert("No se pudo iniciar sesión. Intenta de nuevo.");
+        } finally {
+            // Ocultar el indicador de carga
+            document.getElementById("loading").style.display = "none"; // Ocultar el spinner
         }
-
+    }
         // Configurar los eventos de clic para cada escenario
         window.addEventListener("DOMContentLoaded", () => {
             document.getElementById("escenario-1").addEventListener("click", () => iniciarSesionConGoogle("Bosque"));

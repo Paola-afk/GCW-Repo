@@ -1,3 +1,190 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meow Madness - Bosque</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        position: relative;
+      }
+
+      #icon-container {
+        position: absolute;
+        z-index: 10;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .menu-button {
+        width: 60px;
+        height: 60px;
+        position: absolute;
+        pointer-events: auto;
+      }
+
+      /* Estilos para cada botón en sus esquinas */
+      #escenario-1 {
+        width: 200px;
+        height: auto;
+        top: 25px;
+        left: 50px;
+      }
+
+      #escenario-2 {
+        width: 200px;
+        height: 200px;
+        bottom: 20px;
+        left: 20px;
+      }
+
+      #escenario-3 {
+        width: 60px;
+        height: 60px;
+        top: 20px;
+        right: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="icon-container">
+      <img
+        src="front/UI/Points.png"
+        alt="Esc1"
+        class="menu-button"
+        id="escenario-1"
+      />
+      <img
+        src="front/UI/Power.png"
+        alt="Esc2"
+        class="menu-button"
+        id="escenario-2"
+      />
+      <a href="PauseMenu.html">
+        <img
+          src="front/UI/Pause_button.png"
+          alt="Pause"
+          class="menu-button"
+          id="escenario-3"
+        />
+      </a>
+    </div>
+
+    <script type="module">
+      import * as THREE from "./three.module.js";
+      import { OrbitControls } from "./OrbitControls.js";
+      import { GLTFLoader } from "./GLTFLoader.js";
+
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+      import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
+        authDomain: "coordenadas-251ea.firebaseapp.com",
+        databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
+        projectId: "coordenadas-251ea",
+        storageBucket: "coordenadas-251ea.firebasestorage.app",
+        messagingSenderId: "31232618102",
+        appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth();
+      const db = getDatabase();
+      const provider = new GoogleAuthProvider();
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("#34495E");
+
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
+      camera.position.set(0, 5, 20);
+
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
+
+      const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+      scene.add(hemisphereLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(1, 5, -1);
+      scene.add(directionalLight);
+
+      const loaderGLTF = new GLTFLoader();
+
+      // Obtener los datos de usuarios desde Firebase
+      const usuariosRef = ref(db, "usuarios");
+
+      onValue(usuariosRef, (snapshot) => {
+        const usuariosData = snapshot.val();
+        if (usuariosData) {
+          Object.entries(usuariosData).forEach(([key, value]) => {
+            console.log(`${key}: ${value.x}, ${value.z}`);
+            
+            // Verifica si el modelo del usuario ya existe en la escena
+            const usuarioModelo = scene.getObjectByName(key);
+
+            if (!usuarioModelo) {
+              // Cargar el modelo del gatito
+              loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                const gatito = gltf.scene;
+                gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
+                gatito.position.set(value.x, 0, value.z);  // Usa las coordenadas X, Z de Firebase
+                gatito.name = key;  // Nombre del objeto en la escena
+                scene.add(gatito);
+              });
+            } else {
+              // Actualizar la posición del modelo si ya existe
+              usuarioModelo.position.x = value.x;
+              usuarioModelo.position.z = value.z;
+            }
+          });
+        } else {
+          console.log("No hay datos de usuarios en Firebase.");
+        }
+      });
+
+      // Controladores de movimiento del gatito con teclas
+      const speed = 0.1;
+      let velocity = new THREE.Vector3(0, 0, 0);
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html> -->
+
+
+
+
+
+
+
+
+﻿
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -101,6 +288,28 @@
       import { OrbitControls } from "./OrbitControls.js";
       import { GLTFLoader } from "./GLTFLoader.js";
 
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+      import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
+        authDomain: "coordenadas-251ea.firebaseapp.com",
+        databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
+        projectId: "coordenadas-251ea",
+        storageBucket: "coordenadas-251ea.firebasestorage.app",
+        messagingSenderId: "31232618102",
+        appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth();
+      const db = getDatabase();
+      const provider = new GoogleAuthProvider();
+
       const scene = new THREE.Scene();
       scene.background = new THREE.Color("#34495E");
 
@@ -122,6 +331,40 @@
       const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
       directionalLight.position.set(1, 5, -1);
       scene.add(directionalLight);
+
+
+
+
+// Obtener los datos de usuarios desde Firebase
+const usuariosRef = ref(db, "usuarios");
+
+onValue(usuariosRef, (snapshot) => {
+  const usuariosData = snapshot.val();
+  if (usuariosData) {
+    Object.entries(usuariosData).forEach(([key, value]) => {
+      console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+      
+      // Verifica si el modelo del usuario ya existe en la escena
+      const usuarioModelo = scene.getObjectByName(key);
+
+      if (!usuarioModelo) {
+        // Cargar el modelo del gatito
+        loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+          const gatito = gltf.scene;
+          gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
+          gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
+          gatito.name = key;  // Nombre del objeto en la escena
+          scene.add(gatito);
+        });
+      } else {
+        // Actualizar la posición del modelo si ya existe
+        usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+      }
+    });
+  } else {
+    console.log("No hay datos de usuarios en Firebase.");
+  }
+});
 
 
       let catModel1, catModel2;
