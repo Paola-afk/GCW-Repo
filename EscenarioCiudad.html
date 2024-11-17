@@ -85,14 +85,36 @@
         import { OrbitControls } from "./OrbitControls.js";
         import { GLTFLoader } from "./GLTFLoader.js";
 
+
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+       //import { onAuthStateChanged } from "firebase/auth";
+
+      // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
+            authDomain: "coordenadas-251ea.firebaseapp.com",
+            databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
+            projectId: "coordenadas-251ea",
+            storageBucket: "coordenadas-251ea.firebasestorage.app",
+            messagingSenderId: "31232618102",
+            appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getDatabase();
+        const provider = new GoogleAuthProvider();
+
+        
+
         const scene = new THREE.Scene();
         scene.background = new THREE.Color("#34495E");
 
-        const camera = new THREE.PerspectiveCamera(
-            45,
-            window.innerWidth / window.innerHeight
-        );
-
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
         camera.position.set(0, 5, 20);
 
         const renderer = new THREE.WebGLRenderer();
@@ -107,6 +129,91 @@
         directionalLight.position.set(1, 5, -1);
         scene.add(directionalLight);
 
+
+        let currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            console.log("Usuario autenticado:", currentUser.uid);
+        } else {
+            console.log("No hay usuario autenticado.");
+        }
+        });
+
+        // Función de Login con Google
+        async function login() {
+            await signInWithPopup(auth, provider)
+                .then((result) => {
+                    // Obtener datos del usuario
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    const token = credential.accessToken;
+                    currentUser = result.user; // Guardar el usuario actual
+
+                    // Escribir datos iniciales del jugador en Firebase (posición inicial)
+                    writeUserData(currentUser.uid, 0, 1.9, 0);  // Posición inicial (x, y, z)
+                })
+                .catch((error) => {
+                    console.log("Error de autenticación:", error);
+                });
+        }
+
+        // Función de Logout
+        async function logout() {
+            await signOut(auth).then(() => {
+                console.log("Logout exitoso");
+            }).catch((error) => {
+                console.log("Error al hacer logout", error);
+            });
+        }
+
+        // Escribir la posición del usuario en Firebase
+        function writeUserData(userId, positionX, positionY, positionZ) {
+            set(ref(db, "usuarios/" + userId), {
+                posicion: {
+                    x: positionX,
+                    y: positionY,
+                    z: positionZ
+                }
+            });
+        }
+
+
+        // Obtener los datos de usuarios desde Firebase
+        const usuariosRef = ref(db, "usuarios");
+
+        onValue(usuariosRef, (snapshot) => {
+        const usuariosData = snapshot.val();
+        if (usuariosData) {
+            Object.entries(usuariosData).forEach(([key, value]) => {
+                console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+                
+                // Verifica si el modelo del usuario ya existe en la escena
+                const usuarioModelo = scene.getObjectByName(key);
+
+                if (!usuarioModelo) {
+                    // Si el modelo no existe, cargarlo desde GLTF
+                    loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                        const gatito = gltf.scene;
+                        gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
+                        gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
+                        gatito.name = key;  // Nombre del objeto en la escena
+                        scene.add(gatito);
+                    });
+                } else {
+                    // Si el modelo ya existe, actualizar la posición
+                    usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                }
+            });
+        } else {
+            console.log("No hay datos de usuarios en Firebase.");
+        }
+    });
+
+
+
+
+
         let catModel1, catModel2;
         const latas = [];
         const manotas = [];
@@ -114,6 +221,7 @@
 
         const loaderGLTF = new GLTFLoader();
 
+        /*
         loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
             catModel1 = model.scene;
             catModel1.scale.set(0.7, 0.7, 0.7);
@@ -127,6 +235,18 @@
             catModel2.position.set(-4, 1.9, 0);
             scene.add(catModel2);
         });
+        */
+
+
+        // Función para agregar un modelo de gatito
+        function agregarGatito(position) {
+        loader.load("/Modelos/Gatito-Grande.glb", (gltf) => {
+        const gatito = gltf.scene;
+        gatito.position.set(position.x, 0.5, position.z); // Altura ajustada para el gatito
+        gatito.scale.set(0.7, 0.7, 0.7);
+        scene.add(gatito);
+        });
+    }
 
         const loaderCity = new GLTFLoader();
         loaderCity.load("/Modelos/Ciudad-PIA.glb", function (model) {
@@ -287,88 +407,42 @@
 
         crearColision(0, 0, 65.7, 150, 20, 15); // Edificio
         crearColision(0, 0, -64.7, 150, 20, 15); // Edificio
+    
 
-        
-        
-
-
-
-
-
-        const keysPressed = {};
-        const arrowKeysPressed = {};
-
-      // Escuchar cuando una tecla es presionada
-        document.addEventListener("keydown", (e) => {
-        keysPressed[e.key] = true; // primer gatito
-            if (e.key.startsWith("Arrow")) {
-            arrowKeysPressed[e.key] = true; // segundo gatito
-            }
-        });
-
-        document.addEventListener("keyup", (e) => {
-        keysPressed[e.key] = false; 
-            if (e.key.startsWith("Arrow")) {
-                arrowKeysPressed[e.key] = false;
-            }
-        });
-
-        function updateMovement() {
-            const moveSpeed = 0.2; // Ajusta la velocidad de movimiento
-            const rotationSpeed = 0.1; // Velocidad de rotación
-
-            // Movimiento del primer gatito
-            if (!catModel1) return; 
-            let rotationY = catModel1.rotation.y;
-
-            if (keysPressed["s"]) {
-                catModel1.position.z += moveSpeed;
-                rotationY = 0;
-            }
-            if (keysPressed["w"]) {
-                catModel1.position.z -= moveSpeed;
-                rotationY = Math.PI;
-            }
-            if (keysPressed["a"]) {
-                catModel1.position.x -= moveSpeed;
-                rotationY = -Math.PI / 2;
-            }
-            if (keysPressed["d"]) {
-                catModel1.position.x += moveSpeed;
-                rotationY = Math.PI / 2;
-            }
-
-            if (keysPressed["w"] || keysPressed["s"] || keysPressed["a"] || keysPressed["d"]) {
-                // Lógica para suavizar la rotación
-                catModel1.rotation.y += (rotationY - catModel1.rotation.y) * rotationSpeed;
-            }
-
-            // Movimiento del segundo gatito
-            if (!catModel2) return;
-            let secondRotationY = catModel2.rotation.y;
-
-            if (arrowKeysPressed["ArrowDown"]) {
-                catModel2.position.z += moveSpeed;
-                secondRotationY = 0;
-            }
-            if (arrowKeysPressed["ArrowUp"]) {
-                catModel2.position.z -= moveSpeed;
-                secondRotationY = Math.PI;
-            }
-            if (arrowKeysPressed["ArrowLeft"]) {
-                catModel2.position.x -= moveSpeed;
-                secondRotationY = -Math.PI / 2;
-            }
-            if (arrowKeysPressed["ArrowRight"]) {
-                catModel2.position.x += moveSpeed;
-                secondRotationY = Math.PI / 2;
-            }
-
-            if (arrowKeysPressed["ArrowUp"] || arrowKeysPressed["ArrowDown"] || arrowKeysPressed["ArrowLeft"] || arrowKeysPressed["ArrowRight"]) {
-                // Lógica para suavizar la rotación
-                catModel2.rotation.y += (secondRotationY - catModel2.rotation.y) * rotationSpeed;
-            }
+        document.onkeydown = function (e) {
+        if (!currentUser || !currentUser.uid) {
+            console.error("Usuario no autenticado o currentUser.uid no definido.");
+            return;
         }
+
+        const jugadorActual = scene.getObjectByName(currentUser.uid);
+
+        if (!jugadorActual) {
+            console.error("El modelo del jugador actual no está en la escena.");
+            return;
+        }
+
+        if (e.keyCode == 37) {
+            jugadorActual.position.x -= 1;
+        }
+        if (e.keyCode == 39) {
+            jugadorActual.position.x += 1;
+        }
+        if (e.keyCode == 38) {
+            jugadorActual.position.z -= 1;
+        }
+        if (e.keyCode == 40) {
+            jugadorActual.position.z += 1;
+        }
+
+        writeUserData(
+            currentUser.uid,
+            jugadorActual.position.x,
+            jugadorActual.position.y,
+            jugadorActual.position.z
+        );
+        };
+
 
 
          // Skybox
@@ -388,7 +462,7 @@
         const cameraControl = new OrbitControls(camera, renderer.domElement);
 
         function animate() {
-            updateMovement();
+           // updateMovement();
 
             if (catModel1) detectarColision(catModel1);
             if (catModel2) detectarColision(catModel2);
