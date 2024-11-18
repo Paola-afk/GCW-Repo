@@ -321,7 +321,7 @@
             });
 
 
-            // Detectar colisión con las cajas invisibles
+        // Detectar colisión con las cajas invisibles
         colisiones.forEach((caja) => {
         caja.geometry.computeBoundingBox(); // Calcular boundingBox si no está calculada
 
@@ -423,72 +423,92 @@
         return;
     }
 
-    // Configura la velocidad y variables para la rotación
-    const moveSpeed = 1;
-    let rotationY = jugadorActual.rotation.y;
-    let posicionModificada = false;
+    const moveSpeed = 1; // Velocidad de movimiento
+const rotationSpeed = 0.5; // Velocidad de rotación suave
+let rotationY = jugadorActual.rotation.y; // Rotación inicial del jugador
+let posicionModificada = false; // Bandera de movimiento
 
-    // Maneja las teclas y actualiza posición y rotación
-    switch (e.keyCode) {
-        case 37: // Flecha izquierda
-            jugadorActual.position.x -= moveSpeed;
-            rotationY = -Math.PI / 2; // Mirando hacia la izquierda
-            posicionModificada = true;
-            break;
-        case 39: // Flecha derecha
-            jugadorActual.position.x += moveSpeed;
-            rotationY = Math.PI / 2; // Mirando hacia la derecha
-            posicionModificada = true;
-            break;
-        case 38: // Flecha arriba
-            jugadorActual.position.z -= moveSpeed;
-            rotationY = Math.PI; // Mirando hacia arriba
-            posicionModificada = true;
-            break;
-        case 40: // Flecha abajo
-            jugadorActual.position.z += moveSpeed;
-            rotationY = 0; // Mirando hacia abajo
-            posicionModificada = true;
-            break;
+// Calculamos la dirección de movimiento en base a la rotación
+const direction = new THREE.Vector3(0, 0, 1); // Dirección frontal
+const rotationMatrix = new THREE.Matrix4(); // Matriz de rotación
+
+// Manejo de las teclas para movimiento y rotación
+switch (e.keyCode) {
+    case 39: // Flecha derecha (rotar a la derecha)
+        rotationY -= rotationSpeed; // Rotar a la derecha
+        posicionModificada = true;
+        break;
+    case 37: // Flecha izquierda (rotar a la izquierda)
+        rotationY += rotationSpeed; // Rotar a la izquierda
+        posicionModificada = true;
+        break;
+    case 38: // Flecha arriba (mover hacia adelante)
+        rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
+        direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+
+        // Mover al jugador en la dirección deseada
+        jugadorActual.position.x += direction.x * moveSpeed;
+        jugadorActual.position.z += direction.z * moveSpeed;
+        posicionModificada = true;
+        break;
+    case 40: // Flecha abajo (mover hacia atrás)
+        rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
+        direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+
+        // Mover al jugador en la dirección opuesta
+        jugadorActual.position.x -= direction.x * moveSpeed;
+        jugadorActual.position.z -= direction.z * moveSpeed;
+        posicionModificada = true;
+        break;
+}
+
+// Si hubo movimiento o rotación, interpolar la rotación suavemente
+if (posicionModificada) {
+    // Interpolamos entre la rotación actual y la deseada
+    const deltaRotation = rotationY - jugadorActual.rotation.y;
+    if (Math.abs(deltaRotation) > 0.01) { // Ajustamos un umbral para evitar oscilaciones pequeñas
+        jugadorActual.rotation.y += deltaRotation * rotationSpeed;
     }
 
-    // Si hubo movimiento, actualiza la rotación y la base de datos
-    if (posicionModificada) {
-        jugadorActual.rotation.y = rotationY;
-
+    // Asegúrate de que la posición no sea NaN antes de escribir en Firebase
+    if (!isNaN(jugadorActual.position.x) && !isNaN(jugadorActual.position.y) && !isNaN(jugadorActual.position.z)) {
         writeUserData(
             currentUser.uid,
             jugadorActual.position.x,
             jugadorActual.position.y,
             jugadorActual.position.z
         );
+    } else {
+        console.error("Posición inválida del jugador:", jugadorActual.position);
     }
+}
+
 };
 
 
-        function updateCameraPosition() {
-            if (!currentUser || !currentUser.uid) return;
+// Actualiza la posición de la cámara
+function updateCameraPosition() {
+    if (!currentUser || !currentUser.uid) return;
 
-            // Obtiene el modelo del jugador actual
-            const jugadorActual = scene.getObjectByName(currentUser.uid);
+    const jugadorActual = scene.getObjectByName(currentUser.uid);
+    if (!jugadorActual) return;
 
-            if (!jugadorActual) return;
+    // Define el offset relativo al jugador (cámara detrás y arriba)
+    const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
 
-            // Define la posición deseada para la cámara
-            const offset = new THREE.Vector3(0, 5, 10); // Desplazamiento detrás y por encima del jugador
-            const jugadorPosition = jugadorActual.position.clone();
+    // Aplica la rotación del jugador al offset
+    const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
+    const offsetRotated = offset.clone().applyQuaternion(jugadorRotation);
 
-            // Calcula la posición de la cámara con el offset
-            const cameraPosition = jugadorPosition.add(offset);
+    // Calcula la posición deseada de la cámara
+    const cameraTargetPosition = jugadorActual.position.clone().add(offsetRotated);
 
-            // Actualiza la posición de la cámara
-            camera.position.lerp(cameraPosition, 0.1); // Suaviza el movimiento de la cámara
+    // Suaviza el movimiento de la cámara hacia la posición deseada
+    camera.position.lerp(cameraTargetPosition, 0.1);
 
-            // Hace que la cámara mire al jugador
-            camera.lookAt(jugadorActual.position);
-        }
-
-
+    // La cámara siempre mira al jugador
+    camera.lookAt(jugadorActual.position);
+}
 
 
          // Skybox
