@@ -1,262 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Meow Madness - Ciudad</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            position: relative;
-        }
+    <title>Meow Madness - Bosque</title>
+    <link rel="stylesheet" href="front/css/EscenarioBosque.css">
+  </head>
+  <body>
 
-        #icon-container {
-            position: absolute;
-            z-index: 10;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .menu-button {
-            width: 60px;
-            height: 60px;
-            position: absolute;
-            pointer-events: auto;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-    .menu-button:hover {
-        position: fixed; 
-        z-index: 2; 
-        transition: transform 0.3s ease;
-    }
-
-    .menu-button:hover {
-        transform: translateY(-5px);
-        /*width: 210px;
-        height: 210px;
-          */
-    }
-
-
-        /* Estilos para cada botón en sus esquinas */
-    #escenario-1 {
-        width: 200px;
-        height: auto;
-        top: 25px;
-        left: 50px;
-    }
-
-    #escenario-2 {
-        width: 200px;
-        height: 200px;
-        bottom: 20px;
-        left: 20px;
-    }
-
-    #escenario-3 {
-        width: 60px;
-        height: 60px;
-        top: 20px;
-        right: 20px;
-    }
-    </style>
-</head>
-<body>
     <div id="icon-container">
-        <img src="front/UI/Points.png" alt="Esc1" class="menu-button" id="escenario-1" />
-        <img src="front/UI/Power.png" alt="Esc2" class="menu-button" id="escenario-2" />
-        <a href="PauseMenu.html">
-            <img src="front/UI/Pause_button.png" alt="Pause" class="menu-button" id="escenario-3" />
-        </a>
+      <img
+        src="front/UI/Points.png"
+        alt="Esc1"
+        class="menu-button"
+        id="escenario-1"
+      />
+      <img
+        src="front/UI/Power.png"
+        alt="Esc2"
+        class="menu-button"
+        id="escenario-2"
+      />
+      <a href="PauseMenu.html">
+        <img
+          src="front/UI/Pause_button.png"
+          alt="Pause"
+          class="menu-button"
+          id="escenario-3"
+        />
+      </a>
     </div>
 
     <script type="module">
-        import * as THREE from "./three.module.js";
-        import { OrbitControls } from "./OrbitControls.js";
-        import { GLTFLoader } from "./GLTFLoader.js";
+      import * as THREE from "./three.module.js";
+      import { OrbitControls } from "./OrbitControls.js";
+      import { GLTFLoader } from "./GLTFLoader.js";
 
 
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-       //import { onAuthStateChanged } from "firebase/auth";
+      // *** FIREBASE **** //
+
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+      import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
       // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
-            authDomain: "coordenadas-251ea.firebaseapp.com",
-            databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
-            projectId: "coordenadas-251ea",
-            storageBucket: "coordenadas-251ea.firebasestorage.app",
-            messagingSenderId: "31232618102",
-            appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
-        };
+      const firebaseConfig = {
+        apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
+        authDomain: "coordenadas-251ea.firebaseapp.com",
+        databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
+        projectId: "coordenadas-251ea",
+        storageBucket: "coordenadas-251ea.firebasestorage.app",
+        messagingSenderId: "31232618102",
+        appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
+      };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const db = getDatabase();
-        const provider = new GoogleAuthProvider();
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth();
+      const db = getDatabase();
+      const provider = new GoogleAuthProvider();
 
-        
 
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color("#34495E");
 
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
+
+
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("#34495E");
+
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
         camera.position.set(0, 5, 20);
 
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
 
-        const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
-        scene.add(hemisphereLight);
+      const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+      scene.add(hemisphereLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(1, 5, -1);
-        scene.add(directionalLight);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(1, 5, -1);
+      scene.add(directionalLight);
 
 
-        let currentUser = null;
 
-        onAuthStateChanged(auth, (user) => {
+      // *** VARIABLES GLOBALES *** //
+      let currentUser = null;
+      const latas = [];
+      const manotas = [];
+      const estambres = [];
+      const colisiones = [];
+      let gatito;
+
+
+
+      // Autentifica el usuario
+      onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
             console.log("Usuario autenticado:", currentUser.uid);
         } else {
             console.log("No hay usuario autenticado.");
         }
-        });
-
-        // // Función de Login con Google
-        // async function login() {
-        //     await signInWithPopup(auth, provider)
-        //         .then((result) => {
-        //             // Obtener datos del usuario
-        //             const credential = GoogleAuthProvider.credentialFromResult(result);
-        //             const token = credential.accessToken;
-        //             currentUser = result.user; // Guardar el usuario actual
-
-        //             // Escribir datos iniciales del jugador en Firebase (posición inicial)
-        //             writeUserData(currentUser.uid, 0, 1.9, 0);  // Posición inicial (x, y, z)
-        //         })
-        //         .catch((error) => {
-        //             console.log("Error de autenticación:", error);
-        //         });
-        // }
-
-        // // Función de Logout
-        // async function logout() {
-        //     await signOut(auth).then(() => {
-        //         console.log("Logout exitoso");
-        //     }).catch((error) => {
-        //         console.log("Error al hacer logout", error);
-        //     });
-        // }
-
-        // // Escribir la posición del usuario en Firebase
-        // function writeUserData(userId, positionX, positionY, positionZ) {
-        //     set(ref(db, "usuarios/" + userId), {
-        //         posicion: {
-        //             x: positionX,
-        //             y: positionY,
-        //             z: positionZ
-        //         }
-        //     });
-        // }
+      });
 
 
-        // Obtener los datos de usuarios desde Firebase
-        const usuariosRef = ref(db, "usuarios");
 
-        onValue(usuariosRef, (snapshot) => {
-        const usuariosData = snapshot.val();
-        if (usuariosData) {
-            Object.entries(usuariosData).forEach(([key, value]) => {
-                console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
-                
-                // Verifica si el modelo del usuario ya existe en la escena
-                const usuarioModelo = scene.getObjectByName(key);
+    // Obtener los datos de usuarios desde Firebase
+    const usuariosRef = ref(db, "usuarios");
 
-                if (!usuarioModelo) {
-                    // Si el modelo no existe, cargarlo desde GLTF
-                    loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-                        const gatito = gltf.scene;
-                        gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
-                        gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
-                        gatito.name = key;  // Nombre del objeto en la escena
-                        scene.add(gatito);
-                    });
-                } else {
-                    // Si el modelo ya existe, actualizar la posición
-                    usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                }
+    onValue(usuariosRef, (snapshot) => {
+      const usuariosData = snapshot.val();
+      if (usuariosData) {
+        Object.entries(usuariosData).forEach(([key, value]) => {
+          console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+          
+          // Verifica si el modelo del usuario ya existe en la escena
+          const usuarioModelo = scene.getObjectByName(key);
+
+          if (!usuarioModelo) {
+            // Cargar el modelo del gatito
+            const loaderGLTF = new GLTFLoader();
+            loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+              gatito = gltf.scene;
+              gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
+              gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
+              gatito.name = key;  // Nombre del objeto en la escena
+              scene.add(gatito);
             });
-        } else {
-            console.log("No hay datos de usuarios en Firebase.");
-        }
+          } else {
+            // Actualizar la posición del modelo si ya existe
+            usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+          }
+        });
+      } else {
+        console.log("No hay datos de usuarios en Firebase.");
+      }
     });
 
 
 
 
-
-        let catModel1, catModel2;
-        const latas = [];
-        const manotas = [];
-        const estambres = [];
-
-        const loaderGLTF = new GLTFLoader();
-
-        /*
-        loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-            catModel1 = model.scene;
-            catModel1.scale.set(0.7, 0.7, 0.7);
-            catModel1.position.set(0, 1.9, 0);
-            scene.add(catModel1);
-        });
-
-        loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-            catModel2 = model.scene;
-            catModel2.scale.set(0.7, 0.7, 0.7);
-            catModel2.position.set(-4, 1.9, 0);
-            scene.add(catModel2);
-        });
-        */
+      //Bosque
+      const loaderForest = new GLTFLoader();
+      loaderForest.load("/Modelos/Bosque-PIA.glb", function (model) {
+        const forestModel = model.scene;
+        forestModel.scale.set(20, 20, 20);
+        forestModel.position.set(0, -0.5, 0);
+        scene.add(forestModel);
+      });
 
 
-        // Función para agregar un modelo de gatito
-        function agregarGatito(position) {
-        loader.load("/Modelos/Gatito-Grande.glb", (gltf) => {
-        const gatito = gltf.scene;
-        gatito.position.set(position.x, 0.5, position.z); // Altura ajustada para el gatito
-        gatito.scale.set(0.7, 0.7, 0.7);
-        scene.add(gatito);
-        });
-    }
 
-        const loaderCity = new GLTFLoader();
-        loaderCity.load("/Modelos/Ciudad-PIA.glb", function (model) {
-            const CityModel = model.scene;
-            CityModel.scale.set(45, 45, 45);
-            CityModel.position.set(9, -0.7, 0);
-            scene.add(CityModel);
-        });
-
-        const loaderCan = new GLTFLoader();
+      //Latas
+      const loaderCan = new GLTFLoader();
         function cargarLata(x, y, z) {
             loaderCan.load("/Modelos/Lata-PIA.glb", function (model) {
                 const canModel = model.scene;
@@ -268,24 +167,29 @@
             });
         }
 
-        cargarLata(50, 0, 50);
-        cargarLata(19, 0, -15);
-        cargarLata(-23, 0, 60);
+        cargarLata(25, 0, 50);
+        cargarLata(15, 0, -30);
 
+
+
+        //Manotas
+        const loaderManotas = new GLTFLoader();
         function cargarManotas(x, y, z) {
-            loaderCan.load("/Modelos/Manotas-PIA.glb", function (model) {
-                const manotasModel = model.scene;
-                manotasModel.name = "Manotas"; // Establecer nombre para identificar
-                manotasModel.scale.set(1, 1, 1);
-                manotasModel.position.set(x, y, z);
-                scene.add(manotasModel);
-                manotas.push(manotasModel);
-            });
+          loaderManotas.load("/Modelos/Manotas-PIA.glb", function (model) {
+            const manotasModel = model.scene;
+            manotasModel.name = "Manotas"; // Establecer nombre para identificar
+            manotasModel.scale.set(1, 1, 1);
+            manotasModel.position.set(x, y, z);
+            scene.add(manotasModel);
+            manotas.push(manotasModel);
+          });
         }
 
-        cargarManotas(-50, 2, -50);
-        cargarManotas(-19, 2, 15);
+        cargarManotas(-50, 2, -55);
+        cargarManotas(-19, 2, 20);
 
+
+        const loaderEstambre = new GLTFLoader();
         function cargarEstambre(x, y, z) {
             loaderCan.load("/Modelos/Bola-Estambre.glb", function (model) {
                 const estambreModel = model.scene;
@@ -300,246 +204,271 @@
         cargarEstambre(62, 0.5, -34);
         cargarEstambre(-46, 0.5, 27);
 
-        let gatitoManotasModel; // Declaración global
-        // Carga del modelo GatitoManotas
-        loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
-            gatitoManotasModel = model.scene;
-            gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
-            console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
-        });
-
-        // Modificar la función detectarColision
-        function detectarColision(gatito) {
-            const objetosInteractivos = [...latas, ...manotas, ...estambres];
-            const objetosAEliminar = [];
-
-            objetosInteractivos.forEach((objeto) => {
-                const distancia = gatito.position.distanceTo(objeto.position);
-                if (distancia < 2.5) {
-                    objetosAEliminar.push(objeto);
-                }
-            });
+        // let gatitoManotasModel; // Declaración global
+        // // Carga del modelo GatitoManotas
+        // loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
+        //     gatitoManotasModel = model.scene;
+        //     gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
+        //     console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
+        // });
 
 
-        // Detectar colisión con las cajas invisibles
-        colisiones.forEach((caja) => {
-        caja.geometry.computeBoundingBox(); // Calcular boundingBox si no está calculada
 
-            const cajaMin = caja.geometry.boundingBox.min.clone().add(caja.position);
-            const cajaMax = caja.geometry.boundingBox.max.clone().add(caja.position);
+        // Esta función crea un objeto de colisión
 
-            if (
-                gatito.position.x > cajaMin.x &&
-                gatito.position.x < cajaMax.x &&
-                gatito.position.z > cajaMin.z &&
-                gatito.position.z < cajaMax.z &&
-                gatito.position.y > cajaMin.y &&
-                gatito.position.y < cajaMax.y
-                ) {
-                    // Empujar hacia atrás cuando colisiona con la caja, solo en los ejes X y Z
-                    const direccionEmpuje = new THREE.Vector3().subVectors(gatito.position, caja.position).normalize();
-                    direccionEmpuje.y = 0; // No modificar la posición en Y
-                    gatito.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para el empuje
-                }
-        });
-
-            objetosAEliminar.forEach((objeto) => {
-                console.log(`Colisión detectada con: ${objeto.name}`);
-                scene.remove(objeto);
-
-                const indexLatas = latas.indexOf(objeto);
-                if (indexLatas !== -1) {
-                    latas.splice(indexLatas, 1);
-                    console.log(`Lata eliminada. Quedan: ${latas.length}`);
-                }
-
-                const indexManotas = manotas.indexOf(objeto);
-                if (indexManotas !== -1) {
-                    manotas.splice(indexManotas, 1);
-                    console.log(`Manota eliminada. Quedan: ${manotas.length}`);
-
-                    if (gatito === catModel1) {
-                        scene.remove(catModel1);
-                        catModel1 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
-                        catModel1.position.copy(gatito.position);
-                        scene.add(catModel1);
-                        console.log("GatitoManotas añadido en la posición:", catModel1.position); // Verifica la posición
-                    } else if (gatito === catModel2) {
-                        scene.remove(catModel2);
-                        catModel2 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
-                        catModel2.position.copy(gatito.position);
-                        scene.add(catModel2);
-                        console.log("GatitoManotas añadido en la posición:", catModel2.position); // Verifica la posición
-                    }
-                }
-
-                const indexEstambres = estambres.indexOf(objeto);
-                if (indexEstambres !== -1) {
-                    estambres.splice(indexEstambres, 1);
-                    console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
-                }
-            });
-        }
-
-        const colisiones = [];
-
-
-         // Esta función crea un objeto de colisión
         function crearColision(x, y, z, width, height, depth) {
             const geometry = new THREE.BoxGeometry(width, height, depth);
-            const material = new THREE.MeshBasicMaterial({ visible: false, color: 0xff0000}); // Hacer que la caja de colisión sea completamente invisible
+            const material = new THREE.MeshBasicMaterial({ visible: false }); // Hacer que la caja de colisión sea completamente invisible
             const collisionBox = new THREE.Mesh(geometry, material);
             collisionBox.position.set(x, y, z);
             scene.add(collisionBox);
             colisiones.push(collisionBox);
         }
 
+        // A COLOOOOOOOOOOOOOOOOOOOOR
+        // function crearColision(x, y, z, width, height, depth) {
+        //     const geometry = new THREE.BoxGeometry(width, height, depth);
+        //     const material = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5 });
+        //     const collisionBox = new THREE.Mesh(geometry, material);
+        //     collisionBox.position.set(x, y, z);
+        //     scene.add(collisionBox);
+        //     colisiones.push(collisionBox);
+        // }
+
         // Llama a crearColision para cada objeto que desees que tenga colisión
-        crearColision(-28.5, 0, 3.5, 30.5, 20, 11); // Edificio
-        crearColision(26.2, 0, 3.3, 37.6, 20, 11); // Edificio
-        crearColision(34.5, 0, -30.5, 26, 20, 13); // Edificio
-        crearColision(-11.8, 0, -30.4, 29.6, 20, 12); // Edificio
-        crearColision(22.4, 0, 42, 12.7, 20, 25); // Edificio
-        crearColision(62, 0, 34, 26, 20, 11); // Edificio
+        crearColision(-9, 0, 28, 6, 10, 6); // Lata 1
+        crearColision(-20, 0, 68, 6, 10, 6); // Lata 1
+        crearColision(-38, 0, 75, 6, 10, 6); // Lata 1
+        crearColision(-36, 0, 41, 6, 10, 6); // Lata 1
+        crearColision(11, 0, 75, 6, 10, 6); // Lata 1
+        crearColision(-72, 0, 39, 6, 10, 6); // Lata 1
+        crearColision(-68, 0, 26, 6, 10, 6); // Lata aaa
+        crearColision(-64, 0, 58, 6, 10, 6); // Lata 1
+        crearColision(-66, 0, 72, 6, 10, 6); // Lata 1
+        crearColision(77, 0, 72, 6, 10, 6); // Lata 1
+        crearColision(78, 0, 41, 6, 10, 6); // Lata 1
+        crearColision(75, 0, 15, 6, 10, 6); // Lata 1
+        crearColision(75, 0, -11, 6, 10, 6); // Lata 1
+        crearColision(68, 0, -34, 6, 10, 6); // Lata 1
+        crearColision(72, 0, -50, 6, 10, 6); // Lata 1
+        crearColision(68, 0, -77, 6, 10, 6); // Lata 1
+        crearColision(41, 0, -76, 6, 10, 6); // Lata 1
+        crearColision(17, 0, -76, 6, 10, 6); // Lata bbbbbb
+        crearColision(20, 0, -36, 6, 10, 6); // Lata 1
+        crearColision(33, 0, -51, 6, 10, 6); // Lata 1
+        crearColision(46, 0, -40, 6, 10, 6); // Lata 1
+        crearColision(-14, 0, -74, 6, 10, 6); // Lata 1
+        crearColision(-35, 0, -73, 6, 10, 6); // Lata 1
+        crearColision(-53, 0, -75, 6, 10, 6); // Lata 1
+        crearColision(-74, 0, -73, 6, 10, 6); // Lata aaaaaa
+        crearColision(-54, 0, -55, 6, 10, 6); // Lata 1
+        crearColision(-24, 0, -55, 6, 10, 6); // Lata 1
+        crearColision(-45, 0, -32, 6, 10, 6); // Lata 1
+        crearColision(-47, 0, -1, 6, 10, 6); // Lata 1
+        crearColision(-74, 0, -44, 6, 10, 6); // Lata 1
+        crearColision(-74, 0, -26, 6, 10, 6); // Lata 1
+        crearColision(-70, 0, -4, 6, 10, 6); // Lata 1
+        crearColision(43, 0, 49, 12, 10, 8); // Lata 1
+        crearColision(3, 0, -15, 11, 10, 36); // Lata 1
 
-        crearColision(73.7, 0, 0, 15, 20, 150); // Edificio
-        crearColision(-57, 0, 0, 15, 20, 150); // Edificio
-
-        crearColision(0, 0, 65.7, 150, 20, 15); // Edificio
-        crearColision(0, 0, -64.7, 150, 20, 15); // Edificio
-    
-
-        document.onkeydown = function (e) {
-    if (!currentUser || !currentUser.uid) {
-        console.error("Usuario no autenticado o currentUser.uid no definido.");
-        return;
-    }
-
-    // Obtiene el modelo del jugador actual en la escena
-    const jugadorActual = scene.getObjectByName(currentUser.uid);
-
-    if (!jugadorActual) {
-        console.error("El modelo del jugador actual no está en la escena.");
-        return;
-    }
-
-    const moveSpeed = 1; // Velocidad de movimiento
-const rotationSpeed = 0.5; // Velocidad de rotación suave
-let rotationY = jugadorActual.rotation.y; // Rotación inicial del jugador
-let posicionModificada = false; // Bandera de movimiento
-
-// Calculamos la dirección de movimiento en base a la rotación
-const direction = new THREE.Vector3(0, 0, 1); // Dirección frontal
-const rotationMatrix = new THREE.Matrix4(); // Matriz de rotación
-
-// Manejo de las teclas para movimiento y rotación
-switch (e.keyCode) {
-    case 39: // Flecha derecha (rotar a la derecha)
-        rotationY -= rotationSpeed; // Rotar a la derecha
-        posicionModificada = true;
-        break;
-    case 37: // Flecha izquierda (rotar a la izquierda)
-        rotationY += rotationSpeed; // Rotar a la izquierda
-        posicionModificada = true;
-        break;
-    case 38: // Flecha arriba (mover hacia adelante)
-        rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
-        direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
-
-        // Mover al jugador en la dirección deseada
-        jugadorActual.position.x += direction.x * moveSpeed;
-        jugadorActual.position.z += direction.z * moveSpeed;
-        posicionModificada = true;
-        break;
-    case 40: // Flecha abajo (mover hacia atrás)
-        rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
-        direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
-
-        // Mover al jugador en la dirección opuesta
-        jugadorActual.position.x -= direction.x * moveSpeed;
-        jugadorActual.position.z -= direction.z * moveSpeed;
-        posicionModificada = true;
-        break;
-}
-
-// Si hubo movimiento o rotación, interpolar la rotación suavemente
-if (posicionModificada) {
-    // Interpolamos entre la rotación actual y la deseada
-    const deltaRotation = rotationY - jugadorActual.rotation.y;
-    if (Math.abs(deltaRotation) > 0.01) { // Ajustamos un umbral para evitar oscilaciones pequeñas
-        jugadorActual.rotation.y += deltaRotation * rotationSpeed;
-    }
-
-    // Asegúrate de que la posición no sea NaN antes de escribir en Firebase
-    if (!isNaN(jugadorActual.position.x) && !isNaN(jugadorActual.position.y) && !isNaN(jugadorActual.position.z)) {
-        writeUserData(
-            currentUser.uid,
-            jugadorActual.position.x,
-            jugadorActual.position.y,
-            jugadorActual.position.z
-        );
-    } else {
-        console.error("Posición inválida del jugador:", jugadorActual.position);
-    }
-}
-
-};
+        crearColision(0, 0, -82, 250, 10, 10); // Lata 1
+        crearColision(0, 0, 82, 250, 10, 10); // Lata 1
+        crearColision(-82, 0, 0, 10, 10, 200); // Lata 1
+        crearColision(82, 0, 0, 10, 10, 200); // Lata 1
 
 
-// Actualiza la posición de la cámara
-function updateCameraPosition() {
-    if (!currentUser || !currentUser.uid) return;
-
-    const jugadorActual = scene.getObjectByName(currentUser.uid);
-    if (!jugadorActual) return;
-
-    // Define el offset relativo al jugador (cámara detrás y arriba)
-    const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
-
-    // Aplica la rotación del jugador al offset
-    const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
-    const offsetRotated = offset.clone().applyQuaternion(jugadorRotation);
-
-    // Calcula la posición deseada de la cámara
-    const cameraTargetPosition = jugadorActual.position.clone().add(offsetRotated);
-
-    // Suaviza el movimiento de la cámara hacia la posición deseada
-    camera.position.lerp(cameraTargetPosition, 0.1);
-
-    // La cámara siempre mira al jugador
-    camera.lookAt(jugadorActual.position);
-}
 
 
-         // Skybox
-        const loader = new THREE.CubeTextureLoader();
-        const skyboxTextures = loader.load([
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-        ]);
+        // Modificar la función detectarColision
+        function detectarColision(gatitoModel) {
+          const objetosInteractivos = [...latas, ...manotas, ...estambres];
+          const objetosAEliminar = [];
 
-        scene.background = skyboxTextures;
+          objetosInteractivos.forEach((objeto) => {
+              const distancia = gatitoModel.position.distanceTo(objeto.position);
+              if (distancia < 2.5) {
+                  objetosAEliminar.push(objeto);
 
+                  // Empujar hacia atrás, solo en los ejes X y Z
+                  const direccionEmpuje = new THREE.Vector3().subVectors(gatitoModel.position, objeto.position).normalize();
+                  direccionEmpuje.y = 0; // No modificar la posición en Y
+                  gatitoModel.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para más o menos empuje
+              }
+          });
 
-        const cameraControl = new OrbitControls(camera, renderer.domElement);
+          // Detectar colisión con las cajas invisibles
+          colisiones.forEach((caja) => {
+              caja.geometry.computeBoundingBox(); // Calcular boundingBox si no está calculada
 
-        function animate() {
-           // updateMovement();
+              const cajaMin = caja.geometry.boundingBox.min.clone().add(caja.position);
+              const cajaMax = caja.geometry.boundingBox.max.clone().add(caja.position);
 
-            if (catModel1) detectarColision(catModel1);
-            if (catModel2) detectarColision(catModel2);
+              if (
+                gatitoModel.position.x > cajaMin.x &&
+                gatitoModel.position.x < cajaMax.x &&
+                gatitoModel.position.z > cajaMin.z &&
+                gatitoModel.position.z < cajaMax.z &&
+                gatitoModel.position.y > cajaMin.y &&
+                gatitoModel.position.y < cajaMax.y
+                  ) {
+                    // Empujar hacia atrás cuando colisiona con la caja, solo en los ejes X y Z
+                    const direccionEmpuje = new THREE.Vector3().subVectors(gatitoModel.position, caja.position).normalize();
+                    direccionEmpuje.y = 0; // No modificar la posición en Y
+                    gatitoModel.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para el empuje
+                  }
+          });
 
-            updateCameraPosition();
+          objetosAEliminar.forEach((objeto) => {
+              console.log(`Colisión detectada con: ${objeto.name}`);
+              scene.remove(objeto);
 
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
+              const indexLatas = latas.indexOf(objeto);
+              if (indexLatas !== -1) {
+                  latas.splice(indexLatas, 1);
+                  console.log(`Lata eliminada. Quedan: ${latas.length}`);
+              }
+
+              const indexManotas = manotas.indexOf(objeto);
+              if (indexManotas !== -1) {
+                  manotas.splice(indexManotas, 1);
+                  console.log(`Manota eliminada. Quedan: ${manotas.length}`);
+
+                // // Si el gatito colisiona con una manota, cambiar a GatitoManotas
+                // if (gatito === catModel1) {
+                //     scene.remove(catModel1);
+                //     catModel1 = gatitoManotasModel.clone();
+                //     catModel1.position.copy(gatito.position);
+                //     scene.add(catModel1);
+                //     console.log("GatitoManotas añadido en la posición:", catModel1.position);
+                // } else if (gatito === catModel2) {
+                //     scene.remove(catModel2);
+                //     catModel2 = gatitoManotasModel.clone();
+                //     catModel2.position.copy(gatito.position);
+                //     scene.add(catModel2);
+                //     console.log("GatitoManotas añadido en la posición:", catModel2.position);
+                // }
+              }
+
+              const indexEstambres = estambres.indexOf(objeto);
+              if (indexEstambres !== -1) {
+                  estambres.splice(indexEstambres, 1);
+                  console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
+              }
+          });
         }
 
-        animate();
+
+
+      document.onkeydown = function (e) {
+        if (!currentUser || !currentUser.uid) {
+            console.error("Usuario no autenticado o currentUser.uid no definido.");
+            return;
+        }
+
+        // Obtiene el modelo del jugador actual en la escena
+        const jugadorActual = scene.getObjectByName(currentUser.uid);
+
+        if (!jugadorActual) {
+            console.error("El modelo del jugador actual no está en la escena.");
+            return;
+        }
+
+        // Configura la velocidad y variables para la rotación
+        const moveSpeed = 1;
+        let rotationY = jugadorActual.rotation.y;
+        let posicionModificada = false;
+
+        // Maneja las teclas y actualiza posición y rotación
+        switch (e.keyCode) {
+            case 37: // Flecha izquierda
+                jugadorActual.position.x -= moveSpeed;
+                rotationY = -Math.PI / 2; // Mirando hacia la izquierda
+                posicionModificada = true;
+                break;
+            case 39: // Flecha derecha
+                jugadorActual.position.x += moveSpeed;
+                rotationY = Math.PI / 2; // Mirando hacia la derecha
+                posicionModificada = true;
+                break;
+            case 38: // Flecha arriba
+                jugadorActual.position.z -= moveSpeed;
+                rotationY = Math.PI; // Mirando hacia arriba
+                posicionModificada = true;
+                break;
+            case 40: // Flecha abajo
+                jugadorActual.position.z += moveSpeed;
+                rotationY = 0; // Mirando hacia abajo
+                posicionModificada = true;
+                break;
+        }
+
+        // Si hubo movimiento, actualiza la rotación y la base de datos
+        if (posicionModificada) {
+            jugadorActual.rotation.y = rotationY;
+
+            writeUserData(
+                currentUser.uid,
+                jugadorActual.position.x,
+                jugadorActual.position.y,
+                jugadorActual.position.z
+            );
+        }
+      };
+
+
+      function updateCameraPosition() {
+          if (!currentUser || !currentUser.uid) return;
+
+          // Obtiene el modelo del jugador actual
+          const jugadorActual = scene.getObjectByName(currentUser.uid);
+
+          if (!jugadorActual) return;
+
+          // Define la posición deseada para la cámara
+          const offset = new THREE.Vector3(0, 8, 20); // Desplazamiento detrás y por encima del jugador
+          const jugadorPosition = jugadorActual.position.clone();
+
+          // Calcula la posición de la cámara con el offset
+          const cameraPosition = jugadorPosition.add(offset);
+
+          // Actualiza la posición de la cámara
+          camera.position.lerp(cameraPosition, 0.1); // Suaviza el movimiento de la cámara
+
+          // Hace que la cámara mire al jugador
+          camera.lookAt(jugadorActual.position);
+      }
+
+
+
+       // Skybox
+      const loader = new THREE.CubeTextureLoader();
+      const skyboxTextures = loader.load([
+        "/front/images/Sky.png", 
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+      ]);
+
+      scene.background = skyboxTextures;
+
+      const cameraControl = new OrbitControls(camera, renderer.domElement);
+
+      function animate() {
+        // updateMovement();
+
+        // if (catModel1) detectarColision(catModel1);
+        if (gatito) detectarColision(gatito);
+
+        updateCameraPosition();
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+    
     </script>
-</body>
+  </body>
 </html>
