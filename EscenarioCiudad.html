@@ -89,7 +89,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
        //import { onAuthStateChanged } from "firebase/auth";
 
       // Your web app's Firebase configuration
@@ -167,9 +167,9 @@
         //     });
         // }
 
-        // // Escribir la posición del usuario en Firebase
+        // Escribir la posición del usuario en Firebase
         // function writeUserData(userId, positionX, positionY, positionZ) {
-        //     set(ref(db, "usuarios/" + userId), {
+        //     update(ref(db, "usuarios/" + userId), {
         //         posicion: {
         //             x: positionX,
         //             y: positionY,
@@ -178,6 +178,20 @@
         //     });
         // }
 
+
+
+        // Función para actualizar solo la posición sin perder los otros datos del usuario
+        function writeUserData(userId, positionX, positionY, positionZ) {
+            const userRef = ref(db, "usuarios/" + userId);
+            update(userRef, {
+                posicion: {
+                    x: positionX,
+                    y: positionY,
+                    z: positionZ
+                }
+            });
+        }
+        
 
         // Obtener los datos de usuarios desde Firebase
         const usuariosRef = ref(db, "usuarios");
