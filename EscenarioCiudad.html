@@ -141,42 +141,42 @@
         }
         });
 
-        // Función de Login con Google
-        async function login() {
-            await signInWithPopup(auth, provider)
-                .then((result) => {
-                    // Obtener datos del usuario
-                    const credential = GoogleAuthProvider.credentialFromResult(result);
-                    const token = credential.accessToken;
-                    currentUser = result.user; // Guardar el usuario actual
+        // // Función de Login con Google
+        // async function login() {
+        //     await signInWithPopup(auth, provider)
+        //         .then((result) => {
+        //             // Obtener datos del usuario
+        //             const credential = GoogleAuthProvider.credentialFromResult(result);
+        //             const token = credential.accessToken;
+        //             currentUser = result.user; // Guardar el usuario actual
 
-                    // Escribir datos iniciales del jugador en Firebase (posición inicial)
-                    writeUserData(currentUser.uid, 0, 1.9, 0);  // Posición inicial (x, y, z)
-                })
-                .catch((error) => {
-                    console.log("Error de autenticación:", error);
-                });
-        }
+        //             // Escribir datos iniciales del jugador en Firebase (posición inicial)
+        //             writeUserData(currentUser.uid, 0, 1.9, 0);  // Posición inicial (x, y, z)
+        //         })
+        //         .catch((error) => {
+        //             console.log("Error de autenticación:", error);
+        //         });
+        // }
 
-        // Función de Logout
-        async function logout() {
-            await signOut(auth).then(() => {
-                console.log("Logout exitoso");
-            }).catch((error) => {
-                console.log("Error al hacer logout", error);
-            });
-        }
+        // // Función de Logout
+        // async function logout() {
+        //     await signOut(auth).then(() => {
+        //         console.log("Logout exitoso");
+        //     }).catch((error) => {
+        //         console.log("Error al hacer logout", error);
+        //     });
+        // }
 
-        // Escribir la posición del usuario en Firebase
-        function writeUserData(userId, positionX, positionY, positionZ) {
-            set(ref(db, "usuarios/" + userId), {
-                posicion: {
-                    x: positionX,
-                    y: positionY,
-                    z: positionZ
-                }
-            });
-        }
+        // // Escribir la posición del usuario en Firebase
+        // function writeUserData(userId, positionX, positionY, positionZ) {
+        //     set(ref(db, "usuarios/" + userId), {
+        //         posicion: {
+        //             x: positionX,
+        //             y: positionY,
+        //             z: positionZ
+        //         }
+        //     });
+        // }
 
 
         // Obtener los datos de usuarios desde Firebase

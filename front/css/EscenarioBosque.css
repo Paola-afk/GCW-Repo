@@ -1,0 +1,64 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+}
+
+#icon-container {
+    position: absolute;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.menu-button {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    pointer-events: auto;
+}
+
+.hidden {
+    display: none;
+}
+
+.menu-button:hover {
+  position: fixed; 
+  z-index: 2; 
+  transition: transform 0.3s ease;
+}
+
+.menu-button:hover {
+  transform: translateY(-5px);
+  /*width: 210px;
+  height: 210px;
+  */
+}
+
+
+/* Estilos para cada botón en sus esquinas */
+#escenario-1 {
+    width: 200px;
+    height: auto;
+    top: 25px;
+    left: 50px;
+}
+
+#escenario-2 {
+    width: 200px;
+    height: 200px;
+    bottom: 20px;
+    left: 20px;
+}
+
+#escenario-3 {
+    width: 60px;
+    height: 60px;
+    top: 20px;
+    right: 20px;
+}
