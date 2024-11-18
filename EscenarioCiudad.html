@@ -423,47 +423,54 @@
         return;
     }
 
-    const moveSpeed = 1;
-const rotationSpeed = 0.5; // Ajusta la velocidad de rotación suave (entre 0 y 1)
-let rotationY = jugadorActual.rotation.y; 
-let posicionModificada = false;
+    const moveSpeed = 1; // Velocidad de movimiento
+const rotationSpeed = 0.5; // Velocidad de rotación suave
+let rotationY = jugadorActual.rotation.y; // Rotación inicial del jugador
+let posicionModificada = false; // Bandera de movimiento
 
-// Obtener la dirección de movimiento en función de la rotación del jugador
-const direction = new THREE.Vector3(0, 0, 1);  // Dirección "frontal" del jugador
-const rotationMatrix = new THREE.Matrix4().makeRotationY(jugadorActual.rotation.y);  // Matriz de rotación
-direction.applyMatrix4(rotationMatrix);  // Aplicar rotación
+// Calculamos la dirección de movimiento en base a la rotación
+const direction = new THREE.Vector3(0, 0, 1); // Dirección frontal
+const rotationMatrix = new THREE.Matrix4(); // Matriz de rotación
 
-// Maneja las teclas y actualiza la posición y rotación objetivo
+// Manejo de las teclas para movimiento y rotación
 switch (e.keyCode) {
-    case 39: // Flecha izquierda (rotación a la izquierda)
-        rotationY -= rotationSpeed;  // Rotar el jugador hacia la izquierda
+    case 39: // Flecha derecha (rotar a la derecha)
+        rotationY -= rotationSpeed; // Rotar a la derecha
         posicionModificada = true;
         break;
-    case 37: // Flecha derecha (rotación a la derecha)
-        rotationY += rotationSpeed;  // Rotar el jugador hacia la derecha
+    case 37: // Flecha izquierda (rotar a la izquierda)
+        rotationY += rotationSpeed; // Rotar a la izquierda
         posicionModificada = true;
         break;
     case 38: // Flecha arriba (mover hacia adelante)
-        jugadorActual.position.x += direction.x * moveSpeed;  // Mover hacia adelante
-        jugadorActual.position.z += direction.z * moveSpeed;  // Mover hacia adelante
+        rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
+        direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+
+        // Mover al jugador en la dirección deseada
+        jugadorActual.position.x += direction.x * moveSpeed;
+        jugadorActual.position.z += direction.z * moveSpeed;
         posicionModificada = true;
         break;
     case 40: // Flecha abajo (mover hacia atrás)
-        jugadorActual.position.x -= direction.x * moveSpeed;  // Mover hacia atrás
-        jugadorActual.position.z -= direction.z * moveSpeed;  // Mover hacia atrás
+        rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
+        direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+
+        // Mover al jugador en la dirección opuesta
+        jugadorActual.position.x -= direction.x * moveSpeed;
+        jugadorActual.position.z -= direction.z * moveSpeed;
         posicionModificada = true;
         break;
 }
 
 // Si hubo movimiento o rotación, interpolar la rotación suavemente
 if (posicionModificada) {
-    // Interpolar entre la rotación actual y la rotación deseada
+    // Interpolamos entre la rotación actual y la deseada
     const deltaRotation = rotationY - jugadorActual.rotation.y;
-    if (Math.abs(deltaRotation) > 0.01) { // Ajustamos un pequeño umbral para evitar pequeñas oscilaciones
+    if (Math.abs(deltaRotation) > 0.01) { // Ajustamos un umbral para evitar oscilaciones pequeñas
         jugadorActual.rotation.y += deltaRotation * rotationSpeed;
     }
 
-    // Asegurarse de que la posición no sea NaN antes de escribir en Firebase
+    // Asegúrate de que la posición no sea NaN antes de escribir en Firebase
     if (!isNaN(jugadorActual.position.x) && !isNaN(jugadorActual.position.y) && !isNaN(jugadorActual.position.z)) {
         writeUserData(
             currentUser.uid,
@@ -479,16 +486,15 @@ if (posicionModificada) {
 };
 
 
+// Actualiza la posición de la cámara
 function updateCameraPosition() {
     if (!currentUser || !currentUser.uid) return;
 
-    // Obtiene el modelo del jugador actual
     const jugadorActual = scene.getObjectByName(currentUser.uid);
-
     if (!jugadorActual) return;
 
     // Define el offset relativo al jugador (cámara detrás y arriba)
-    const offset = new THREE.Vector3(0, 5, -10); // 5 unidades arriba y 10 detrás
+    const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
 
     // Aplica la rotación del jugador al offset
     const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
