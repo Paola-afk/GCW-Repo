@@ -466,6 +466,28 @@
 };
 
 
+        function updateCameraPosition() {
+            if (!currentUser || !currentUser.uid) return;
+
+            // Obtiene el modelo del jugador actual
+            const jugadorActual = scene.getObjectByName(currentUser.uid);
+
+            if (!jugadorActual) return;
+
+            // Define la posición deseada para la cámara
+            const offset = new THREE.Vector3(0, 5, 10); // Desplazamiento detrás y por encima del jugador
+            const jugadorPosition = jugadorActual.position.clone();
+
+            // Calcula la posición de la cámara con el offset
+            const cameraPosition = jugadorPosition.add(offset);
+
+            // Actualiza la posición de la cámara
+            camera.position.lerp(cameraPosition, 0.1); // Suaviza el movimiento de la cámara
+
+            // Hace que la cámara mire al jugador
+            camera.lookAt(jugadorActual.position);
+        }
+
 
 
 
@@ -490,6 +512,8 @@
 
             if (catModel1) detectarColision(catModel1);
             if (catModel2) detectarColision(catModel2);
+
+            updateCameraPosition();
 
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
