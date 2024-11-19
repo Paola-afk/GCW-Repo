@@ -181,18 +181,20 @@
 
 
         // Función para actualizar solo la posición sin perder los otros datos del usuario
-        function writeUserData(userId, positionX, positionY, positionZ) {
+        function writeUserData(userId, positionX, positionY, positionZ, rotationY) {
             const userRef = ref(db, "usuarios/" + userId);
             update(userRef, {
                 posicion: {
                     x: positionX,
                     y: positionY,
                     z: positionZ
+                },
+                rotacion: {
+                    y: rotationY
                 }
             });
         }
         
-
         // Obtener los datos de usuarios desde Firebase
         const usuariosRef = ref(db, "usuarios");
 
@@ -438,64 +440,66 @@
     }
 
     const moveSpeed = 1; // Velocidad de movimiento
-const rotationSpeed = 0.5; // Velocidad de rotación suave
-let rotationY = jugadorActual.rotation.y; // Rotación inicial del jugador
-let posicionModificada = false; // Bandera de movimiento
+    const rotationSpeed = 0.5; // Velocidad de rotación suave
+    let rotationY = jugadorActual.rotation.y; // Rotación inicial del jugador
+    let posicionModificada = false; // Bandera de movimiento
 
-// Calculamos la dirección de movimiento en base a la rotación
-const direction = new THREE.Vector3(0, 0, 1); // Dirección frontal
-const rotationMatrix = new THREE.Matrix4(); // Matriz de rotación
+    // Calculamos la dirección de movimiento en base a la rotación
+    const direction = new THREE.Vector3(0, 0, 1); // Dirección frontal
+    const rotationMatrix = new THREE.Matrix4(); // Matriz de rotación
 
-// Manejo de las teclas para movimiento y rotación
-switch (e.keyCode) {
-    case 39: // Flecha derecha (rotar a la derecha)
-        rotationY -= rotationSpeed; // Rotar a la derecha
-        posicionModificada = true;
-        break;
-    case 37: // Flecha izquierda (rotar a la izquierda)
-        rotationY += rotationSpeed; // Rotar a la izquierda
-        posicionModificada = true;
-        break;
-    case 38: // Flecha arriba (mover hacia adelante)
-        rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
-        direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+    // Manejo de las teclas para movimiento y rotación
+    switch (e.keyCode) {
+        case 39: // Flecha derecha (rotar a la derecha)
+            rotationY -= rotationSpeed; // Rotar a la derecha
+            posicionModificada = true;
+            break;
+        case 37: // Flecha izquierda (rotar a la izquierda)
+            rotationY += rotationSpeed; // Rotar a la izquierda
+            posicionModificada = true;
+            break;
+        case 38: // Flecha arriba (mover hacia adelante)
+            rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
+            direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
 
-        // Mover al jugador en la dirección deseada
-        jugadorActual.position.x += direction.x * moveSpeed;
-        jugadorActual.position.z += direction.z * moveSpeed;
-        posicionModificada = true;
-        break;
-    case 40: // Flecha abajo (mover hacia atrás)
-        rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
-        direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+            // Mover al jugador en la dirección deseada
+            jugadorActual.position.x += direction.x * moveSpeed;
+            jugadorActual.position.z += direction.z * moveSpeed;
+            posicionModificada = true;
+            break;
+        case 40: // Flecha abajo (mover hacia atrás)
+            rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
+            direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
 
-        // Mover al jugador en la dirección opuesta
-        jugadorActual.position.x -= direction.x * moveSpeed;
-        jugadorActual.position.z -= direction.z * moveSpeed;
-        posicionModificada = true;
-        break;
-}
-
-// Si hubo movimiento o rotación, interpolar la rotación suavemente
-if (posicionModificada) {
-    // Interpolamos entre la rotación actual y la deseada
-    const deltaRotation = rotationY - jugadorActual.rotation.y;
-    if (Math.abs(deltaRotation) > 0.01) { // Ajustamos un umbral para evitar oscilaciones pequeñas
-        jugadorActual.rotation.y += deltaRotation * rotationSpeed;
+            // Mover al jugador en la dirección opuesta
+            jugadorActual.position.x -= direction.x * moveSpeed;
+            jugadorActual.position.z -= direction.z * moveSpeed;
+            posicionModificada = true;
+            break;
     }
 
-    // Asegúrate de que la posición no sea NaN antes de escribir en Firebase
-    if (!isNaN(jugadorActual.position.x) && !isNaN(jugadorActual.position.y) && !isNaN(jugadorActual.position.z)) {
-        writeUserData(
-            currentUser.uid,
-            jugadorActual.position.x,
-            jugadorActual.position.y,
-            jugadorActual.position.z
-        );
-    } else {
-        console.error("Posición inválida del jugador:", jugadorActual.position);
+    // Si hubo movimiento o rotación, interpolar la rotación suavemente
+    if (posicionModificada) {
+        // Interpolamos entre la rotación actual y la deseada
+        const deltaRotation = rotationY - jugadorActual.rotation.y;
+        if (Math.abs(deltaRotation) > 0.01) { // Ajustamos un umbral para evitar oscilaciones pequeñas
+            jugadorActual.rotation.y += deltaRotation * rotationSpeed;
+        }
+
+        // Asegúrate de que la posición no sea NaN antes de escribir en Firebase
+        if (!isNaN(jugadorActual.position.x) && !isNaN(jugadorActual.position.y) && !isNaN(jugadorActual.position.z) && !isNaN(jugadorActual.rotation.y)) {
+            writeUserData(
+                currentUser.uid,
+                jugadorActual.position.x,
+                jugadorActual.position.y,
+                jugadorActual.position.z, 
+                jugadorActual.rotation.y,
+                currentUser
+            );
+        } else {
+            console.error("Posición inválida del jugador:", jugadorActual.position, jugadorActual.rotation);
+        }
     }
-}
 
 };
 
