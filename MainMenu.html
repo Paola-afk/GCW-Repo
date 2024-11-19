@@ -5,42 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeowMadness - Menú Inicial</title>
     <link rel="stylesheet" href="front/css/MainMenu.css">
-    <!-- <script>
+    
+
+    <script type="module">
+        import * as THREE from "./three.module.js";
+        import { OrbitControls } from "./OrbitControls.js";
+        import { GLTFLoader } from "./GLTFLoader.js";
+
+
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+       //import { onAuthStateChanged } from "firebase/auth";
+
+      // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
+            authDomain: "coordenadas-251ea.firebaseapp.com",
+            databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
+            projectId: "coordenadas-251ea",
+            storageBucket: "coordenadas-251ea.firebasestorage.app",
+            messagingSenderId: "31232618102",
+            appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getDatabase();
+        const provider = new GoogleAuthProvider();
+
 
         function verificarAudio() {
         const audio = document.getElementById('background-music');
-    
-            // Verificar si el audio estaba reproduciéndose
-            const isPlaying = localStorage.getItem('isAudioPlaying');
-            if (isPlaying === 'true') {
-                audio.play();
-            }
 
-            // Verificar y aplicar volumen guardado
-            const savedVolume = localStorage.getItem('audioVolume');
-            audio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1.0; // Si no hay volumen guardado, usar el valor por defecto
-
-            // Guardar estado del audio en localStorage cuando se reproduce o pausa
-            audio.addEventListener('play', () => {
-                localStorage.setItem('isAudioPlaying', 'true');
-            });
-            audio.addEventListener('pause', () => {
-                localStorage.setItem('isAudioPlaying', 'false');
-            });
-
-            // Evento para verificar si el audio está listo para reproducirse y sin errores
-            audio.addEventListener('loadedmetadata', () => {
-                console.log('El audio se ha cargado correctamente y está listo para reproducirse.');
-            });
-
-            // Evento para manejar errores de carga de audio
-            audio.addEventListener('error', (e) => {
-                console.error('Error al cargar el audio:', e);
-            });
+        // Verificar si el audio estaba reproduciéndose
+        const isPlaying = localStorage.getItem('isAudioPlaying');
+        if (isPlaying === 'true') {
+            audio.play();
         }
 
-        window.onload = verificarAudio;
-    </script> -->
+        // Verificar y aplicar volumen guardado
+        const savedVolume = localStorage.getItem('audioVolume');
+        audio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1.0; // Si no hay volumen guardado, usar el valor por defecto
+
+        // Guardar estado del audio en localStorage cuando se reproduce o pausa
+        audio.addEventListener('play', () => {
+            localStorage.setItem('isAudioPlaying', 'true');
+        });
+        audio.addEventListener('pause', () => {
+            localStorage.setItem('isAudioPlaying', 'false');
+        });
+
+        // Evento para verificar si el audio está listo para reproducirse y sin errores
+        audio.addEventListener('loadedmetadata', () => {
+            console.log('El audio se ha cargado correctamente y está listo para reproducirse.');
+        });
+
+        // Evento para manejar errores de carga de audio
+        audio.addEventListener('error', (e) => {
+            console.error('Error al cargar el audio:', e);
+        });
+    }
+
+        </script>
+
 
 </head>
 <body>
@@ -48,6 +78,10 @@
         Tu navegador no soporta el elemento de audio.
     </audio> -->
 
+    <audio id="background-music" src="assets/audio/MeowMadness.mp3" autoplay loop>
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+    
     <div id="menu" class="menu-container">
         <div >
             <img src="front/UI/Meow-madness-14-8-2024.png" alt="MeowMadness" class="logo">
@@ -62,7 +96,7 @@
         </div>
     </div>
 
-
+<!--
     <script>
         window.fbAsyncInit = function() {
         FB.init({
@@ -105,6 +139,7 @@
 
         };
     </script>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+-->
+    <!--<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>-->
 </body>
 </html>
