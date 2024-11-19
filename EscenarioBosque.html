@@ -101,6 +101,8 @@
         if (user) {
             currentUser = user;
             console.log("Usuario autenticado:", currentUser.uid);
+
+            console.log(currentUser);
         } else {
             console.log("No hay usuario autenticado.");
         }
@@ -121,39 +123,85 @@
       }
 
 
-    // Obtener los datos de usuarios desde Firebase
-    const usuariosRef = ref(db, "usuarios");
+    // Recuperar el valor del "usuario" de localStorage
+    const usuarioData = localStorage.getItem("usuario");
 
-    onValue(usuariosRef, (snapshot) => {
-      const usuariosData = snapshot.val();
-      if (usuariosData) {
-        Object.entries(usuariosData).forEach(([key, value]) => {
-          console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
-          
-          // Verifica si el modelo del usuario ya existe en la escena
-          const usuarioModelo = scene.getObjectByName(key);
+    // Parsear el JSON para obtener los datos como un objeto
+    const usuario = JSON.parse(usuarioData);
 
-          if (!usuarioModelo) {
-            // Cargar el modelo del gatito
-            const loaderGLTF = new GLTFLoader();
-            loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-              gatito = gltf.scene;
-              gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
-              gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
-              gatito.name = key;  // Nombre del objeto en la escena
-              scene.add(gatito);
+    // Obtener el escenario seleccionado
+    const escenarioSeleccionado = usuario.escenarioSeleccionado;
+
+    console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario lo seleccionó
+
+    // Verifica que el escenario actual sea el que ha elegido el usuario
+    if (escenarioSeleccionado === "Bosque") {
+        // Obtener los datos de usuarios desde Firebase
+        const usuariosRef = ref(db, "usuarios");
+
+        onValue(usuariosRef, (snapshot) => {
+          const usuariosData = snapshot.val();
+          if (usuariosData) {
+            Object.entries(usuariosData).forEach(([key, value]) => {
+              console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+
+              // Verifica si el modelo del usuario ya existe en la escena
+              const usuarioModelo = scene.getObjectByName(key);
+
+              if (!usuarioModelo) {
+                // Cargar el modelo del gatito
+                const loaderGLTF = new GLTFLoader();
+                loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                  gatito = gltf.scene;
+                  gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
+                  gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
+                  gatito.name = key;  // Nombre del objeto en la escena
+                  scene.add(gatito);
+                });
+              } else {
+                // Actualizar la posición del modelo si ya existe
+                usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+              }
             });
           } else {
-            // Actualizar la posición del modelo si ya existe
-            usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+            console.log("No hay datos de usuarios en Firebase.");
           }
         });
-      } else {
-        console.log("No hay datos de usuarios en Firebase.");
-      }
-    });
+    }
 
 
+
+//         // Obtener los datos de usuarios desde Firebase
+//         const usuariosRef = ref(db, "usuarios");
+
+// onValue(usuariosRef, (snapshot) => {
+//   const usuariosData = snapshot.val();
+//   if (usuariosData) {
+//     Object.entries(usuariosData).forEach(([key, value]) => {
+//       console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+      
+//       // Verifica si el modelo del usuario ya existe en la escena
+//       const usuarioModelo = scene.getObjectByName(key);
+
+//       if (!usuarioModelo) {
+//         // Cargar el modelo del gatito
+//         const loaderGLTF = new GLTFLoader();
+//         loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+//           gatito = gltf.scene;
+//           gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
+//           gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
+//           gatito.name = key;  // Nombre del objeto en la escena
+//           scene.add(gatito);
+//         });
+//       } else {
+//         // Actualizar la posición del modelo si ya existe
+//         usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+//       }
+//     });
+//   } else {
+//     console.log("No hay datos de usuarios en Firebase.");
+//   }
+// });
 
 
       //Bosque
