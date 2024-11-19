@@ -131,54 +131,28 @@
 
 
         let currentUser = null;
+        const latas = [];
+        const manotas = [];
+        const estambres = [];
+        const colisiones = [];
+        const gatitos = []; // Lista para almacenar todos los gatitos
 
+        let velocidadNormal = 1; // Velocidad base del gatito
+        let velocidadAumentada = 2; // Velocidad aumentada
+        let velocidadActual = velocidadNormal; // Velocidad activa
+
+
+        // Autentifica el usuario
         onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            console.log("Usuario autenticado:", currentUser.uid);
-        } else {
-            console.log("No hay usuario autenticado.");
-        }
+            if (user) {
+                currentUser = user;
+                console.log("Usuario autenticado:", currentUser.uid);
+
+                console.log(currentUser);
+            } else {
+                console.log("No hay usuario autenticado.");
+            }
         });
-
-        // // Función de Login con Google
-        // async function login() {
-        //     await signInWithPopup(auth, provider)
-        //         .then((result) => {
-        //             // Obtener datos del usuario
-        //             const credential = GoogleAuthProvider.credentialFromResult(result);
-        //             const token = credential.accessToken;
-        //             currentUser = result.user; // Guardar el usuario actual
-
-        //             // Escribir datos iniciales del jugador en Firebase (posición inicial)
-        //             writeUserData(currentUser.uid, 0, 1.9, 0);  // Posición inicial (x, y, z)
-        //         })
-        //         .catch((error) => {
-        //             console.log("Error de autenticación:", error);
-        //         });
-        // }
-
-        // // Función de Logout
-        // async function logout() {
-        //     await signOut(auth).then(() => {
-        //         console.log("Logout exitoso");
-        //     }).catch((error) => {
-        //         console.log("Error al hacer logout", error);
-        //     });
-        // }
-
-        // Escribir la posición del usuario en Firebase
-        // function writeUserData(userId, positionX, positionY, positionZ) {
-        //     update(ref(db, "usuarios/" + userId), {
-        //         posicion: {
-        //             x: positionX,
-        //             y: positionY,
-        //             z: positionZ
-        //         }
-        //     });
-        // }
-
-
 
         // Función para actualizar solo la posición sin perder los otros datos del usuario
         function writeUserData(userId, positionX, positionY, positionZ, rotationY) {
@@ -195,76 +169,57 @@
             });
         }
         
-        // Obtener los datos de usuarios desde Firebase
-        const usuariosRef = ref(db, "usuarios");
+// Recuperar el valor del "usuario" de localStorage
+const usuarioData = localStorage.getItem("usuario");
 
-        onValue(usuariosRef, (snapshot) => {
-        const usuariosData = snapshot.val();
+// Parsear el JSON para obtener los datos como un objeto
+const usuario = JSON.parse(usuarioData);
+
+// Obtener el escenario seleccionado
+const escenarioSeleccionado = usuario.escenarioSeleccionado;
+
+console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario lo seleccionó
+
+// Verifica que el escenario actual sea el que ha elegido el usuario
+if (escenarioSeleccionado === "Ciudad") {
+    // Obtener los datos de usuarios desde Firebase
+    const usuariosRef = ref(db, "usuarios");
+
+    onValue(usuariosRef, (snapshot) => {
+    const usuariosData = snapshot.val();
         if (usuariosData) {
-            Object.entries(usuariosData).forEach(([key, value]) => {
-                console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
-                
-                // Verifica si el modelo del usuario ya existe en la escena
-                const usuarioModelo = scene.getObjectByName(key);
+        Object.entries(usuariosData).forEach(([key, value]) => {
+            console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
 
-                if (!usuarioModelo) {
-                    // Si el modelo no existe, cargarlo desde GLTF
-                    loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-                        const gatito = gltf.scene;
-                        gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
-                        gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
-                        gatito.rotation.y = value.rotacion?.y || 0;
-                        gatito.name = key;  // Nombre del objeto en la escena
-                        scene.add(gatito);
-                    });
-                } else {
-                    // Si el modelo ya existe, actualizar la posición
-                    usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                    usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
-                }
-            });
+            // Verifica si el modelo del usuario ya existe en la escena
+            const usuarioModelo = scene.getObjectByName(key);
+
+            if (!usuarioModelo) {
+            // Cargar el modelo del gatito
+                const loaderGLTF = new GLTFLoader();
+                loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                const gatito = gltf.scene;
+                gatito.scale.set(0.7, 0.7, 0.7);  
+                gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                gatito.rotation.y = value.rotacion?.y || 0;
+                gatito.name = key;
+                scene.add(gatito);
+                gatitos.push(gatito); // Agrega el gatito a la lista
+                });
+            } else {
+            // Actualizar la posición del modelo si ya existe
+                usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
+            }
+        });
         } else {
             console.log("No hay datos de usuarios en Firebase.");
         }
     });
+}
 
 
 
-
-
-        let catModel1, catModel2;
-        const latas = [];
-        const manotas = [];
-        const estambres = [];
-
-        const loaderGLTF = new GLTFLoader();
-
-        /*
-        loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-            catModel1 = model.scene;
-            catModel1.scale.set(0.7, 0.7, 0.7);
-            catModel1.position.set(0, 1.9, 0);
-            scene.add(catModel1);
-        });
-
-        loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-            catModel2 = model.scene;
-            catModel2.scale.set(0.7, 0.7, 0.7);
-            catModel2.position.set(-4, 1.9, 0);
-            scene.add(catModel2);
-        });
-        */
-
-
-        // Función para agregar un modelo de gatito
-        function agregarGatito(position) {
-        loader.load("/Modelos/Gatito-Grande.glb", (gltf) => {
-        const gatito = gltf.scene;
-        gatito.position.set(position.x, 0.5, position.z); // Altura ajustada para el gatito
-        gatito.scale.set(0.7, 0.7, 0.7);
-        scene.add(gatito);
-        });
-    }
 
         const loaderCity = new GLTFLoader();
         loaderCity.load("/Modelos/Ciudad-PIA.glb", function (model) {
@@ -274,6 +229,7 @@
             scene.add(CityModel);
         });
 
+        //Latas
         const loaderCan = new GLTFLoader();
         function cargarLata(x, y, z) {
             loaderCan.load("/Modelos/Lata-PIA.glb", function (model) {
@@ -286,12 +242,13 @@
             });
         }
 
-        cargarLata(50, 0, 50);
-        cargarLata(19, 0, -15);
-        cargarLata(-23, 0, 60);
+        cargarLata(25, 0, 50);
+        cargarLata(15, 0, -30);
 
+        //Manotas
+        const loaderManotas = new GLTFLoader();
         function cargarManotas(x, y, z) {
-            loaderCan.load("/Modelos/Manotas-PIA.glb", function (model) {
+            loaderManotas.load("/Modelos/Manotas-PIA.glb", function (model) {
                 const manotasModel = model.scene;
                 manotasModel.name = "Manotas"; // Establecer nombre para identificar
                 manotasModel.scale.set(1, 1, 1);
@@ -301,9 +258,11 @@
             });
         }
 
-        cargarManotas(-50, 2, -50);
-        cargarManotas(-19, 2, 15);
+        cargarManotas(-50, 2, -55);
+        cargarManotas(-19, 2, 20);
 
+
+        const loaderEstambre = new GLTFLoader();
         function cargarEstambre(x, y, z) {
             loaderCan.load("/Modelos/Bola-Estambre.glb", function (model) {
                 const estambreModel = model.scene;
@@ -318,94 +277,21 @@
         cargarEstambre(62, 0.5, -34);
         cargarEstambre(-46, 0.5, 27);
 
-        let gatitoManotasModel; // Declaración global
+       /* let gatitoManotasModel; // Declaración global
         // Carga del modelo GatitoManotas
         loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
             gatitoManotasModel = model.scene;
             gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
             console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
         });
+        */
 
-        // Modificar la función detectarColision
-        function detectarColision(gatito) {
-            const objetosInteractivos = [...latas, ...manotas, ...estambres];
-            const objetosAEliminar = [];
+        // *** COLISIONES *** //
 
-            objetosInteractivos.forEach((objeto) => {
-                const distancia = gatito.position.distanceTo(objeto.position);
-                if (distancia < 2.5) {
-                    objetosAEliminar.push(objeto);
-                }
-            });
-
-
-        // Detectar colisión con las cajas invisibles
-        colisiones.forEach((caja) => {
-        caja.geometry.computeBoundingBox(); // Calcular boundingBox si no está calculada
-
-            const cajaMin = caja.geometry.boundingBox.min.clone().add(caja.position);
-            const cajaMax = caja.geometry.boundingBox.max.clone().add(caja.position);
-
-            if (
-                gatito.position.x > cajaMin.x &&
-                gatito.position.x < cajaMax.x &&
-                gatito.position.z > cajaMin.z &&
-                gatito.position.z < cajaMax.z &&
-                gatito.position.y > cajaMin.y &&
-                gatito.position.y < cajaMax.y
-                ) {
-                    // Empujar hacia atrás cuando colisiona con la caja, solo en los ejes X y Z
-                    const direccionEmpuje = new THREE.Vector3().subVectors(gatito.position, caja.position).normalize();
-                    direccionEmpuje.y = 0; // No modificar la posición en Y
-                    gatito.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para el empuje
-                }
-        });
-
-            objetosAEliminar.forEach((objeto) => {
-                console.log(`Colisión detectada con: ${objeto.name}`);
-                scene.remove(objeto);
-
-                const indexLatas = latas.indexOf(objeto);
-                if (indexLatas !== -1) {
-                    latas.splice(indexLatas, 1);
-                    console.log(`Lata eliminada. Quedan: ${latas.length}`);
-                }
-
-                const indexManotas = manotas.indexOf(objeto);
-                if (indexManotas !== -1) {
-                    manotas.splice(indexManotas, 1);
-                    console.log(`Manota eliminada. Quedan: ${manotas.length}`);
-
-                    if (gatito === catModel1) {
-                        scene.remove(catModel1);
-                        catModel1 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
-                        catModel1.position.copy(gatito.position);
-                        scene.add(catModel1);
-                        console.log("GatitoManotas añadido en la posición:", catModel1.position); // Verifica la posición
-                    } else if (gatito === catModel2) {
-                        scene.remove(catModel2);
-                        catModel2 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
-                        catModel2.position.copy(gatito.position);
-                        scene.add(catModel2);
-                        console.log("GatitoManotas añadido en la posición:", catModel2.position); // Verifica la posición
-                    }
-                }
-
-                const indexEstambres = estambres.indexOf(objeto);
-                if (indexEstambres !== -1) {
-                    estambres.splice(indexEstambres, 1);
-                    console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
-                }
-            });
-        }
-
-        const colisiones = [];
-
-
-         // Esta función crea un objeto de colisión
+        // Esta función crea un objeto de colisión
         function crearColision(x, y, z, width, height, depth) {
             const geometry = new THREE.BoxGeometry(width, height, depth);
-            const material = new THREE.MeshBasicMaterial({ visible: false, color: 0xff0000}); // Hacer que la caja de colisión sea completamente invisible
+            const material = new THREE.MeshBasicMaterial({ visible: false }); // Hacer que la caja de colisión sea completamente invisible
             const collisionBox = new THREE.Mesh(geometry, material);
             collisionBox.position.set(x, y, z);
             scene.add(collisionBox);
@@ -425,141 +311,230 @@
 
         crearColision(0, 0, 65.7, 150, 20, 15); // Edificio
         crearColision(0, 0, -64.7, 150, 20, 15); // Edificio
-    
 
-        document.onkeydown = function (e) {
-    if (!currentUser || !currentUser.uid) {
-        console.error("Usuario no autenticado o currentUser.uid no definido.");
-        return;
-    }
 
-    // Obtiene el modelo del jugador actual en la escena
-    const jugadorActual = scene.getObjectByName(currentUser.uid);
 
-    if (!jugadorActual) {
-        console.error("El modelo del jugador actual no está en la escena.");
-        return;
-    }
+        function detectarColisiones() {
+            gatitos.forEach((gatito) => {
+                colisiones.forEach((colision) => {
+                    const boxGatito = new THREE.Box3().setFromObject(gatito);
+                    const boxColision = new THREE.Box3().setFromObject(colision);
 
-    const moveSpeed = 1; // Velocidad de movimiento
-    const rotationSpeed = 0.5; // Velocidad de rotación suave
-    let rotationY = jugadorActual.rotation.y; // Rotación inicial del jugador
-    let posicionModificada = false; // Bandera de movimiento
+                    if (boxGatito.intersectsBox(boxColision)) {
+                        console.log(`¡Colisión detectada para ${gatito.name}!`);
 
-    // Calculamos la dirección de movimiento en base a la rotación
-    const direction = new THREE.Vector3(0, 0, 1); // Dirección frontal
-    const rotationMatrix = new THREE.Matrix4(); // Matriz de rotación
+                        // Calcula la dirección del empuje, ignorando el eje Y
+                        const direction = new THREE.Vector3()
+                            .subVectors(gatito.position, colision.position);
 
-    // Manejo de las teclas para movimiento y rotación
-    switch (e.keyCode) {
-        case 39: // Flecha derecha (rotar a la derecha)
-            rotationY -= rotationSpeed; // Rotar a la derecha
-            posicionModificada = true;
-            break;
-        case 37: // Flecha izquierda (rotar a la izquierda)
-            rotationY += rotationSpeed; // Rotar a la izquierda
-            posicionModificada = true;
-            break;
-        case 38: // Flecha arriba (mover hacia adelante)
-            rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
-            direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+                        direction.y = 0; // Ignorar componente vertical
+                        direction.normalize();
 
-            // Mover al jugador en la dirección deseada
-            jugadorActual.position.x += direction.x * moveSpeed;
-            jugadorActual.position.z += direction.z * moveSpeed;
-            posicionModificada = true;
-            break;
-        case 40: // Flecha abajo (mover hacia atrás)
-            rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
-            direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
-
-            // Mover al jugador en la dirección opuesta
-            jugadorActual.position.x -= direction.x * moveSpeed;
-            jugadorActual.position.z -= direction.z * moveSpeed;
-            posicionModificada = true;
-            break;
-    }
-
-    // Si hubo movimiento o rotación, interpolar la rotación suavemente
-    if (posicionModificada) {
-        // Interpolamos entre la rotación actual y la deseada
-        const deltaRotation = rotationY - jugadorActual.rotation.y;
-        if (Math.abs(deltaRotation) > 0.01) { // Ajustamos un umbral para evitar oscilaciones pequeñas
-            jugadorActual.rotation.y += deltaRotation * rotationSpeed;
+                        // Aplica un empuje hacia atrás solo en X y Z
+                        gatito.position.add(direction.multiplyScalar(0.5)); // Ajusta la fuerza si es necesario
+                    }
+                });
+            });
         }
 
-        // Asegúrate de que la posición no sea NaN antes de escribir en Firebase
-        if (!isNaN(jugadorActual.position.x) && !isNaN(jugadorActual.position.y) && !isNaN(jugadorActual.position.z) && !isNaN(jugadorActual.rotation.y)) {
-            writeUserData(
-                currentUser.uid,
-                jugadorActual.position.x,
-                jugadorActual.position.y,
-                jugadorActual.position.z, 
-                jugadorActual.rotation.y,
-                currentUser
-            );
-        } else {
-            console.error("Posición inválida del jugador:", jugadorActual.position, jugadorActual.rotation);
-        }
-    }
-
-};
 
 
-// Actualiza la posición de la cámara
-function updateCameraPosition() {
-    if (!currentUser || !currentUser.uid) return;
+        // Función para verificar colisiones y eliminar objetos
+        function verificarColisiones() {
+            // Verificar colisiones para cada gatito
+            gatitos.forEach((gatito) => {
+                const gatitoPos = gatito.position;
 
-    const jugadorActual = scene.getObjectByName(currentUser.uid);
-    if (!jugadorActual) return;
+                // Verificar colisión con latas
+                for (let i = latas.length - 1; i >= 0; i--) {
+                    const lata = latas[i];
+                    const distancia = gatitoPos.distanceTo(lata.position);
+                    if (distancia < 2) { // Ajusta este valor según el tamaño de tus objetos
+                        scene.remove(lata); // Eliminar del escenario
+                        latas.splice(i, 1); // Eliminar del array
+                        console.log("Lata recogida");
+                    }
+                }
 
-    // Define el offset relativo al jugador (cámara detrás y arriba)
-    const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
+                // Verificar colisión con manotas
+                for (let i = manotas.length - 1; i >= 0; i--) {
+                    const manota = manotas[i];
+                    const distancia = gatitoPos.distanceTo(manota.position);
+                    if (distancia < 1.5) { // Ajusta este valor según el tamaño de tus objetos
+                        scene.remove(manota); // Eliminar del escenario
+                        manotas.splice(i, 1); // Eliminar del array
+                        console.log("Manota recogida");
+                    }
+                }
 
-    // Aplica la rotación del jugador al offset
-    const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
-    const offsetRotated = offset.clone().applyQuaternion(jugadorRotation);
+                // Verificar colisión con estambres
+                estambres.forEach(estambre => {
+                  // Calcula la distancia entre el gatito y el estambre
+                  const distancia = gatitoPos.distanceTo(estambre.position);
 
-    // Calcula la posición deseada de la cámara
-    const cameraTargetPosition = jugadorActual.position.clone().add(offsetRotated);
-
-    // Suaviza el movimiento de la cámara hacia la posición deseada
-    camera.position.lerp(cameraTargetPosition, 0.1);
-
-    // La cámara siempre mira al jugador
-    camera.lookAt(jugadorActual.position);
-}
-
-
-         // Skybox
-        const loader = new THREE.CubeTextureLoader();
-        const skyboxTextures = loader.load([
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-            "/front/images/sky3.jpg", 
-        ]);
-
-        scene.background = skyboxTextures;
+                  // Si la distancia es suficientemente pequeña, hay colisión
+                  if (distancia < 2) { // Puedes ajustar el valor de "5" según el tamaño del estambre
+                    scene.remove(estambre); // Eliminar del escenario
+                    console.log("Estambre");
+                    activarVelocidadAumentada();
+                  }
+                });
+              });
+          }
 
 
-        const cameraControl = new OrbitControls(camera, renderer.domElement);
 
-        function animate() {
-           // updateMovement();
 
-            if (catModel1) detectarColision(catModel1);
-            if (catModel2) detectarColision(catModel2);
 
-            updateCameraPosition();
+        // *** POWER UPS *** //
 
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
+        //Velocidad
+        function activarVelocidadAumentada() {
+          velocidadActual = velocidadAumentada; // Aumenta la velocidad
+
+          // Después de 5 segundos, vuelve a la velocidad normal
+          setTimeout(() => {
+            velocidadActual = velocidadNormal; // Restaura la velocidad normal
+            console.log("Velocidad restaurada.");
+          }, 5000); // 5000 ms = 5 segundos
         }
 
-        animate();
+
+
+        // *** TECLADO *** //
+        
+      document.onkeydown = function (e) {
+        if (!currentUser || !currentUser.uid) {
+            console.error("Usuario no autenticado o currentUser.uid no definido.");
+            return;
+        }
+
+        // Obtiene el modelo del jugador actual en la escena
+        const jugadorActual = scene.getObjectByName(currentUser.uid);
+
+        if (!jugadorActual) {
+            console.error("El modelo del jugador actual no está en la escena.");
+            return;
+        }
+
+        const moveSpeed = 1; // Velocidad de movimiento
+        const rotationSpeed = 0.5; // Velocidad de rotación suave
+        let rotationY = jugadorActual.rotation.y; // Rotación inicial del jugador
+        let posicionModificada = false; // Bandera de movimiento
+
+        // Calculamos la dirección de movimiento en base a la rotación
+        const direction = new THREE.Vector3(0, 0, 1); // Dirección frontal
+        const rotationMatrix = new THREE.Matrix4(); // Matriz de rotación
+
+        // Manejo de las teclas para movimiento y rotación
+        switch (e.keyCode) {
+            case 39: // Flecha derecha (rotar a la derecha)
+                rotationY -= rotationSpeed; // Rotar a la derecha
+                posicionModificada = true;
+                break;
+            case 37: // Flecha izquierda (rotar a la izquierda)
+                rotationY += rotationSpeed; // Rotar a la izquierda
+                posicionModificada = true;
+                break;
+            case 38: // Flecha arriba (mover hacia adelante)
+                rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
+                direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+
+                // Mover al jugador en la dirección deseada
+                jugadorActual.position.x += direction.x * velocidadActual;
+                jugadorActual.position.z += direction.z * velocidadActual;
+                posicionModificada = true;
+                break;
+            case 40: // Flecha abajo (mover hacia atrás)
+                rotationMatrix.makeRotationY(rotationY); // Crear la matriz de rotación
+                direction.applyMatrix4(rotationMatrix); // Aplicar la rotación a la dirección
+
+                // Mover al jugador en la dirección opuesta
+                jugadorActual.position.x -= direction.x * velocidadActual;
+                jugadorActual.position.z -= direction.z * velocidadActual;
+                posicionModificada = true;
+                break;
+        }
+
+        // Si hubo movimiento o rotación, interpolar la rotación suavemente
+        if (posicionModificada) {
+            // Interpolamos entre la rotación actual y la deseada
+            const deltaRotation = rotationY - jugadorActual.rotation.y;
+            if (Math.abs(deltaRotation) > 0.01) { // Ajustamos un umbral para evitar oscilaciones pequeñas
+                jugadorActual.rotation.y += deltaRotation * rotationSpeed;
+            }
+
+            // Asegúrate de que la posición no sea NaN antes de escribir en Firebase
+            if (!isNaN(jugadorActual.position.x) && !isNaN(jugadorActual.position.y) && !isNaN(jugadorActual.position.z) && !isNaN(jugadorActual.rotation.y)) {
+                writeUserData(
+                    currentUser.uid,
+                    jugadorActual.position.x,
+                    jugadorActual.position.y,
+                    jugadorActual.position.z, 
+                    jugadorActual.rotation.y,
+                    currentUser
+                );
+            } else {
+                console.error("Posición inválida del jugador:", jugadorActual.position, jugadorActual.rotation);
+            }
+        }
+      };
+
+
+      function updateCameraPosition() {
+          if (!currentUser || !currentUser.uid) return;
+
+          const jugadorActual = scene.getObjectByName(currentUser.uid);
+          if (!jugadorActual) return;
+
+          // Define el offset relativo al jugador (cámara detrás y arriba)
+          const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
+
+          // Aplica la rotación del jugador al offset
+          const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
+          const offsetRotated = offset.clone().applyQuaternion(jugadorRotation);
+
+          // Calcula la posición deseada de la cámara
+          const cameraTargetPosition = jugadorActual.position.clone().add(offsetRotated);
+
+          // Suaviza el movimiento de la cámara hacia la posición deseada
+          camera.position.lerp(cameraTargetPosition, 0.1);
+
+          // La cámara siempre mira al jugador
+          camera.lookAt(jugadorActual.position);
+      }
+
+
+
+       // Skybox
+      const loader = new THREE.CubeTextureLoader();
+      const skyboxTextures = loader.load([
+        "/front/images/Sky.png", 
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+      ]);
+
+      scene.background = skyboxTextures;
+
+      const cameraControl = new OrbitControls(camera, renderer.domElement);
+
+      function animate() {
+        // updateMovement();
+        // // Simulación del movimiento del gatito
+        detectarColisiones();
+        verificarColisiones();
+
+        updateCameraPosition();
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+
     </script>
 </body>
 </html>
