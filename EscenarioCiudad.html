@@ -213,12 +213,14 @@
                         const gatito = gltf.scene;
                         gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
                         gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
+                        gatito.rotation.y = value.rotacion?.y || 0;
                         gatito.name = key;  // Nombre del objeto en la escena
                         scene.add(gatito);
                     });
                 } else {
                     // Si el modelo ya existe, actualizar la posición
                     usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                    usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
                 }
             });
         } else {
