@@ -131,15 +131,29 @@
 
 
         let currentUser = null;
+        const latas = [];
+        const manotas = [];
+         const estambres = [];
+        const colisiones = [];
+        const gatitos = []; // Lista para almacenar todos los gatitos
 
+        let velocidadNormal = 1; // Velocidad base del gatito
+        let velocidadAumentada = 2; // Velocidad aumentada
+        let velocidadActual = velocidadNormal; // Velocidad activa
+
+
+        // Autentifica el usuario
         onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            console.log("Usuario autenticado:", currentUser.uid);
-        } else {
-            console.log("No hay usuario autenticado.");
-        }
+            if (user) {
+                currentUser = user;
+                console.log("Usuario autenticado:", currentUser.uid);
+
+                console.log(currentUser);
+            } else {
+                console.log("No hay usuario autenticado.");
+            }
         });
+        
 
         // // Función de Login con Google
         // async function login() {
@@ -231,32 +245,10 @@
 
 
 
-
-        let catModel1, catModel2;
-        const latas = [];
-        const manotas = [];
-        const estambres = [];
-
         const loaderGLTF = new GLTFLoader();
 
-        /*
-        loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-            catModel1 = model.scene;
-            catModel1.scale.set(0.7, 0.7, 0.7);
-            catModel1.position.set(0, 1.9, 0);
-            scene.add(catModel1);
-        });
-
-        loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (model) {
-            catModel2 = model.scene;
-            catModel2.scale.set(0.7, 0.7, 0.7);
-            catModel2.position.set(-4, 1.9, 0);
-            scene.add(catModel2);
-        });
-        */
-
-
-        // Función para agregar un modelo de gatito
+        // Función para agregar un modelo de 
+        
         function agregarGatito(position) {
         loader.load("/Modelos/Gatito-Grande.glb", (gltf) => {
         const gatito = gltf.scene;
@@ -265,6 +257,7 @@
         scene.add(gatito);
         });
     }
+        
 
         const loaderCity = new GLTFLoader();
         loaderCity.load("/Modelos/Ciudad-PIA.glb", function (model) {
@@ -318,94 +311,19 @@
         cargarEstambre(62, 0.5, -34);
         cargarEstambre(-46, 0.5, 27);
 
-        let gatitoManotasModel; // Declaración global
+       /* let gatitoManotasModel; // Declaración global
         // Carga del modelo GatitoManotas
         loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
             gatitoManotasModel = model.scene;
             gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
             console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
         });
-
-        // Modificar la función detectarColision
-        function detectarColision(gatito) {
-            const objetosInteractivos = [...latas, ...manotas, ...estambres];
-            const objetosAEliminar = [];
-
-            objetosInteractivos.forEach((objeto) => {
-                const distancia = gatito.position.distanceTo(objeto.position);
-                if (distancia < 2.5) {
-                    objetosAEliminar.push(objeto);
-                }
-            });
+        */
 
 
-        // Detectar colisión con las cajas invisibles
-        colisiones.forEach((caja) => {
-        caja.geometry.computeBoundingBox(); // Calcular boundingBox si no está calculada
-
-            const cajaMin = caja.geometry.boundingBox.min.clone().add(caja.position);
-            const cajaMax = caja.geometry.boundingBox.max.clone().add(caja.position);
-
-            if (
-                gatito.position.x > cajaMin.x &&
-                gatito.position.x < cajaMax.x &&
-                gatito.position.z > cajaMin.z &&
-                gatito.position.z < cajaMax.z &&
-                gatito.position.y > cajaMin.y &&
-                gatito.position.y < cajaMax.y
-                ) {
-                    // Empujar hacia atrás cuando colisiona con la caja, solo en los ejes X y Z
-                    const direccionEmpuje = new THREE.Vector3().subVectors(gatito.position, caja.position).normalize();
-                    direccionEmpuje.y = 0; // No modificar la posición en Y
-                    gatito.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para el empuje
-                }
-        });
-
-            objetosAEliminar.forEach((objeto) => {
-                console.log(`Colisión detectada con: ${objeto.name}`);
-                scene.remove(objeto);
-
-                const indexLatas = latas.indexOf(objeto);
-                if (indexLatas !== -1) {
-                    latas.splice(indexLatas, 1);
-                    console.log(`Lata eliminada. Quedan: ${latas.length}`);
-                }
-
-                const indexManotas = manotas.indexOf(objeto);
-                if (indexManotas !== -1) {
-                    manotas.splice(indexManotas, 1);
-                    console.log(`Manota eliminada. Quedan: ${manotas.length}`);
-
-                    if (gatito === catModel1) {
-                        scene.remove(catModel1);
-                        catModel1 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
-                        catModel1.position.copy(gatito.position);
-                        scene.add(catModel1);
-                        console.log("GatitoManotas añadido en la posición:", catModel1.position); // Verifica la posición
-                    } else if (gatito === catModel2) {
-                        scene.remove(catModel2);
-                        catModel2 = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
-                        catModel2.position.copy(gatito.position);
-                        scene.add(catModel2);
-                        console.log("GatitoManotas añadido en la posición:", catModel2.position); // Verifica la posición
-                    }
-                }
-
-                const indexEstambres = estambres.indexOf(objeto);
-                if (indexEstambres !== -1) {
-                    estambres.splice(indexEstambres, 1);
-                    console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
-                }
-            });
-        }
-
-        const colisiones = [];
-
-
-         // Esta función crea un objeto de colisión
         function crearColision(x, y, z, width, height, depth) {
             const geometry = new THREE.BoxGeometry(width, height, depth);
-            const material = new THREE.MeshBasicMaterial({ visible: false, color: 0xff0000}); // Hacer que la caja de colisión sea completamente invisible
+            const material = new THREE.MeshBasicMaterial({ visible: true }); // Hacer que la caja de colisión sea completamente invisible
             const collisionBox = new THREE.Mesh(geometry, material);
             collisionBox.position.set(x, y, z);
             scene.add(collisionBox);
@@ -425,7 +343,78 @@
 
         crearColision(0, 0, 65.7, 150, 20, 15); // Edificio
         crearColision(0, 0, -64.7, 150, 20, 15); // Edificio
-    
+
+        // Modificar la función detectarColision
+        function detectarColisiones() {
+            gatitos.forEach((gatito) => {
+                colisiones.forEach((colision) => {
+                    const boxGatito = new THREE.Box3().setFromObject(gatito);
+                    const boxColision = new THREE.Box3().setFromObject(colision);
+
+                    if (boxGatito.intersectsBox(boxColision)) {
+                        console.log(`¡Colisión detectada para ${gatito.name}!`);
+
+                        // Calcula la dirección del empuje, ignorando el eje Y
+                        const direction = new THREE.Vector3()
+                            .subVectors(gatito.position, colision.position);
+
+                        direction.y = 0; // Ignorar componente vertical
+                        direction.normalize();
+
+                        // Aplica un empuje hacia atrás solo en X y Z
+                        gatito.position.add(direction.multiplyScalar(0.5)); // Ajusta la fuerza si es necesario
+                    }
+                });
+            });
+        }
+
+
+
+         // Función para verificar colisiones y eliminar objetos
+        function verificarColisiones() {
+            // Verificar colisiones para cada gatito
+            gatitos.forEach((gatito) => {
+                const gatitoPos = gatito.position;
+
+                // Verificar colisión con latas
+                for (let i = latas.length - 1; i >= 0; i--) {
+                    const lata = latas[i];
+                    const distancia = gatitoPos.distanceTo(lata.position);
+                    if (distancia < 2) { // Ajusta este valor según el tamaño de tus objetos
+                        scene.remove(lata); // Eliminar del escenario
+                        latas.splice(i, 1); // Eliminar del array
+                        console.log("Lata recogida");
+                    }
+                }
+
+                // Verificar colisión con manotas
+                for (let i = manotas.length - 1; i >= 0; i--) {
+                    const manota = manotas[i];
+                    const distancia = gatitoPos.distanceTo(manota.position);
+                    if (distancia < 1.5) { // Ajusta este valor según el tamaño de tus objetos
+                        scene.remove(manota); // Eliminar del escenario
+                        manotas.splice(i, 1); // Eliminar del array
+                        console.log("Manota recogida");
+                    }
+                }
+
+                // Verificar colisión con estambres
+                estambres.forEach((estambre) => {
+                    const distancia = gatito.position.distanceTo(estambre.position);
+
+                    // Si la distancia es menor a un umbral (colisión detectada)
+                    if (distancia < 2) {
+                        // Incrementa la velocidad temporalmente
+                        console.log("¡Colisión con el estambre!");
+                        aumentarVelocidad();
+                        // Remover el estambre de la escena
+                        scene.remove(estambre);
+                        estambres.splice(estambres.indexOf(estambre), 1); // Elimina el estambre de la lista
+                    }
+                });
+            });
+        }
+
 
         document.onkeydown = function (e) {
     if (!currentUser || !currentUser.uid) {
@@ -548,18 +537,22 @@ function updateCameraPosition() {
         const cameraControl = new OrbitControls(camera, renderer.domElement);
 
         function animate() {
-           // updateMovement();
+        // updateMovement();
+        // Simulación del movimiento del gatito
+        gatitos.forEach((gatito) => {
+                gatito.position.x += velocidadActual * 0.1; // Ejemplo de movimiento
+            });
+        detectarColisiones();
+        verificarColisiones();
 
-            if (catModel1) detectarColision(catModel1);
-            if (catModel2) detectarColision(catModel2);
+        updateCameraPosition();
 
-            updateCameraPosition();
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+    animate();
 
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
-        }
 
-        animate();
     </script>
 </body>
 </html>
