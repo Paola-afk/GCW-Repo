@@ -92,7 +92,7 @@
       const manotas = [];
       const estambres = [];
       const colisiones = [];
-      let gatito;
+      const gatitos = []; // Lista para almacenar todos los gatitos
 
 
 
@@ -152,11 +152,12 @@
                 // Cargar el modelo del gatito
                 const loaderGLTF = new GLTFLoader();
                 loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-                  gatito = gltf.scene;
-                  gatito.scale.set(0.7, 0.7, 0.7);  // Ajusta el tamaño
-                  gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);  // Usa las coordenadas X, Y, Z de Firebase
-                  gatito.name = key;  // Nombre del objeto en la escena
+                  const gatito = gltf.scene;
+                  gatito.scale.set(0.7, 0.7, 0.7);  
+                  gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                  gatito.name = key;
                   scene.add(gatito);
+                  gatitos.push(gatito); // Agrega el gatito a la lista
                 });
               } else {
                 // Actualizar la posición del modelo si ya existe
@@ -340,83 +341,89 @@
 
 
 
-        // Modificar la función detectarColision
-        function detectarColision(gatitoModel) {
-          const objetosInteractivos = [...latas, ...manotas, ...estambres];
-          const objetosAEliminar = [];
+        function detectarColisiones() {
+            gatitos.forEach((gatito) => {
+                colisiones.forEach((colision) => {
+                    const boxGatito = new THREE.Box3().setFromObject(gatito);
+                    const boxColision = new THREE.Box3().setFromObject(colision);
 
-          objetosInteractivos.forEach((objeto) => {
-              const distancia = gatitoModel.position.distanceTo(objeto.position);
-              if (distancia < 2.5) {
-                  objetosAEliminar.push(objeto);
+                    if (boxGatito.intersectsBox(boxColision)) {
+                        console.log(`¡Colisión detectada para ${gatito.name}!`);
 
-                  // Empujar hacia atrás, solo en los ejes X y Z
-                  const direccionEmpuje = new THREE.Vector3().subVectors(gatitoModel.position, objeto.position).normalize();
-                  direccionEmpuje.y = 0; // No modificar la posición en Y
-                  gatitoModel.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para más o menos empuje
-              }
-          });
+                        // Calcula la dirección del empuje, ignorando el eje Y
+                        const direction = new THREE.Vector3()
+                            .subVectors(gatito.position, colision.position);
 
-          // Detectar colisión con las cajas invisibles
-          colisiones.forEach((caja) => {
-              caja.geometry.computeBoundingBox(); // Calcular boundingBox si no está calculada
+                        direction.y = 0; // Ignorar componente vertical
+                        direction.normalize();
 
-              const cajaMin = caja.geometry.boundingBox.min.clone().add(caja.position);
-              const cajaMax = caja.geometry.boundingBox.max.clone().add(caja.position);
-
-              if (
-                gatitoModel.position.x > cajaMin.x &&
-                gatitoModel.position.x < cajaMax.x &&
-                gatitoModel.position.z > cajaMin.z &&
-                gatitoModel.position.z < cajaMax.z &&
-                gatitoModel.position.y > cajaMin.y &&
-                gatitoModel.position.y < cajaMax.y
-                  ) {
-                    // Empujar hacia atrás cuando colisiona con la caja, solo en los ejes X y Z
-                    const direccionEmpuje = new THREE.Vector3().subVectors(gatitoModel.position, caja.position).normalize();
-                    direccionEmpuje.y = 0; // No modificar la posición en Y
-                    gatitoModel.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para el empuje
-                  }
-          });
-
-          objetosAEliminar.forEach((objeto) => {
-              console.log(`Colisión detectada con: ${objeto.name}`);
-              scene.remove(objeto);
-
-              const indexLatas = latas.indexOf(objeto);
-              if (indexLatas !== -1) {
-                  latas.splice(indexLatas, 1);
-                  console.log(`Lata eliminada. Quedan: ${latas.length}`);
-              }
-
-              const indexManotas = manotas.indexOf(objeto);
-              if (indexManotas !== -1) {
-                  manotas.splice(indexManotas, 1);
-                  console.log(`Manota eliminada. Quedan: ${manotas.length}`);
-
-                // // Si el gatito colisiona con una manota, cambiar a GatitoManotas
-                // if (gatito === catModel1) {
-                //     scene.remove(catModel1);
-                //     catModel1 = gatitoManotasModel.clone();
-                //     catModel1.position.copy(gatito.position);
-                //     scene.add(catModel1);
-                //     console.log("GatitoManotas añadido en la posición:", catModel1.position);
-                // } else if (gatito === catModel2) {
-                //     scene.remove(catModel2);
-                //     catModel2 = gatitoManotasModel.clone();
-                //     catModel2.position.copy(gatito.position);
-                //     scene.add(catModel2);
-                //     console.log("GatitoManotas añadido en la posición:", catModel2.position);
-                // }
-              }
-
-              const indexEstambres = estambres.indexOf(objeto);
-              if (indexEstambres !== -1) {
-                  estambres.splice(indexEstambres, 1);
-                  console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
-              }
-          });
+                        // Aplica un empuje hacia atrás solo en X y Z
+                        gatito.position.add(direction.multiplyScalar(0.5)); // Ajusta la fuerza si es necesario
+                    }
+                });
+            });
         }
+
+        //   // Detectar colisión con las cajas invisibles
+        //   colisiones.forEach((caja) => {
+        //       caja.geometry.computeBoundingBox(); // Calcular boundingBox si no está calculada
+
+        //       const cajaMin = caja.geometry.boundingBox.min.clone().add(caja.position);
+        //       const cajaMax = caja.geometry.boundingBox.max.clone().add(caja.position);
+
+        //       if (
+        //         gatitoModel.position.x > cajaMin.x &&
+        //         gatitoModel.position.x < cajaMax.x &&
+        //         gatitoModel.position.z > cajaMin.z &&
+        //         gatitoModel.position.z < cajaMax.z &&
+        //         gatitoModel.position.y > cajaMin.y &&
+        //         gatitoModel.position.y < cajaMax.y
+        //           ) {
+        //             // Empujar hacia atrás cuando colisiona con la caja, solo en los ejes X y Z
+        //             const direccionEmpuje = new THREE.Vector3().subVectors(gatitoModel.position, caja.position).normalize();
+        //             direccionEmpuje.y = 0; // No modificar la posición en Y
+        //             gatitoModel.position.add(direccionEmpuje.multiplyScalar(0.5)); // Ajusta el valor para el empuje
+        //           }
+        //   });
+
+        //   objetosAEliminar.forEach((objeto) => {
+        //       console.log(`Colisión detectada con: ${objeto.name}`);
+        //       scene.remove(objeto);
+
+        //       const indexLatas = latas.indexOf(objeto);
+        //       if (indexLatas !== -1) {
+        //           latas.splice(indexLatas, 1);
+        //           console.log(`Lata eliminada. Quedan: ${latas.length}`);
+        //       }
+
+        //       const indexManotas = manotas.indexOf(objeto);
+        //       if (indexManotas !== -1) {
+        //           manotas.splice(indexManotas, 1);
+        //           console.log(`Manota eliminada. Quedan: ${manotas.length}`);
+
+        //         // // Si el gatito colisiona con una manota, cambiar a GatitoManotas
+        //         // if (gatito === catModel1) {
+        //         //     scene.remove(catModel1);
+        //         //     catModel1 = gatitoManotasModel.clone();
+        //         //     catModel1.position.copy(gatito.position);
+        //         //     scene.add(catModel1);
+        //         //     console.log("GatitoManotas añadido en la posición:", catModel1.position);
+        //         // } else if (gatito === catModel2) {
+        //         //     scene.remove(catModel2);
+        //         //     catModel2 = gatitoManotasModel.clone();
+        //         //     catModel2.position.copy(gatito.position);
+        //         //     scene.add(catModel2);
+        //         //     console.log("GatitoManotas añadido en la posición:", catModel2.position);
+        //         // }
+        //       }
+
+        //       const indexEstambres = estambres.indexOf(objeto);
+        //       if (indexEstambres !== -1) {
+        //           estambres.splice(indexEstambres, 1);
+        //           console.log(`Estambre eliminado. Quedan: ${estambres.length}`);
+        //       }
+        //   });
+        // }
 
 
 
@@ -520,7 +527,9 @@
         // updateMovement();
 
         // if (catModel1) detectarColision(catModel1);
-        if (gatito) detectarColision(gatito);
+        // if (gatito) detectarColision(gatito);
+
+        detectarColisiones();
 
         updateCameraPosition();
 
