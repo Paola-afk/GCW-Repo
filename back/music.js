@@ -1,3 +1,4 @@
+//hola
 let audio;
 
 // Verificar si ya existe una instancia global de la música
