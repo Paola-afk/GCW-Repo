@@ -74,9 +74,76 @@
             document.getElementById("escenario-2").addEventListener("click", () => iniciarSesionConGoogle("Ciudad"));
             document.getElementById("escenario-3").addEventListener("click", () => iniciarSesionConGoogle("Galaxia"));
         });
-    </script>
+
+
+
+        function verificarAudio() {
+        const audio = document.getElementById('background-music');
+
+        // Verificar si el audio estaba reproduciéndose
+        const isPlaying = localStorage.getItem('isAudioPlaying');
+        if (isPlaying === 'true') {
+            audio.play();
+        }
+
+        // Verificar y aplicar volumen guardado
+        const savedVolume = localStorage.getItem('audioVolume');
+        audio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1.0; // Si no hay volumen guardado, usar el valor por defecto
+
+        // Guardar estado del audio en localStorage cuando se reproduce o pausa
+        audio.addEventListener('play', () => {
+            localStorage.setItem('isAudioPlaying', 'true');
+        });
+        audio.addEventListener('pause', () => {
+            localStorage.setItem('isAudioPlaying', 'false');
+        });
+
+        // Evento para verificar si el audio está listo para reproducirse y sin errores
+        audio.addEventListener('loadedmetadata', () => {
+            console.log('El audio se ha cargado correctamente y está listo para reproducirse.');
+        });
+
+        // Evento para manejar errores de carga de audio
+        audio.addEventListener('error', (e) => {
+            console.error('Error al cargar el audio:', e);
+        });
+    }
+
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+        const audio = document.getElementById('background-music');
+        if (audio) {
+            const savedVolume = localStorage.getItem('audioVolume');
+            audio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1.0; // Valor por defecto 1.0
+
+            // Intentar reproducir la música
+            audio.play().catch((error) => {
+                console.warn('La reproducción automática está bloqueada:', error);
+                // Mostrar un botón para iniciar la música manualmente
+                const playButton = document.createElement('button');
+                playButton.textContent = 'Reproducir Música';
+                playButton.style.position = 'absolute';
+                playButton.style.top = '10px';
+                playButton.style.left = '10px';
+                document.body.appendChild(playButton);
+
+                playButton.addEventListener('click', () => {
+                    audio.play();
+                    playButton.remove();
+                });
+            });
+        }
+    });
+
+
+</script>
 </head>
 <body>
+    <audio id="background-music" src="assets/audio/MeowMadness.mp3" autoplay loop>
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
     <div id="pause-menu" class="hidden">
         <div class="menu-background">
             <img src="front/UI/escenario_menu.png" alt="Fondo menu">

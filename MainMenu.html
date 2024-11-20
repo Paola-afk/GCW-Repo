@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeowMadness - Menú Inicial</title>
     <link rel="stylesheet" href="front/css/MainMenu.css">
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
 
     <script type="module">
@@ -69,6 +69,36 @@
             console.error('Error al cargar el audio:', e);
         });
     }
+
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+    const audio = document.getElementById('background-music');
+    if (audio) {
+        const savedVolume = localStorage.getItem('audioVolume');
+        audio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1.0; // Valor por defecto 1.0
+
+        // Intentar reproducir la música
+        audio.play().catch((error) => {
+            console.warn('La reproducción automática está bloqueada:', error);
+            // Mostrar un botón para iniciar la música manualmente
+            const playButton = document.createElement('button');
+            playButton.textContent = 'Reproducir Música';
+            playButton.style.position = 'absolute';
+            playButton.style.top = '10px';
+            playButton.style.left = '10px';
+            document.body.appendChild(playButton);
+
+            playButton.addEventListener('click', () => {
+                audio.play();
+                playButton.remove();
+            });
+        });
+    }
+});
+
+
+
 
     </script>
 
