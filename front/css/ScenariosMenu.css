@@ -51,6 +51,20 @@ body {
     */
 }
 
+#escenario-1, #escenario-2, #escenario-3 {
+    margin: 0px 10px;
+    cursor: pointer;
+    width: 180px;
+    height: 190px;
+    background-color: transparent; /* Fondo transparente */
+    background-size: cover; /* La imagen cubre todo el área del botón */
+    background-position: center; /* Centra la imagen */
+    border: none; /* Elimina cualquier borde */
+    outline: none; /* Elimina cualquier contorno que pueda aparecer al hacer clic */
+    box-shadow: none; /* Elimina cualquier sombra que pueda dar el efecto de borde */
+    transition: transform 0.3s ease; /* Transición para el efecto hover */
+}
+
 .menu-buttons2 {
     position: absolute;
     top: 70%;
