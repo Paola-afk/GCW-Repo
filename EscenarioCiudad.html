@@ -180,43 +180,49 @@ const escenarioSeleccionado = usuario.escenarioSeleccionado;
 
 console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario lo seleccionó
 
-// Verifica que el escenario actual sea el que ha elegido el usuario
-if (escenarioSeleccionado === "Ciudad") {
-    // Obtener los datos de usuarios desde Firebase
-    const usuariosRef = ref(db, "usuarios");
+            // Inicializa un mapa para rastrear los modelos cargados
+            const objetosCargados = new Map();
 
-    onValue(usuariosRef, (snapshot) => {
-    const usuariosData = snapshot.val();
-        if (usuariosData) {
-        Object.entries(usuariosData).forEach(([key, value]) => {
-            console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+            if (escenarioSeleccionado === "Ciudad") {
+            // Obtener los datos de usuarios desde Firebase
+            const usuariosRef = ref(db, "usuarios");
 
-            // Verifica si el modelo del usuario ya existe en la escena
-            const usuarioModelo = scene.getObjectByName(key);
+            onValue(usuariosRef, (snapshot) => {
+                const usuariosData = snapshot.val();
+                if (usuariosData) {
+                Object.entries(usuariosData).forEach(([key, value]) => {
+                    console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
 
-            if (!usuarioModelo) {
-            // Cargar el modelo del gatito
-                const loaderGLTF = new GLTFLoader();
-                loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-                const gatito = gltf.scene;
-                gatito.scale.set(0.7, 0.7, 0.7);  
-                gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                gatito.rotation.y = value.rotacion?.y || 0;
-                gatito.name = key;
-                scene.add(gatito);
-                gatitos.push(gatito); // Agrega el gatito a la lista
+                    if (!objetosCargados.has(key)) {
+                    // Cargar el modelo del gatito solo si no existe en el mapa
+                    const loaderGLTF = new GLTFLoader();
+                    loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                        const gatito = gltf.scene;
+                        gatito.scale.set(0.7, 0.7, 0.7);
+                        gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                        gatito.rotation.y = value.rotacion?.y || 0;
+                        gatito.name = key;
+                        scene.add(gatito);
+                        gatitos.push(gatito); // Agrega el gatito a la lista
+
+                        // Almacenar el modelo en el mapa
+                        objetosCargados.set(key, gatito);
+
+                        // Asigna el voto al primer gatito que ingrese
+                        asignarVotoGatito(gatito);
+                    });
+                    } else {
+                    // Si el modelo ya existe, se actualizan su posición y rotación
+                    const usuarioModelo = objetosCargados.get(key);
+                    usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                    usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
+                    }
                 });
-            } else {
-            // Actualizar la posición del modelo si ya existe
-                usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
+                } else {
+                console.log("No hay datos de usuarios en Firebase.");
+                }
+            });
             }
-        });
-        } else {
-            console.log("No hay datos de usuarios en Firebase.");
-        }
-    });
-}
 
 
 
