@@ -248,13 +248,13 @@
 
         cargarMouse(40, 0, 20);
 
-        // let gatitoManotasModel; // Declaración global
-        // // Carga del modelo GatitoManotas
-        // loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
-        //     gatitoManotasModel = model.scene;
-        //     gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
-        //     console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
-        // });
+        // Carga del modelo GatitoManotas
+        const loaderGatoManotas = new GLTFLoader();
+        loaderGatoManotas.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
+            const gatitoManotasModel = model.scene;
+            gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
+            console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
+        });
 
 
         // *** COLISIONES *** //
@@ -391,7 +391,7 @@
                 mouses.forEach((mouse, index) => {
                     const distancia = gatitoPos.distanceTo(mouse.position);
 
-                    if (distancia < 2) { // Ajusta el valor según el tamaño del ratón
+                    if (distancia < 3) { // Ajusta el valor según el tamaño del ratón
                         scene.remove(mouse); // Eliminar del escenario
                         mouses.splice(index, 1); // Eliminar del array
                         console.log("Ratón recogido");
