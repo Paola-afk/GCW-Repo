@@ -88,6 +88,9 @@
 
       let startGame = false;
 
+      const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
+
+
 
       // Autentifica el usuario
       onAuthStateChanged(auth, (user) => {
@@ -124,6 +127,7 @@
 
       // Obtener el escenario seleccionado
       const escenarioSeleccionado = usuario.escenarioSeleccionado;
+      const nombreJugador = usuario.nombre;
 
       console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario lo seleccionó
 
@@ -148,6 +152,7 @@
                   gatito.scale.set(0.7, 0.7, 0.7);
                   gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
                   gatito.rotation.y = value.rotacion?.y || 0;
+                  gatito.user = value.nombre;
                   gatito.name = key;
                   gatito.voto = false;
                   scene.add(gatito);
@@ -330,6 +335,8 @@
 
         // Función para verificar colisiones y eliminar objetos
         function verificarColisiones() {
+            const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
+
             // Verificar colisiones para cada gatito
             gatitos.forEach((gatito) => {
                 const gatitoPos = gatito.position;
@@ -338,10 +345,21 @@
                 for (let i = latas.length - 1; i >= 0; i--) {
                     const lata = latas[i];
                     const distancia = gatitoPos.distanceTo(lata.position);
+
                     if (distancia < 2) { // Ajusta este valor según el tamaño de tus objetos
-                        scene.remove(lata); // Eliminar del escenario
+                        scene.remove(lata); // Eliminar la lata del escenario
                         latas.splice(i, 1); // Eliminar del array
                         console.log("Lata recogida");
+
+                        // Asignar inmunidad de 5 segundos al gatito
+                        gatito.inmunidad = true;
+                        gatito.tiempoInmunidad = tiempoActual;  // Registrar el momento en que se activa la inmunidad
+
+                        // Activar la función para gestionar la inmunidad (esto podría tener efectos visuales o lógicos adicionales)
+                        // gatitoInmunidad();
+
+                        // Registrar en consola que se ha activado la inmunidad
+                        console.log(`${gatito.user} ha recibido inmunidad por 5 segundos`);
                     }
                 }
 
@@ -353,21 +371,20 @@
                         scene.remove(manota); // Eliminar del escenario
                         manotas.splice(i, 1); // Eliminar del array
                         console.log("Manota recogida");
-                        console.log(`${gatito.name} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
-
+                        console.log(`${gatito.user} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
                     }
                 }
 
                 // Verificar colisión con estambres
                 estambres.forEach((estambre, index) => {
-                  const distancia = gatitoPos.distanceTo(estambre.position);
+                    const distancia = gatitoPos.distanceTo(estambre.position);
 
-                  if (distancia < 2) { // Ajusta el valor según el tamaño del estambre
-                      scene.remove(estambre); // Eliminar del escenario
-                      estambres.splice(index, 1); // Eliminar del array
-                      console.log("Estambre recogido");
-                      activarVelocidadAumentada(); // Activar velocidad aumentada
-                  }
+                    if (distancia < 2) { // Ajusta el valor según el tamaño del estambre
+                        scene.remove(estambre); // Eliminar del escenario
+                        estambres.splice(index, 1); // Eliminar del array
+                        console.log("Estambre recogido");
+                        activarVelocidadAumentada(); // Activar velocidad aumentada
+                    }
                 });
 
                 // Verificar colisión con el ratón
@@ -379,42 +396,40 @@
                         mouses.splice(index, 1); // Eliminar del array
                         console.log("Ratón recogido");
                         
-                        
                         // Asignar el voto y comenzar el juego
                         gatito.voto = true;  // Asignar voto al gatito
                         startGame = true;    // Comenzar el juego
-                        console.log(`${gatito.name} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
+                        console.log(`${gatito.user} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
                         iniciarJuego();      // Llama a una función que comience el juego
                     }
                 });
 
+                // Verificar si la inmunidad ha expirado (5 segundos)
+                if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad >= 5000)) {
+                    gatito.inmunidad = false;
+                    console.log(`${gatito.user} ya no tiene inmunidad`);
+                }
 
-
-
-
-                // Verificar colisiones para cada gatito
-                gatitos.forEach((gatito) => {
-                  const gatitoPos = gatito.position;
-
-                  // Verificar colisión con otros gatitos
-                  gatitos.forEach((otroGatito) => {
-                    // Evitar que un gatito se vote a sí mismo
+                // Verificar colisión con otros gatitos
+                gatitos.forEach((otroGatito) => {
                     if (gatito !== otroGatito) {
-                      const distancia = gatitoPos.distanceTo(otroGatito.position);
+                        const distancia = gatitoPos.distanceTo(otroGatito.position);
 
-                      // Si el gatito con voto toca a otro gatito, le pega el voto
-                      if (distancia < 2 && gatito.voto && !otroGatito.voto) { // Ajusta el valor "2" según el tamaño
-                        otroGatito.voto = true; // Asignar el voto al otro gatito
-                        gatito.voto = false;    // El gatito original pierde el voto
+                        // Si el gatito con voto toca a otro gatito y no tiene inmunidad
+                        if (distancia < 2 && gatito.voto && !otroGatito.voto && !otroGatito.inmunidad) {
+                            otroGatito.voto = true;  // Asignar el voto al otro gatito
+                            gatito.voto = false;     // El gatito original pierde el voto
 
-                        console.log(`${gatito.name} le ha pegado el voto a ${otroGatito.name}`);
-                        console.log(`${otroGatito.name} tiene ahora el voto: ${otroGatito.voto}`);
-                      }
+                            // Activar inmunidad para el gatito que recibió el voto durante 3 segundos
+                            gatito.inmunidad = true;
+                            gatito.tiempoInmunidad = tiempoActual;  // Registrar el momento en que la inmunidad se activa
+                            console.log(`${gatito.user} le ha pegado el voto a ${otroGatito.user}`);
+                            console.log(`${otroGatito.user} tiene ahora el voto: ${otroGatito.voto}`);
+                        }
                     }
-                  });
-                });        
+                });
             });
-          }
+        }
 
 
           // *** JUGABILIDAD VOTO *** //
@@ -424,6 +439,7 @@
               console.log("El juego ha comenzado");
               // Aquí puedes agregar cualquier lógica adicional que inicie el juego
           }
+
 
         // *** POWER UPS *** //
         //Velocidad
