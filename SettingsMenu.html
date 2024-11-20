@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MeowMadness - Menú Configuracion</title>
     <link rel="stylesheet" href="front/css/SettingsMenu.css">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div id="settings-menu" class="hidden">
@@ -31,6 +32,52 @@
             <img src="front/UI/close_button.png" alt="Cerrar" id="close-settings">
         </div>
     </div>
+
+
+    <script>
+       // Obtener controles
+const musicVolumeControl = document.getElementById('music-volume');
+const soundVolumeControl = document.getElementById('sound-volume');
+
+// Referencia al audio global
+const audio = parent.document.getElementById('background-music'); // Buscar audio en el documento principal
+
+// Cargar volumen desde localStorage
+const savedMusicVolume = localStorage.getItem('audioVolume');
+const savedSoundVolume = localStorage.getItem('soundVolume');
+
+if (savedMusicVolume !== null) {
+    musicVolumeControl.value = savedMusicVolume * 100; // Convertir de 0-1 a 0-100
+    if (audio) audio.volume = savedMusicVolume; // Aplicar volumen inicial
+}
+
+if (savedSoundVolume !== null) {
+    soundVolumeControl.value = savedSoundVolume * 100;
+}
+
+// Cambiar volumen de la música global
+musicVolumeControl.addEventListener('input', (event) => {
+    const newVolume = event.target.value / 100; // Convertir de 0-100 a 0-1
+    if (audio) {
+        audio.volume = newVolume; // Cambiar volumen global
+    }
+    localStorage.setItem('audioVolume', newVolume); // Guardar en localStorage
+});
+
+// Cambiar volumen de los efectos de sonido
+soundVolumeControl.addEventListener('input', (event) => {
+    const newVolume = event.target.value / 100;
+    localStorage.setItem('soundVolume', newVolume); // Guardar en localStorage
+    // Aquí puedes aplicar el volumen a tus sonidos si tienes un sistema para manejarlos.
+});
+
+// Botón para cerrar la configuración
+const closeButton = document.getElementById('close-settings');
+closeButton.addEventListener('click', () => {
+    window.history.back(); // Volver a la página anterior
+});
+
+    </script>
     
 </body>
 </html>
