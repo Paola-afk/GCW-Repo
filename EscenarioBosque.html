@@ -9,25 +9,10 @@
   <body>
 
     <div id="icon-container">
-      <img
-        src="front/UI/Points.png"
-        alt="Esc1"
-        class="menu-button"
-        id="escenario-1"
-      />
-      <img
-        src="front/UI/Power.png"
-        alt="Esc2"
-        class="menu-button"
-        id="escenario-2"
-      />
+      <img src="front/UI/Points.png" alt="Esc1" class="menu-button" id="escenario-1"/>
+      <img src="front/UI/Power.png" alt="Esc2" class="menu-button" id="escenario-2"/>
       <a href="PauseMenu.html">
-        <img
-          src="front/UI/Pause_button.png"
-          alt="Pause"
-          class="menu-button"
-          id="escenario-3"
-        />
+        <img src="front/UI/Pause_button.png" alt="Pause" class="menu-button" id="escenario-3"/>
       </a>
     </div>
 
@@ -35,7 +20,6 @@
       import * as THREE from "./three.module.js";
       import { OrbitControls } from "./OrbitControls.js";
       import { GLTFLoader } from "./GLTFLoader.js";
-
 
       // *** FIREBASE **** //
 
@@ -84,11 +68,11 @@
 
 
       // *** VARIABLES GLOBALES *** //
-
       let currentUser = null;
       const latas = [];
       const manotas = [];
       const estambres = [];
+      const mouses = [];
       const colisiones = [];
       const gatitos = []; // Lista para almacenar todos los gatitos
 
@@ -99,6 +83,11 @@
       let gatitosConInmunidad = new Set(); // Para manejar los gatitos con inmunidad
       let votoGatito = null; // Referencia al gatito con el voto
       let tiempoInmunidad = 3000; // 3 segundos de inmunidad
+
+      const animatableObjects = []; // Lista para almacenar objetos animados
+
+      let startGame = false;
+
 
       // Autentifica el usuario
       onAuthStateChanged(auth, (user) => {
@@ -111,9 +100,6 @@
             console.log("No hay usuario autenticado.");
         }
       });
-
-
-      
 
       // Función para actualizar solo la posición sin perder los otros datos del usuario
       function writeUserData(userId, positionX, positionY, positionZ, rotationY) {
@@ -141,45 +127,46 @@
 
       console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario lo seleccionó
 
-      // Verifica que el escenario actual sea el que ha elegido el usuario
+      // Inicializa un mapa para rastrear los modelos cargados
+      const objetosCargados = new Map();
+
       if (escenarioSeleccionado === "Bosque") {
-          // Obtener los datos de usuarios desde Firebase
-          const usuariosRef = ref(db, "usuarios");
+        // Obtener los datos de usuarios desde Firebase
+        const usuariosRef = ref(db, "usuarios");
 
-          onValue(usuariosRef, (snapshot) => {
-            const usuariosData = snapshot.val();
-            if (usuariosData) {
-              Object.entries(usuariosData).forEach(([key, value]) => {
-                console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+        onValue(usuariosRef, (snapshot) => {
+          const usuariosData = snapshot.val();
+          if (usuariosData) {
+            Object.entries(usuariosData).forEach(([key, value]) => {
+              // console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
 
-                // Verifica si el modelo del usuario ya existe en la escena
-                const usuarioModelo = scene.getObjectByName(key);
+              if (!objetosCargados.has(key)) {
+                // Cargar el modelo del gatito solo si no existe en el mapa
+                const loaderGLTF = new GLTFLoader();
+                loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                  const gatito = gltf.scene;
+                  gatito.scale.set(0.7, 0.7, 0.7);
+                  gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                  gatito.rotation.y = value.rotacion?.y || 0;
+                  gatito.name = key;
+                  gatito.voto = false;
+                  scene.add(gatito);
+                  gatitos.push(gatito); // Agrega el gatito a la lista
 
-                if (!usuarioModelo) {
-                  // Cargar el modelo del gatito
-                  const loaderGLTF = new GLTFLoader();
-                  loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-                    const gatito = gltf.scene;
-                    gatito.scale.set(0.7, 0.7, 0.7);  
-                    gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                    gatito.rotation.y = value.rotacion?.y || 0;
-                    gatito.name = key;
-                    scene.add(gatito);
-                    gatitos.push(gatito); // Agrega el gatito a la lista
-
-                    // Asigna el voto al primer gatito que ingrese
-                    asignarVotoGatito(gatito);
-                  });
-                } else {
-                  // Actualizar la posición del modelo si ya existe
-                  usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                  usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
-                }
-              });
-            } else {
-              console.log("No hay datos de usuarios en Firebase.");
-            }
-          });
+                  // Almacenar el modelo en el mapa
+                  objetosCargados.set(key, gatito);
+                });
+              } else {
+                // Si el modelo ya existe, se actualizan su posición y rotación
+                const usuarioModelo = objetosCargados.get(key);
+                usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
+              }
+            });
+          } else {
+            console.log("No hay datos de usuarios en Firebase.");
+          }
+        });
       }
 
 
@@ -240,6 +227,22 @@
         cargarEstambre(62, 0.5, -34);
         cargarEstambre(-46, 0.5, 27);
 
+
+        //Ratón
+        const loaderMouse = new GLTFLoader();
+        function cargarMouse(x, y, z) {
+          loaderMouse.load("/Modelos/Mouse.glb", function (model) {
+            const mouseModel = model.scene;
+            mouseModel.name = "Manotas"; // Establecer nombre para identificar
+            mouseModel.scale.set(1, 1, 1);
+            mouseModel.position.set(x, y, z);
+            scene.add(mouseModel);
+            mouses.push(mouseModel);
+          });
+        }
+
+        cargarMouse(40, 0, 20);
+
         // let gatitoManotasModel; // Declaración global
         // // Carga del modelo GatitoManotas
         // loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
@@ -249,9 +252,7 @@
         // });
 
 
-
         // *** COLISIONES *** //
-
         // Esta función crea un objeto de colisión
         function crearColision(x, y, z, width, height, depth) {
             const geometry = new THREE.BoxGeometry(width, height, depth);
@@ -311,7 +312,7 @@
                     const boxColision = new THREE.Box3().setFromObject(colision);
 
                     if (boxGatito.intersectsBox(boxColision)) {
-                        console.log(`¡Colisión detectada para ${gatito.name}!`);
+                        // console.log(`¡Colisión detectada para ${gatito.name}!`);
 
                         // Calcula la dirección del empuje, ignorando el eje Y
                         const direction = new THREE.Vector3()
@@ -326,8 +327,6 @@
                 });
             });
         }
-
-
 
         // Función para verificar colisiones y eliminar objetos
         function verificarColisiones() {
@@ -354,83 +353,79 @@
                         scene.remove(manota); // Eliminar del escenario
                         manotas.splice(i, 1); // Eliminar del array
                         console.log("Manota recogida");
+                        console.log(`${gatito.name} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
+
                     }
                 }
 
                 // Verificar colisión con estambres
-                estambres.forEach(estambre => {
-                  // Calcula la distancia entre el gatito y el estambre
+                estambres.forEach((estambre, index) => {
                   const distancia = gatitoPos.distanceTo(estambre.position);
 
-                  // Si la distancia es suficientemente pequeña, hay colisión
-                  if (distancia < 2) { // Puedes ajustar el valor de "5" según el tamaño del estambre
-                    scene.remove(estambre); // Eliminar del escenario
-                    console.log("Estambre");
-                    activarVelocidadAumentada();
+                  if (distancia < 2) { // Ajusta el valor según el tamaño del estambre
+                      scene.remove(estambre); // Eliminar del escenario
+                      estambres.splice(index, 1); // Eliminar del array
+                      console.log("Estambre recogido");
+                      activarVelocidadAumentada(); // Activar velocidad aumentada
                   }
                 });
-              });
+
+                // Verificar colisión con el ratón
+                mouses.forEach((mouse, index) => {
+                    const distancia = gatitoPos.distanceTo(mouse.position);
+
+                    if (distancia < 2) { // Ajusta el valor según el tamaño del ratón
+                        scene.remove(mouse); // Eliminar del escenario
+                        mouses.splice(index, 1); // Eliminar del array
+                        console.log("Ratón recogido");
+                        
+                        
+                        // Asignar el voto y comenzar el juego
+                        gatito.voto = true;  // Asignar voto al gatito
+                        startGame = true;    // Comenzar el juego
+                        console.log(`${gatito.name} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
+                        iniciarJuego();      // Llama a una función que comience el juego
+                    }
+                });
+
+
+
+
+
+                // Verificar colisiones para cada gatito
+                gatitos.forEach((gatito) => {
+                  const gatitoPos = gatito.position;
+
+                  // Verificar colisión con otros gatitos
+                  gatitos.forEach((otroGatito) => {
+                    // Evitar que un gatito se vote a sí mismo
+                    if (gatito !== otroGatito) {
+                      const distancia = gatitoPos.distanceTo(otroGatito.position);
+
+                      // Si el gatito con voto toca a otro gatito, le pega el voto
+                      if (distancia < 2 && gatito.voto && !otroGatito.voto) { // Ajusta el valor "2" según el tamaño
+                        otroGatito.voto = true; // Asignar el voto al otro gatito
+                        gatito.voto = false;    // El gatito original pierde el voto
+
+                        console.log(`${gatito.name} le ha pegado el voto a ${otroGatito.name}`);
+                        console.log(`${otroGatito.name} tiene ahora el voto: ${otroGatito.voto}`);
+                      }
+                    }
+                  });
+                });        
+            });
           }
 
 
-          // VOTOOOOO
-
-// Esta función asigna el voto al primer gatito que ingresa
-function asignarVotoGatito(gatito) {
-  console.log("Objeto gatito:", gatito); // Verifica la estructura completa del objeto
-  if (votoGatito === null) {
-    votoGatito = gatito; // El primer gatito que entra obtiene el voto
-    gatito.voto = true;   // Marcar al gatito con el voto
-    console.log(`¡El gatito ${gatito.name} con el voto es el primero!`);
-  }
-}
-
-
-          function manejarColisiones() {
-            for (let i = 0; i < gatitos.length; i++) {
-              for (let j = i + 1; j < gatitos.length; j++) {
-                const gatito1 = gatitos[i];
-                const gatito2 = gatitos[j];
-
-                if (detectarColision(gatito1, gatito2)) {
-                  // Si uno de los gatitos tiene el voto, transfiera el voto
-                  if (gatito1.voto && !gatitosConInmunidad.has(gatito1)) {
-                    transferirVoto(gatito1, gatito2);
-                  } else if (gatito2.voto && !gatitosConInmunidad.has(gatito2)) {
-                    transferirVoto(gatito2, gatito1);
-                  }
-                }
-              }
-            }
+          // *** JUGABILIDAD VOTO *** //
+          // Función para iniciar el juego
+          function iniciarJuego() {
+              // Lógica para iniciar el juego
+              console.log("El juego ha comenzado");
+              // Aquí puedes agregar cualquier lógica adicional que inicie el juego
           }
-
-          // Función que detecta la colisión (puedes adaptar la lógica a tu escena)
-          function detectarColision(gatito1, gatito2) {
-            const distancia = gatito1.position.distanceTo(gatito2.position);
-            return distancia < 2; // Asegúrate de ajustar el umbral de distancia
-          }
-
-          // Función para transferir el voto y dar inmunidad
-          function transferirVoto(gatitoConVoto, nuevoGatito) {
-            if (nuevoGatito !== gatitoConVoto && !gatitosConInmunidad.has(gatitoConVoto)) {
-              // Transferir el voto
-              nuevoGatito.voto = true;
-              gatitoConVoto.voto = false; // El gatito original pierde el voto
-              console.log(`${nuevoGatito.name} ahora tiene el voto.`);
-
-              // Marcar al gatito que tuvo el voto como inmune
-              gatitosConInmunidad.add(gatitoConVoto);
-              setTimeout(() => {
-                gatitosConInmunidad.delete(gatitoConVoto);
-                console.log(`${gatitoConVoto.name} ya no está inmune.`);
-              }, tiempoInmunidad);
-            }
-          }
-
-
 
         // *** POWER UPS *** //
-
         //Velocidad
         function activarVelocidadAumentada() {
           velocidadActual = velocidadAumentada; // Aumenta la velocidad
@@ -444,13 +439,13 @@ function asignarVotoGatito(gatito) {
 
 
 
-        // *** TECLADO *** //
-        
-      document.onkeydown = function (e) {
-        if (!currentUser || !currentUser.uid) {
-            console.error("Usuario no autenticado o currentUser.uid no definido.");
-            return;
-        }
+
+        // *** TECLADO *** //    
+        document.onkeydown = function (e) {
+          if (!currentUser || !currentUser.uid) {
+              console.error("Usuario no autenticado o currentUser.uid no definido.");
+              return;
+          }
 
         // Obtiene el modelo del jugador actual en la escena
         const jugadorActual = scene.getObjectByName(currentUser.uid);
@@ -569,6 +564,8 @@ function asignarVotoGatito(gatito) {
         // // Simulación del movimiento del gatito
         detectarColisiones();
         verificarColisiones();
+
+        
 
         updateCameraPosition();
 
