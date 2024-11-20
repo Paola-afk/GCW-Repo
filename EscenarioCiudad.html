@@ -376,17 +376,17 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
                 // Verificar colisión con estambres
                 estambres.forEach(estambre => {
                   // Calcula la distancia entre el gatito y el estambre
-                  const distancia = gatitoPos.distanceTo(estambre.position);
+                const distancia = gatitoPos.distanceTo(estambre.position);
 
                   // Si la distancia es suficientemente pequeña, hay colisión
                   if (distancia < 2) { // Puedes ajustar el valor de "5" según el tamaño del estambre
                     scene.remove(estambre); // Eliminar del escenario
                     console.log("Estambre");
                     activarVelocidadAumentada();
-                  }
+                }
                 });
-              });
-          }
+            });
+        }
 
 
 
@@ -399,17 +399,17 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
           velocidadActual = velocidadAumentada; // Aumenta la velocidad
 
           // Después de 5 segundos, vuelve a la velocidad normal
-          setTimeout(() => {
-            velocidadActual = velocidadNormal; // Restaura la velocidad normal
-            console.log("Velocidad restaurada.");
-          }, 5000); // 5000 ms = 5 segundos
+            setTimeout(() => {
+                velocidadActual = velocidadNormal; // Restaura la velocidad normal
+                console.log("Velocidad restaurada.");
+            }, 5000); // 5000 ms = 5 segundos
         }
 
 
 
         // *** TECLADO *** //
         
-      document.onkeydown = function (e) {
+        document.onkeydown = function (e) {
         if (!currentUser || !currentUser.uid) {
             console.error("Usuario no autenticado o currentUser.uid no definido.");
             return;
@@ -484,61 +484,61 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
                 console.error("Posición inválida del jugador:", jugadorActual.position, jugadorActual.rotation);
             }
         }
-      };
+    };
 
 
-      function updateCameraPosition() {
-          if (!currentUser || !currentUser.uid) return;
+    function updateCameraPosition() {
+        if (!currentUser || !currentUser.uid) return;
 
-          const jugadorActual = scene.getObjectByName(currentUser.uid);
-          if (!jugadorActual) return;
+        const jugadorActual = scene.getObjectByName(currentUser.uid);
+        if (!jugadorActual) return;
 
-          // Define el offset relativo al jugador (cámara detrás y arriba)
-          const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
+            // Define el offset relativo al jugador (cámara detrás y arriba)
+            const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
 
-          // Aplica la rotación del jugador al offset
-          const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
-          const offsetRotated = offset.clone().applyQuaternion(jugadorRotation);
+            // Aplica la rotación del jugador al offset
+            const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
+            const offsetRotated = offset.clone().applyQuaternion(jugadorRotation);
 
-          // Calcula la posición deseada de la cámara
-          const cameraTargetPosition = jugadorActual.position.clone().add(offsetRotated);
+            // Calcula la posición deseada de la cámara
+            const cameraTargetPosition = jugadorActual.position.clone().add(offsetRotated);
 
-          // Suaviza el movimiento de la cámara hacia la posición deseada
-          camera.position.lerp(cameraTargetPosition, 0.1);
+            // Suaviza el movimiento de la cámara hacia la posición deseada
+            camera.position.lerp(cameraTargetPosition, 0.1);
 
-          // La cámara siempre mira al jugador
-          camera.lookAt(jugadorActual.position);
-      }
+            // La cámara siempre mira al jugador
+            camera.lookAt(jugadorActual.position);
+    }
 
 
 
        // Skybox
-      const loader = new THREE.CubeTextureLoader();
-      const skyboxTextures = loader.load([
-        "/front/images/Sky.png", 
-        "/front/images/Sky.png",
-        "/front/images/Sky.png",
-        "/front/images/Sky.png",
-        "/front/images/Sky.png",
-        "/front/images/Sky.png",
-      ]);
+        const loader = new THREE.CubeTextureLoader();
+        const skyboxTextures = loader.load([
+            "/front/images/Sky.png", 
+            "/front/images/Sky.png",
+            "/front/images/Sky.png",
+            "/front/images/Sky.png",
+            "/front/images/Sky.png",
+            "/front/images/Sky.png",
+        ]);
 
-      scene.background = skyboxTextures;
+        scene.background = skyboxTextures;
 
-      const cameraControl = new OrbitControls(camera, renderer.domElement);
+        const cameraControl = new OrbitControls(camera, renderer.domElement);
 
-      function animate() {
-        // updateMovement();
-        // // Simulación del movimiento del gatito
-        detectarColisiones();
-        verificarColisiones();
+        function animate() {
+            // updateMovement();
+            // // Simulación del movimiento del gatito
+            detectarColisiones();
+            verificarColisiones();
 
-        updateCameraPosition();
+            updateCameraPosition();
 
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      }
-      animate();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
 
 
     </script>
