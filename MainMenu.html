@@ -71,47 +71,11 @@
         });
     }
 
-/*
-
-    document.addEventListener('DOMContentLoaded', () => {
-    const audio = document.getElementById('background-music');
-    if (audio) {
-        const savedVolume = localStorage.getItem('audioVolume');
-        audio.volume = savedVolume !== null ? parseFloat(savedVolume) : 1.0; // Valor por defecto 1.0
-
-        // Intentar reproducir la música
-        audio.play().catch((error) => {
-            console.warn('La reproducción automática está bloqueada:', error);
-            // Mostrar un botón para iniciar la música manualmente
-            const playButton = document.createElement('button');
-            playButton.textContent = 'Reproducir Música';
-            playButton.style.position = 'absolute';
-            playButton.style.top = '10px';
-            playButton.style.left = '10px';
-            document.body.appendChild(playButton);
-
-            playButton.addEventListener('click', () => {
-                audio.play();
-                playButton.remove();
-            });
-        });
-    }
-        
-});
-*/
-
-
 </script>
 
 
 </head>
 <body>
-
-    <!--
-    <audio id="background-music" src="assets/audio/MeowMadness.mp3" autoplay loop>
-        Tu navegador no soporta el elemento de audio.
-    </audio>
--->
     
     <div id="menu" class="menu-container">
         <div >
@@ -123,54 +87,9 @@
         </div>
         <div class="buttons-container">
             <div class="button"><a href="SettingsMenu.html" ><img src="front/UI/ConfigVerde.png" alt="Configuracion"></a></div>
-            <div class="button"><a href="Info.html" ><img src="front/UI/InfoRojo.png" alt="Puntuaciones"></a></div>
+            <div class="button"><a href="Puntuaciones.html" ><img src="front/UI/InfoRojo.png" alt="Puntuaciones"></a></div>
         </div>
     </div>
 
-<!--
-    <script>
-        window.fbAsyncInit = function() {
-        FB.init({
-            appId            : '1046131813667684',
-            xfbml            : true,
-            version          : 'v20.0'
-        });
-
-        FB.api(
-            "404505349416260/feed", 
-            "POST", 
-            {
-                message: "Hola desde JS",
-                access_token:"EAAcH3cqj1yMBOy910o91wgifmaJ7KlPgQN0ZBHBbalCNsbgVKzaZAf2GTb6O9srVImuLDFDLj94m745cnpsU7XWUxsmuQRDhcjekjr16FZAsC3bDLX8tgwqmSWVHhZC1dslw8MGscrSJN9Dx0UmHlJluScb7irkNtJlR2E7qZC5ZBfJNNs8GBnLOkyE98fvWgOHFyCSPJQd1cyIIn2N9aFDWzgYaZCWSvAt"
-            },
-            function(response){
-                if (responde && !response.console.error()){
-                    console.log("post", response);
-                }else{
-                    console.log("error");
-                }
-            }
-        );
-
-
-        FB.api2(
-            "122101681190511430/posts", 
-            "GET", 
-            {
-                access_token:"EAAO3c4skU2QBO5CbIbXprUYt75RdZBPaBPInUVeSDRorZBlovA9KSwxXkqawiTq2Lc6lM1zoLm9ukQOaX5d9UGsEwP06UlrcqXklTJYDZB34DJFYePOeD0qJBSI2MIqy7qMZAYfgyGxC6Y5FtlR2gqfXtRISTxxSwtWDfQYSUKUmZBVjLP2z1uLbXqhdBglCXJ0fbXozOxQZCVv2IOjTg99oPlH4v9EnL1TBzWhZBdTUo1v7KdYTquUqZBhpwOIA8jMuVRRlDwZDZD"
-            },
-            function(response){
-                if (responde && !response.console.error()){
-                    console.log(response);
-                }else{
-                    console.log("error");
-                }
-            }
-        );
-
-        };
-    </script>
--->
-    <!--<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>-->
 </body>
 </html>
