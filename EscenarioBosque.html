@@ -83,18 +83,18 @@
 
       let gatitosConInmunidad = new Set(); // Para manejar los gatitos con inmunidad
       let votoGatito = null; // Referencia al gatito con el voto
-      let tiempoInmunidad = 3000; // 3 segundos de inmunidad
+      let tiempoInmunidad = 5000; // 3 segundos de inmunidad
 
       const animatableObjects = []; // Lista para almacenar objetos animados
 
       let startGame = false;
 
       const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
-
       let tiempoInicio = null;  // Variable para almacenar el tiempo de inicio
       let tiempoLimite = 3 * 60 * 1000; // 5 minutos en milisegundos (5 * 60 * 1000)
+      let isTiempoFinalizado = false; // Flag para detener el contador
+      
       let jugadorConVoto = null; // Para guardar al jugador con el voto
-
       let primerJugador = null;
 
 
@@ -192,53 +192,59 @@
         scene.add(forestModel);
       });
 
-      //Latas
-      const loaderCan = new GLTFLoader();
-        function cargarLata(x, y, z) {
-            loaderCan.load("/Modelos/Lata-PIA.glb", function (model) {
-                const canModel = model.scene;
-                canModel.name = "Lata"; // Establecer nombre para identificar
-                canModel.scale.set(1, 1, 1);
-                canModel.position.set(x, y, z);
-                scene.add(canModel);
-                latas.push(canModel);
+
+
+      function cargarModelos(){
+
+          //Latas
+          const loaderCan = new GLTFLoader();
+          function cargarLata(x, y, z) {
+              loaderCan.load("/Modelos/Lata-PIA.glb", function (model) {
+                  const canModel = model.scene;
+                  canModel.name = "Lata"; // Establecer nombre para identificar
+                  canModel.scale.set(1, 1, 1);
+                  canModel.position.set(x, y, z);
+                  scene.add(canModel);
+                  latas.push(canModel);
+              });
+          }
+
+          cargarLata(25, 0, 50);
+          cargarLata(15, 0, -30);
+
+          //Manotas
+          const loaderManotas = new GLTFLoader();
+          function cargarManotas(x, y, z) {
+            loaderManotas.load("/Modelos/Manotas-PIA.glb", function (model) {
+              const manotasModel = model.scene;
+              manotasModel.name = "Manotas"; // Establecer nombre para identificar
+              manotasModel.scale.set(1, 1, 1);
+              manotasModel.position.set(x, y, z);
+              scene.add(manotasModel);
+              manotas.push(manotasModel);
             });
-        }
+          }
 
-        cargarLata(25, 0, 50);
-        cargarLata(15, 0, -30);
-
-        //Manotas
-        const loaderManotas = new GLTFLoader();
-        function cargarManotas(x, y, z) {
-          loaderManotas.load("/Modelos/Manotas-PIA.glb", function (model) {
-            const manotasModel = model.scene;
-            manotasModel.name = "Manotas"; // Establecer nombre para identificar
-            manotasModel.scale.set(1, 1, 1);
-            manotasModel.position.set(x, y, z);
-            scene.add(manotasModel);
-            manotas.push(manotasModel);
-          });
-        }
-
-        cargarManotas(-50, 2, -55);
-        cargarManotas(-19, 2, 20);
+          cargarManotas(-50, 2, -55);
+          cargarManotas(-19, 2, 20);
 
 
-        const loaderEstambre = new GLTFLoader();
-        function cargarEstambre(x, y, z) {
-            loaderCan.load("/Modelos/Bola-Estambre.glb", function (model) {
-                const estambreModel = model.scene;
-                estambreModel.name = "Estambre"; // Establecer nombre para identificar
-                estambreModel.scale.set(1, 1, 1);
-                estambreModel.position.set(x, y, z);
-                scene.add(estambreModel);
-                estambres.push(estambreModel);
-            });
-        }
+          const loaderEstambre = new GLTFLoader();
+          function cargarEstambre(x, y, z) {
+              loaderCan.load("/Modelos/Bola-Estambre.glb", function (model) {
+                  const estambreModel = model.scene;
+                  estambreModel.name = "Estambre"; // Establecer nombre para identificar
+                  estambreModel.scale.set(1, 1, 1);
+                  estambreModel.position.set(x, y, z);
+                  scene.add(estambreModel);
+                  estambres.push(estambreModel);
+              });
+          }
 
-        cargarEstambre(62, 0.5, -34);
-        cargarEstambre(-46, 0.5, 27);
+          cargarEstambre(62, 0.5, -34);
+          cargarEstambre(-46, 0.5, 27);
+      }
+      
 
 
         //Ratón
@@ -345,7 +351,7 @@
 
         // Función para verificar colisiones y eliminar objetos
         function verificarColisiones() {
-            // const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
+            const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
 
             // Verificar colisiones para cada gatito
             gatitos.forEach((gatito) => {
@@ -435,16 +441,22 @@
                             jugadorConVoto = primerJugador;
                             console.log(`${gatito.user} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
                             iniciarJuego();      // Llama a una función que comience el juego
+                            cargarModelos();
                         }                    
                       }
                 });
 
-                // Verificar si la inmunidad ha expirado (5 segundos)
-                if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad >= 5000)) {
-                    gatito.inmunidad = false;
-                    console.log(`${gatito.user} ya no tiene inmunidad`);
+                if (gatito.inmunidad)   {
+                  console.log(`Inmunidad de ${gatito.user} está activa desde: ${gatito.tiempoInmunidad}`);
+                  
                 }
 
+
+// Verificar si la inmunidad ha expirado (5 segundos)
+if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad >= 5000)) {
+    gatito.inmunidad = false;
+    console.log(`${gatito.user} ya no tiene inmunidad`);
+}
                 // Verificar colisión con otros gatitos
                 gatitos.forEach((otroGatito) => {
                     if (gatito !== otroGatito) {
@@ -462,6 +474,8 @@
                             jugadorConVoto = otroGatito;  // Guardar al jugador con el voto
                             console.log(`${gatito.user} le ha pegado el voto a ${otroGatito.user}`);
                             console.log(`${otroGatito.user} tiene ahora el voto: ${otroGatito.voto}`);
+                            console.log(`${gatito.user} tiene ahora inmunidad: ${gatito.inmunidad}`);
+
                         }
 
 
@@ -527,25 +541,37 @@
 
           // Función para verificar si han pasado 5 minutos y el último jugador con voto pierde
           function verificarTiempo() {
-              if (tiempoInicio !== null) {
-                  const tiempoTranscurrido = Date.now() - tiempoInicio;
+            if (tiempoInicio !== null && !isTiempoFinalizado) {
+              const tiempoTranscurrido = Date.now() - tiempoInicio;
 
-                  if (tiempoTranscurrido >= tiempoLimite) {
-                      // Si el tiempo ha pasado, el jugador con el voto pierde
-                      console.log(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
-                      // Aquí puedes agregar lógica para terminar el juego o penalizar al jugador
-                  }
+              if (tiempoTranscurrido >= tiempoLimite) {
+                  // Si el tiempo ha pasado, el jugador con el voto pierde
+                  console.log(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
+                  // Aquí puedes agregar lógica para terminar el juego o penalizar al jugador
 
-                  // Calcular el tiempo restante
-        const tiempoRestante = tiempoLimite - tiempoTranscurrido;
-        const minutos = Math.floor(tiempoRestante / 60000); // Obtener minutos
-        const segundos = Math.floor((tiempoRestante % 60000) / 1000); // Obtener segundos
-
-        // Mostrar el tiempo restante en el contador en pantalla
-        const contadorElement = document.getElementById('contador');
-        contadorElement.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+                  isTiempoFinalizado = true; // Detenemos el contador
               }
+
+              // Calcular el tiempo restante
+              const tiempoRestante = tiempoLimite - tiempoTranscurrido;
+
+              // Si el tiempo restante es menor o igual a 0, detenemos el contador
+              if (tiempoRestante <= 0) {
+                  document.getElementById('contador').textContent = "00:00"; // Mostrar 00:00
+                  isTiempoFinalizado = true; // Detener el contador
+                  return; // Detener la ejecución de la función
+              }
+
+              // Calcular minutos y segundos
+              const minutos = Math.floor(tiempoRestante / 60000); // Obtener minutos
+              const segundos = Math.floor((tiempoRestante % 60000) / 1000); // Obtener segundos
+
+              // Mostrar el tiempo restante en el contador en pantalla
+              const contadorElement = document.getElementById('contador');
+              contadorElement.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+            }
           }
+
 
         // *** POWER UPS *** //
         //Velocidad
