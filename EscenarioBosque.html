@@ -73,6 +73,7 @@
       const manotas = [];
       const estambres = [];
       const mouses = [];
+      let gatitoManotasModel; // Variable global para el modelo GatitoManotas
       const colisiones = [];
       const gatitos = []; // Lista para almacenar todos los gatitos
 
@@ -155,6 +156,7 @@
                   gatito.user = value.nombre;
                   gatito.name = key;
                   gatito.voto = false;
+                  gatito.manotas = false;
                   scene.add(gatito);
                   gatitos.push(gatito); // Agrega el gatito a la lista
 
@@ -251,10 +253,12 @@
         // Carga del modelo GatitoManotas
         const loaderGatoManotas = new GLTFLoader();
         loaderGatoManotas.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
-            const gatitoManotasModel = model.scene;
-            gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
+            gatitoManotasModel = model.scene;
+            gatitoManotasModel.scale.set(0.6, 0.6, 0.6);
             console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
         });
+
+
 
 
         // *** COLISIONES *** //
@@ -371,7 +375,26 @@
                         scene.remove(manota); // Eliminar del escenario
                         manotas.splice(i, 1); // Eliminar del array
                         console.log("Manota recogida");
-                        console.log(`${gatito.user} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
+
+                        // Transformar el gatito al modelo GatitoManotas
+                        if (gatitoManotasModel) {
+                            scene.remove(gatito); // Eliminar el modelo actual del gatito
+                            const nuevoModelo = gatitoManotasModel.clone(); // Clonar el modelo cargado
+                            nuevoModelo.position.copy(gatitoPos); // Mantener la posición actual del gatito
+                            nuevoModelo.name = gatito.name; // Conservar el nombre del gatito para identificarlo
+                            nuevoModelo.user = gatito.user; // Conservar el nombre del gatito para identificarlo
+                            nuevoModelo.manotas = true; // Conservar el nombre del gatito para identificarlo
+                            
+                            scene.add(nuevoModelo); // Añadir el nuevo modelo al escenario
+
+                            // Reemplazar el modelo en el array de gatitos
+                            const index = gatitos.indexOf(gatito);
+                            if (index !== -1) {
+                                gatitos[index] = nuevoModelo;
+                            }
+                        } else {
+                            console.warn("El modelo GatitoManotas no está cargado aún.");
+                        }
                     }
                 }
 
@@ -415,17 +438,47 @@
                     if (gatito !== otroGatito) {
                         const distancia = gatitoPos.distanceTo(otroGatito.position);
 
-                        // Si el gatito con voto toca a otro gatito y no tiene inmunidad
-                        if (distancia < 2 && gatito.voto && !otroGatito.voto && !otroGatito.inmunidad) {
-                            otroGatito.voto = true;  // Asignar el voto al otro gatito
-                            gatito.voto = false;     // El gatito original pierde el voto
+                        // Si un gatito con "manotas" choca con otro
+                        if (distancia < 2 && gatito.manotas) {
+                            console.log(`${gatito.user} empuja a ${otroGatito.user}`);
 
-                            // Activar inmunidad para el gatito que recibió el voto durante 3 segundos
-                            gatito.inmunidad = true;
-                            gatito.tiempoInmunidad = tiempoActual;  // Registrar el momento en que la inmunidad se activa
-                            console.log(`${gatito.user} le ha pegado el voto a ${otroGatito.user}`);
-                            console.log(`${otroGatito.user} tiene ahora el voto: ${otroGatito.voto}`);
-                        }
+                            // Empujar al otro gatito
+                            const direccion = new THREE.Vector3().subVectors(
+                                otroGatito.position,
+                                gatito.position
+                            ).normalize();
+                            const fuerzaEmpuje = 15; // Ajusta la fuerza del empuje
+
+                            // Mover el otro gatito en la dirección del empuje
+                            otroGatito.position.add(direccion.multiplyScalar(fuerzaEmpuje));
+
+                            
+                            // Volver al modelo original si el gatito tiene manotas
+                            if (gatito.manotas) {
+                            // Eliminar el modelo actual con manotas
+                            scene.remove(gatito);
+
+                            // Cargar el modelo original del gatito
+                            const loaderGLTF = new GLTFLoader();
+                            loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                                const gatitoOriginal = gltf.scene;
+                                gatitoOriginal.scale.set(0.7, 0.7, 0.7);
+                                gatitoOriginal.position.copy(gatito.position); // Mantener la posición
+                                gatitoOriginal.rotation.y = gatito.rotation.y; // Mantener la rotación
+                                gatitoOriginal.user = gatito.user; // Mantener el nombre de usuario
+                                gatitoOriginal.name = gatito.name; // Mantener el nombre
+                                gatitoOriginal.manotas = false; // Marcar como gatito sin manotas
+
+                                scene.add(gatitoOriginal); // Añadir el modelo original al escenario
+
+                                // Reemplazar el modelo en el array de gatitos
+                                const index = gatitos.indexOf(gatito);
+                                if (index !== -1) {
+                                    gatitos[index] = gatitoOriginal; // Actualizar el gatito en el array
+                                }
+                            });
+                        }                        
+                      }
                     }
                 });
             });
