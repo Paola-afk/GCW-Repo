@@ -442,21 +442,20 @@
                             console.log(`${gatito.user} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
                             iniciarJuego();      // Llama a una función que comience el juego
                             cargarModelos();
+                             // Crear la partícula en la posición del gatito
+                            crearParticula(gatito.position); 
                         }                    
                       }
                 });
 
-                if (gatito.inmunidad)   {
-                  console.log(`Inmunidad de ${gatito.user} está activa desde: ${gatito.tiempoInmunidad}`);
-                  
+
+
+                // Verificar si la inmunidad ha expirado (5 segundos)
+                if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad >= 5000)) {
+                    gatito.inmunidad = false;
+                    console.log(`${gatito.user} ya no tiene inmunidad`);
                 }
 
-
-// Verificar si la inmunidad ha expirado (5 segundos)
-if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad >= 5000)) {
-    gatito.inmunidad = false;
-    console.log(`${gatito.user} ya no tiene inmunidad`);
-}
                 // Verificar colisión con otros gatitos
                 gatitos.forEach((otroGatito) => {
                     if (gatito !== otroGatito) {
@@ -531,12 +530,6 @@ if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad >= 5000)) {
           function iniciarJuego() {
               tiempoInicio = Date.now();  // Establecer el tiempo de inicio
               console.log("El juego ha comenzado");
-              // Establecer al primer jugador con el voto
-              // const primerJugador = gatitos.find(gatito => gatito.voto);
-              // if (primerJugador) {
-              //     jugadorConVoto = primerJugador;  // Guardar al jugador con el voto
-              //     console.log(`${jugadorConVoto.user} es el primer jugador con el voto`);
-              // }
           }
 
           // Función para verificar si han pasado 5 minutos y el último jugador con voto pierde
@@ -587,6 +580,64 @@ if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad >= 5000)) {
 
 
 
+        // *** PARTICULAS ***//
+        // Función para crear una partícula sin TWEEN.js
+        function crearParticula(posicion) {
+            const geometria = new THREE.SphereGeometry(0.1, 8, 8); // Esfera pequeña para la partícula
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Color verde para la partícula
+            const particula = new THREE.Mesh(geometria, material);
+
+            particula.position.copy(posicion); // Colocar la partícula en la posición dada
+
+            // Añadir la partícula a la escena
+            scene.add(particula);
+
+            // Variables para la animación de la partícula
+            let vida = 1; // Duración de la partícula (1 segundo de vida)
+            let escalaInicial = 0.1; // Tamaño inicial de la partícula
+            let escalaFinal = 2; // Tamaño final de la partícula
+
+            // Actualización de la partícula en cada frame
+            function actualizarParticula() {
+                // Reducir la "vida" de la partícula
+                vida -= 0.01;
+
+                // Cambiar el tamaño de la partícula a medida que se va desintegrando
+                particula.scale.set(escalaInicial + (escalaFinal - escalaInicial) * (1 - vida), 
+                                    escalaInicial + (escalaFinal - escalaInicial) * (1 - vida), 
+                                    escalaInicial + (escalaFinal - escalaInicial) * (1 - vida));
+
+                // Desaparecer la partícula después de un tiempo
+                if (vida <= 0) {
+                    scene.remove(particula); // Eliminar la partícula de la escena
+                }
+            }
+
+            // Llamar a la función de actualización de la partícula en cada frame
+            function animateParticula() {
+                actualizarParticula();
+                if (vida > 0) {
+                    requestAnimationFrame(animateParticula);
+                }
+            }
+
+            // Iniciar la animación de la partícula
+            animateParticula();
+        }
+        
+
+        // Generar partículas de forma continua
+        function generarParticulasContinuamente() {
+            setInterval(() => {
+                // Crear una nueva partícula en una posición aleatoria en la escena
+                const posicionAleatoria = new THREE.Vector3(
+                    Math.random() * 10 - 5, // Posición en X entre -5 y 5
+                    Math.random() * 10 - 5, // Posición en Y entre -5 y 5
+                    Math.random() * 10 - 5  // Posición en Z entre -5 y 5
+                );
+                crearParticula(posicionAleatoria);
+            }, 100); // Crear una partícula cada 100 milisegundos
+        }
 
         // *** TECLADO *** //    
         document.onkeydown = function (e) {
@@ -709,12 +760,11 @@ if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad >= 5000)) {
 
       function animate() {
         // updateMovement();
-        // // Simulación del movimiento del gatito
         detectarColisiones();
         verificarColisiones();
 
         verificarTiempo();
-
+        // generarParticulasContinuamente();
         updateCameraPosition();
 
         renderer.render(scene, camera);
