@@ -21,12 +21,24 @@
                 <img src="front/UI/exit_normal.png" alt="Exit" class="menu-button" id="exit-button">
             </a>
 
-            <img src="front/UI/play_button.png" alt="Play" class="menu-button" id="play-button">
+            <a href="#" id="resume-button">
+                <img src="front/UI/play_button.png" alt="Play" class="menu-button" id="play-button">
+            </a>
             
             <a href="/SettingsMenu.html">
             <img src="front/UI/settings_button.png" alt="Settings" class="menu-button" id="settings-button">
             </a>
         </div>
     </div>
+
+
+    <script>
+        // En tu archivo JS o en una etiqueta script dentro del HTML de la pantalla de pausa
+        document.getElementById('resume-button').addEventListener('click', () => {
+            window.history.back();  // Esto hará que regrese a la página anterior
+        });
+
+    </script>
+
 </body>
 </html>

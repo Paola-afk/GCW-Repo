@@ -1,21 +1,33 @@
 // sounds.js
 
-// Cargar y controlar el volumen de los efectos de sonido
-const powerUpSound = new Audio('../assets/sounds/sound3.wav'); // Efecto de sonido para los power-ups
+// Sonidos para cada power-up
+const powerUpSounds = {
+    "empuje": new Audio('../assets/sounds/sound1.mp3'),
+    "velocidad": new Audio('../assets/sounds/sound2.wav'),
+    "inmunidad": new Audio('../assets/sounds/sound3.wav')
+};
 
-// Función para reproducir el sonido de los power-ups
-export function playPowerUpSound() {
-    powerUpSound.currentTime = 0; // Reiniciar el sonido si está pausado
-    powerUpSound.volume = localStorage.getItem('soundVolume') 
-        ? parseFloat(localStorage.getItem('soundVolume')) 
-        : 1.0; // Usar volumen guardado o por defecto
-    powerUpSound.play().catch((error) => {
-        console.warn('Error al reproducir el efecto de sonido:', error);
-    });
+// Función para reproducir el sonido de un power-up específico
+export function playPowerUpSound(type) {
+    const sound = powerUpSounds[type];
+
+    if (sound) {
+        sound.currentTime = 0;  // Reiniciar el sonido si está pausado
+        sound.volume = localStorage.getItem('soundVolume') 
+            ? parseFloat(localStorage.getItem('soundVolume')) 
+            : 1.0; // Usar volumen guardado o por defecto
+        sound.play().catch((error) => {
+            console.warn('Error al reproducir el efecto de sonido:', error);
+        });
+    } else {
+        console.warn('Sonido no encontrado para el tipo de power-up:', type);
+    }
 }
 
 // Función para actualizar el volumen de los efectos de sonido
 export function setSoundVolume(volume) {
-    powerUpSound.volume = volume;
+    Object.values(powerUpSounds).forEach(sound => {
+        sound.volume = volume;
+    });
     localStorage.setItem('soundVolume', volume); // Guardar volumen en localStorage
 }
