@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="front/css/EscenarioBosque.css">
   </head>
   <body>
-
     <div id="icon-container">
-      <img src="front/UI/Points.png" alt="Esc1" class="menu-button" id="escenario-1"/>
+      <img src="front/UI/Points.png" alt="Esc1" class="menu-button" id="escenario-1"/> <p id="contador">00:00</p>
+  
       <img src="front/UI/Power.png" alt="Esc2" class="menu-button" id="escenario-2"/>
       <a href="PauseMenu.html">
         <img src="front/UI/Pause_button.png" alt="Pause" class="menu-button" id="escenario-3"/>
@@ -90,6 +90,12 @@
       let startGame = false;
 
       const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
+
+      let tiempoInicio = null;  // Variable para almacenar el tiempo de inicio
+      let tiempoLimite = 3 * 60 * 1000; // 5 minutos en milisegundos (5 * 60 * 1000)
+      let jugadorConVoto = null; // Para guardar al jugador con el voto
+
+      let primerJugador = null;
 
 
 
@@ -339,7 +345,7 @@
 
         // Función para verificar colisiones y eliminar objetos
         function verificarColisiones() {
-            const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
+            // const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
 
             // Verificar colisiones para cada gatito
             gatitos.forEach((gatito) => {
@@ -420,11 +426,17 @@
                         console.log("Ratón recogido");
                         
                         // Asignar el voto y comenzar el juego
-                        gatito.voto = true;  // Asignar voto al gatito
-                        startGame = true;    // Comenzar el juego
-                        console.log(`${gatito.user} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
-                        iniciarJuego();      // Llama a una función que comience el juego
-                    }
+                        // Solo asignar el voto al primer gatito que lo recoja
+                        if (!primerJugador) {  // Verifica si ya se asignó el voto
+                            gatito.voto = true;  // Asignar voto al gatito
+                            startGame = true;    // Comenzar el juego
+
+                            primerJugador = gatito; // Guardar al primer jugador con el voto
+                            jugadorConVoto = primerJugador;
+                            console.log(`${gatito.user} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
+                            iniciarJuego();      // Llama a una función que comience el juego
+                        }                    
+                      }
                 });
 
                 // Verificar si la inmunidad ha expirado (5 segundos)
@@ -437,6 +449,21 @@
                 gatitos.forEach((otroGatito) => {
                     if (gatito !== otroGatito) {
                         const distancia = gatitoPos.distanceTo(otroGatito.position);
+
+                            // Si el gatito con voto toca a otro gatito y no tiene inmunidad
+                            if (distancia < 2 && gatito.voto && !otroGatito.voto && !otroGatito.inmunidad) {
+                            otroGatito.voto = true;  // Asignar el voto al otro gatito
+                            gatito.voto = false;     // El gatito original pierde el voto
+
+                            // Activar inmunidad para el gatito que recibió el voto durante 3 segundos
+                            gatito.inmunidad = true;
+                            gatito.tiempoInmunidad = tiempoActual;  // Registrar el momento en que la inmunidad se activa
+
+                            jugadorConVoto = otroGatito;  // Guardar al jugador con el voto
+                            console.log(`${gatito.user} le ha pegado el voto a ${otroGatito.user}`);
+                            console.log(`${otroGatito.user} tiene ahora el voto: ${otroGatito.voto}`);
+                        }
+
 
                         // Si un gatito con "manotas" choca con otro
                         if (distancia < 2 && gatito.manotas) {
@@ -488,11 +515,37 @@
           // *** JUGABILIDAD VOTO *** //
           // Función para iniciar el juego
           function iniciarJuego() {
-              // Lógica para iniciar el juego
+              tiempoInicio = Date.now();  // Establecer el tiempo de inicio
               console.log("El juego ha comenzado");
-              // Aquí puedes agregar cualquier lógica adicional que inicie el juego
+              // Establecer al primer jugador con el voto
+              // const primerJugador = gatitos.find(gatito => gatito.voto);
+              // if (primerJugador) {
+              //     jugadorConVoto = primerJugador;  // Guardar al jugador con el voto
+              //     console.log(`${jugadorConVoto.user} es el primer jugador con el voto`);
+              // }
           }
 
+          // Función para verificar si han pasado 5 minutos y el último jugador con voto pierde
+          function verificarTiempo() {
+              if (tiempoInicio !== null) {
+                  const tiempoTranscurrido = Date.now() - tiempoInicio;
+
+                  if (tiempoTranscurrido >= tiempoLimite) {
+                      // Si el tiempo ha pasado, el jugador con el voto pierde
+                      console.log(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
+                      // Aquí puedes agregar lógica para terminar el juego o penalizar al jugador
+                  }
+
+                  // Calcular el tiempo restante
+        const tiempoRestante = tiempoLimite - tiempoTranscurrido;
+        const minutos = Math.floor(tiempoRestante / 60000); // Obtener minutos
+        const segundos = Math.floor((tiempoRestante % 60000) / 1000); // Obtener segundos
+
+        // Mostrar el tiempo restante en el contador en pantalla
+        const contadorElement = document.getElementById('contador');
+        contadorElement.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+              }
+          }
 
         // *** POWER UPS *** //
         //Velocidad
@@ -634,7 +687,7 @@
         detectarColisiones();
         verificarColisiones();
 
-        
+        verificarTiempo();
 
         updateCameraPosition();
 

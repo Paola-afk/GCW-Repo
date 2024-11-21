@@ -16,6 +16,18 @@ body {
     pointer-events: none;
 }
 
+#contador {
+    position: absolute;
+    margin-top: 30px;
+    left: 15%; /* Centra el contador respecto al contenedor */
+    transform: translateX(-50%); /* Ajusta para centrar el texto */
+    font-size: 24px;
+    color: rgb(0, 0, 0);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 15; /* Asegúrate de que el contador esté encima de los iconos */
+}
+
 .menu-button {
     width: 60px;
     height: 60px;
@@ -28,37 +40,32 @@ body {
 }
 
 .menu-button:hover {
-  position: fixed; 
-  z-index: 2; 
-  transition: transform 0.3s ease;
+    position: fixed;
+    z-index: 2;
+    transition: transform 0.3s ease;
 }
 
 .menu-button:hover {
-  transform: translateY(-5px);
-  /*width: 210px;
-  height: 210px;
-  */
+    transform: translateY(-5px);
 }
 
-
-/* Estilos para cada botón en sus esquinas */
+/* Estilos para los botones de icono */
 #escenario-1 {
-    width: 200px;
-    height: auto;
     top: 25px;
     left: 50px;
+    width: 200px; /* Asegúrate de que el tamaño de los botones esté bien definido */
 }
 
 #escenario-2 {
-    width: 200px;
-    height: 200px;
     bottom: 20px;
     left: 20px;
+    width: 200px;
+    height: 200px;
 }
 
 #escenario-3 {
-    width: 60px;
-    height: 60px;
     top: 20px;
     right: 20px;
+    width: 60px;
+    height: 60px;
 }
