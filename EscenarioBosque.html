@@ -16,6 +16,16 @@
       </a>
     </div>
 
+    <div id="modal" style="display: none;">
+      <div id="modal-content">
+        <h2>¡Fin del juego!</h2>
+        <p id="mensaje-modal"></p>
+        <button onclick="location.href='Info.html'">Cerrar</button>
+      </div>
+    </div>
+    <div id="overlay"></div>
+            
+
     <script type="module">
       import * as THREE from "./three.module.js";
       import { OrbitControls } from "./OrbitControls.js";
@@ -91,7 +101,7 @@
 
       const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
       let tiempoInicio = null;  // Variable para almacenar el tiempo de inicio
-      let tiempoLimite = 3 * 60 * 1000; // 5 minutos en milisegundos (5 * 60 * 1000)
+      let tiempoLimite = 1 * 60 * 1000; // 5 minutos en milisegundos (5 * 60 * 1000)
       let isTiempoFinalizado = false; // Flag para detener el contador
       
       let jugadorConVoto = null; // Para guardar al jugador con el voto
@@ -538,32 +548,49 @@
               const tiempoTranscurrido = Date.now() - tiempoInicio;
 
               if (tiempoTranscurrido >= tiempoLimite) {
-                  // Si el tiempo ha pasado, el jugador con el voto pierde
-                  console.log(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
-                  // Aquí puedes agregar lógica para terminar el juego o penalizar al jugador
+                console.log(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
+                isTiempoFinalizado = true; // Detenemos el contador
 
-                  isTiempoFinalizado = true; // Detenemos el contador
+                // Abrir el modal con el nombre del jugador
+                abrirModal(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
               }
 
               // Calcular el tiempo restante
               const tiempoRestante = tiempoLimite - tiempoTranscurrido;
 
-              // Si el tiempo restante es menor o igual a 0, detenemos el contador
               if (tiempoRestante <= 0) {
-                  document.getElementById('contador').textContent = "00:00"; // Mostrar 00:00
-                  isTiempoFinalizado = true; // Detener el contador
-                  return; // Detener la ejecución de la función
+                document.getElementById('contador').textContent = "00:00";
+                isTiempoFinalizado = true; // Detener el contador
+                abrirModal(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
+                return; // Detener la ejecución de la función
               }
 
               // Calcular minutos y segundos
-              const minutos = Math.floor(tiempoRestante / 60000); // Obtener minutos
-              const segundos = Math.floor((tiempoRestante % 60000) / 1000); // Obtener segundos
+              const minutos = Math.floor(tiempoRestante / 60000);
+              const segundos = Math.floor((tiempoRestante % 60000) / 1000);
 
-              // Mostrar el tiempo restante en el contador en pantalla
+              // Mostrar el tiempo restante
               const contadorElement = document.getElementById('contador');
               contadorElement.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
             }
           }
+
+
+
+          function abrirModal(mensaje) {
+            document.getElementById('mensaje-modal').textContent = mensaje;
+            document.getElementById('modal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+          }
+
+          function cerrarModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+          }
+
+
+
+
 
 
         // *** POWER UPS *** //

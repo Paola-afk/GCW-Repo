@@ -1,115 +1,109 @@
-/* Estilos generales de la página */
+/* General */
 body {
-    font-family: Arial, sans-serif;
-    background-image: url("../images/gatitos6.jpg");
-    background-size: cover;
-    background-position: center top;
+    font-family: 'Arial', sans-serif;
     margin: 0;
     padding: 0;
-}
-
-/* Estilos del menú */
-.menu-container {
-    text-align: center;
+    background-image: url("../images/gatitos6.jpg");
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 20px;
-    background-color: #222;
-    color: white;
 }
 
-.logo {
-    max-width: 200px;
-}
-
-.button-container, .buttons-container {
-    margin-top: 20px;
-}
-
-.button {
-    margin: 10px;
-}
-
-.button img {
-    width: 150px;
-    cursor: pointer;
-}
-
-/* Estilos generales de la tabla */
-table {
-    width: 100%;               /* Hacer que la tabla ocupe el 100% del ancho del contenedor */
-    border-collapse: collapse;  /* Eliminar el espacio entre las celdas */
-    margin-top: 20px;           /* Agregar margen superior */
-    font-family: Arial, sans-serif; /* Fuente general */
-    background-color: #f9f9f9;  /* Fondo de la tabla */
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Sombra alrededor de la tabla */
-}
-
-/* Estilos para las celdas de la tabla */
-td, th {
-    padding: 12px 15px;        /* Espaciado dentro de las celdas */
-    border: 1px solid #dddddd; /* Bordes ligeros entre celdas */
-    text-align: left;          /* Alinear el contenido a la izquierda */
-    font-size: 14px;           /* Tamaño de texto */
-    color: #333333;            /* Color de texto */
-}
-
-/* Estilo para las filas impares (efecto de zebra) */
-tr:nth-child(odd) {
-    background-color: #f1f1f1; /* Fondo gris claro para las filas impares */
-}
-
-/* Estilo para las filas al pasar el ratón */
-tr:hover {
-    background-color: #e0e0e0; /* Fondo más oscuro al hacer hover */
-}
-
-/* Estilos para el encabezado de la tabla */
-th {
-    background-color: #4CAF50;  /* Fondo verde para el encabezado */
-    color: white;               /* Texto blanco para el encabezado */
-    text-transform: uppercase;   /* Texto en mayúsculas */
-    letter-spacing: 0.1em;       /* Espaciado entre letras */
-}
-
-/* Ajuste adicional para pantallas pequeñas */
-@media screen and (max-width: 600px) {
-    table {
-        font-size: 12px;         /* Texto más pequeño en pantallas pequeñas */
-    }
-
-    td, th {
-        padding: 8px 10px;      /* Reducir el padding en pantallas pequeñas */
-    }
-}
-
-/* Estilos del input y botón para comentarios */
-.comment-section {
-    margin-top: 30px;
+h2, h3 {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
     text-align: center;
+    background: linear-gradient(90deg, #ff78dd, #871dff, #1100ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
 }
 
-.comment-section label {
-    font-size: 18px;
-    margin-right: 10px;
+/* Formulario */
+div {
+    margin: 20px 0;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.925); /* Sombra mejorada */
+    width: 100%;
+    max-width: 600px;
 }
 
-.comment-section input[type="text"] {
-    width: 300px;
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+input[type="text"] {
+    width: 100%;
     padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
-.comment-section button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4CAF50;
+button {
+    background-color: #ec69fd;
     color: white;
+    padding: 10px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.comment-section button:hover {
-    background-color: #45a049;
+button:hover {
+    background-color: #871dff;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* Tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Sombra añadida */
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background-color: #ec69fd;
+    color: white;
+    text-transform: uppercase;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f4f4f9;
+}
+
+table tbody tr:hover {
+    background-color: #e9f7ff;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+    table {
+        font-size: 0.9rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+    }
 }
