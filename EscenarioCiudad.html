@@ -1,230 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meow Madness - Ciudad</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            position: relative;
-        }
+    <link rel="stylesheet" href="front/css/EscenarioBosque.css">
+  </head>
+  <body>
 
-        #icon-container {
-            position: absolute;
-            z-index: 10;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .menu-button {
-            width: 60px;
-            height: 60px;
-            position: absolute;
-            pointer-events: auto;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-    .menu-button:hover {
-        position: fixed; 
-        z-index: 2; 
-        transition: transform 0.3s ease;
-    }
-
-    .menu-button:hover {
-        transform: translateY(-5px);
-        /*width: 210px;
-        height: 210px;
-          */
-    }
-
-
-        /* Estilos para cada botón en sus esquinas */
-    #escenario-1 {
-        width: 200px;
-        height: auto;
-        top: 25px;
-        left: 50px;
-    }
-
-    #escenario-2 {
-        width: 200px;
-        height: 200px;
-        bottom: 20px;
-        left: 20px;
-    }
-
-    #escenario-3 {
-        width: 60px;
-        height: 60px;
-        top: 20px;
-        right: 20px;
-    }
-    </style>
-</head>
-<body>
     <div id="icon-container">
-        <img src="front/UI/Points.png" alt="Esc1" class="menu-button" id="escenario-1" />
-        <img src="front/UI/Power.png" alt="Esc2" class="menu-button" id="escenario-2" />
-        <a href="PauseMenu.html">
-            <img src="front/UI/Pause_button.png" alt="Pause" class="menu-button" id="escenario-3" />
-        </a>
+      <img src="front/UI/Points.png" alt="Esc1" class="menu-button" id="escenario-1"/>
+      <img src="front/UI/Power.png" alt="Esc2" class="menu-button" id="escenario-2"/>
+      <a href="PauseMenu.html">
+        <img src="front/UI/Pause_button.png" alt="Pause" class="menu-button" id="escenario-3"/>
+      </a>
     </div>
 
     <script type="module">
-        import * as THREE from "./three.module.js";
-        import { OrbitControls } from "./OrbitControls.js";
-        import { GLTFLoader } from "./GLTFLoader.js";
+      import * as THREE from "./three.module.js";
+      import { OrbitControls } from "./OrbitControls.js";
+      import { GLTFLoader } from "./GLTFLoader.js";
+
+      // *** FIREBASE **** //
+
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
+      import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
 
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
-       //import { onAuthStateChanged } from "firebase/auth";
+
+      //Sonidos
+      import { playPowerUpSound, setSoundVolume } from './back/sound.js';
 
       // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
-            authDomain: "coordenadas-251ea.firebaseapp.com",
-            databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
-            projectId: "coordenadas-251ea",
-            storageBucket: "coordenadas-251ea.firebasestorage.app",
-            messagingSenderId: "31232618102",
-            appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
-        };
+      const firebaseConfig = {
+        apiKey: "AIzaSyC0po5j4MfBukAWFINQQryp0LKKZwvpzEY",
+        authDomain: "coordenadas-251ea.firebaseapp.com",
+        databaseURL: "https://coordenadas-251ea-default-rtdb.firebaseio.com/",
+        projectId: "coordenadas-251ea",
+        storageBucket: "coordenadas-251ea.firebasestorage.app",
+        messagingSenderId: "31232618102",
+        appId: "1:31232618102:web:739c3ad3aee30ebf8c7957"
+      };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const db = getDatabase();
-        const provider = new GoogleAuthProvider();
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth();
+      const db = getDatabase();
+      const provider = new GoogleAuthProvider();
 
-        
 
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color("#34495E");
+      // *** ESCENA *** //
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color("#34495E");
 
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight);
         camera.position.set(0, 5, 20);
 
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
+      const renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
 
-        const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
-        scene.add(hemisphereLight);
+      const hemisphereLight = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
+      scene.add(hemisphereLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(1, 5, -1);
-        scene.add(directionalLight);
-
-
-        let currentUser = null;
-        const latas = [];
-        const manotas = [];
-        const estambres = [];
-        const colisiones = [];
-        const gatitos = []; // Lista para almacenar todos los gatitos
-
-        let velocidadNormal = 1; // Velocidad base del gatito
-        let velocidadAumentada = 2; // Velocidad aumentada
-        let velocidadActual = velocidadNormal; // Velocidad activa
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(1, 5, -1);
+      scene.add(directionalLight);
 
 
-        // Autentifica el usuario
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                console.log("Usuario autenticado:", currentUser.uid);
+      // *** VARIABLES GLOBALES *** //
+      let currentUser = null;
+      const latas = [];
+      const manotas = [];
+      const colisiones = [];
+      const gatitos = []; // Lista para almacenar todos los gatitos
+      let gatitoManotasModel; // Variable global para el modelo GatitoManotas
 
-                console.log(currentUser);
-            } else {
-                console.log("No hay usuario autenticado.");
+      let velocidadNormal = 1; // Velocidad base del gatito
+      let velocidadAumentada = 3; // Velocidad aumentada
+      let velocidadActual = velocidadNormal; // Velocidad activa
+
+      let gatitosConInmunidad = new Set(); // Para manejar los gatitos con inmunidad
+      let votoGatito = null; // Referencia al gatito con el voto
+      let tiempoInmunidad = 3000; // 3 segundos de inmunidad
+
+      const animatableObjects = []; // Lista para almacenar objetos animados
+
+        let startGame = false;
+
+      const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
+
+
+
+      // Autentifica el usuario
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            console.log("Usuario autenticado:", currentUser.uid);
+
+            console.log(currentUser);
+        } else {
+            console.log("No hay usuario autenticado.");
+        }
+    });
+
+      // Función para actualizar solo la posición sin perder los otros datos del usuario
+    function writeUserData(userId, positionX, positionY, positionZ, rotationY) {
+        const userRef = ref(db, "usuarios/" + userId);
+        update(userRef, {
+            posicion: {
+                x: positionX,
+                y: positionY,
+                z: positionZ
+            },
+            rotacion: {
+                y: rotationY
             }
         });
-
-        // Función para actualizar solo la posición sin perder los otros datos del usuario
-        function writeUserData(userId, positionX, positionY, positionZ, rotationY) {
-            const userRef = ref(db, "usuarios/" + userId);
-            update(userRef, {
-                posicion: {
-                    x: positionX,
-                    y: positionY,
-                    z: positionZ
-                },
-                rotacion: {
-                    y: rotationY
-                }
-            });
         }
-        
-// Recuperar el valor del "usuario" de localStorage
-const usuarioData = localStorage.getItem("usuario");
 
-// Parsear el JSON para obtener los datos como un objeto
-const usuario = JSON.parse(usuarioData);
+      // Recuperar el valor del "usuario" de localStorage
+      const usuarioData = localStorage.getItem("usuario");
 
-// Obtener el escenario seleccionado
-const escenarioSeleccionado = usuario.escenarioSeleccionado;
+      // Parsear el JSON para obtener los datos como un objeto
+      const usuario = JSON.parse(usuarioData);
 
-console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario lo seleccionó
+      // Obtener el escenario seleccionado
+      const escenarioSeleccionado = usuario.escenarioSeleccionado;
+    const nombreJugador = usuario.nombre;
 
-            // Inicializa un mapa para rastrear los modelos cargados
-            const objetosCargados = new Map();
+    console.log(escenarioSeleccionado); 
 
-            if (escenarioSeleccionado === "Ciudad") {
-            // Obtener los datos de usuarios desde Firebase
-            const usuariosRef = ref(db, "usuarios");
+      // Inicializa un mapa para rastrear los modelos cargados
+    const objetosCargados = new Map();
 
-            onValue(usuariosRef, (snapshot) => {
-                const usuariosData = snapshot.val();
-                if (usuariosData) {
-                Object.entries(usuariosData).forEach(([key, value]) => {
-                    console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+    if (escenarioSeleccionado === "Ciudad") {
+        // Obtener los datos de usuarios desde Firebase
+        const usuariosRef = ref(db, "usuarios");
 
-                    if (!objetosCargados.has(key)) {
-                    // Cargar el modelo del gatito solo si no existe en el mapa
-                    const loaderGLTF = new GLTFLoader();
-                    loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-                        const gatito = gltf.scene;
-                        gatito.scale.set(0.7, 0.7, 0.7);
-                        gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                        gatito.rotation.y = value.rotacion?.y || 0;
-                        gatito.name = key;
-                        scene.add(gatito);
-                        gatitos.push(gatito); // Agrega el gatito a la lista
+        onValue(usuariosRef, (snapshot) => {
+          const usuariosData = snapshot.val();
+          if (usuariosData) {
+            Object.entries(usuariosData).forEach(([key, value]) => {
+              // console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
 
-                        // Almacenar el modelo en el mapa
-                        objetosCargados.set(key, gatito);
+              if (!objetosCargados.has(key)) {
+                // Cargar el modelo del gatito solo si no existe en el mapa
+                const loaderGLTF = new GLTFLoader();
+                loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                  const gatito = gltf.scene;
+                  gatito.scale.set(0.7, 0.7, 0.7);
+                  gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                  gatito.rotation.y = value.rotacion?.y || 0;
+                  gatito.user = value.nombre;
+                  gatito.name = key;
+                  //gatito.voto = false;
+                  gatito.manotas = false;
+                  scene.add(gatito);
+                  gatitos.push(gatito); // Agrega el gatito a la lista
 
-                        // Asigna el voto al primer gatito que ingrese
-                        asignarVotoGatito(gatito);
-                    });
-                    } else {
-                    // Si el modelo ya existe, se actualizan su posición y rotación
-                    const usuarioModelo = objetosCargados.get(key);
-                    usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                    usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
-                    }
+                  // Almacenar el modelo en el mapa
+                  objetosCargados.set(key, gatito);
                 });
-                } else {
-                console.log("No hay datos de usuarios en Firebase.");
-                }
+              } else {
+                // Si el modelo ya existe, se actualizan su posición y rotación
+                const usuarioModelo = objetosCargados.get(key);
+                usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
+              }
             });
-            }
-
-
+          } else {
+            console.log("No hay datos de usuarios en Firebase.");
+          }
+        });
+      }
 
 
         const loaderCity = new GLTFLoader();
@@ -250,6 +202,8 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
 
         cargarLata(25, 0, 50);
         cargarLata(15, 0, -30);
+        cargarLata(62, 0.5, -34);
+        cargarLata(-46, 0.5, 27);
 
         //Manotas
         const loaderManotas = new GLTFLoader();
@@ -268,32 +222,17 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
         cargarManotas(-19, 2, 20);
 
 
-        const loaderEstambre = new GLTFLoader();
-        function cargarEstambre(x, y, z) {
-            loaderCan.load("/Modelos/Bola-Estambre.glb", function (model) {
-                const estambreModel = model.scene;
-                estambreModel.name = "Estambre"; // Establecer nombre para identificar
-                estambreModel.scale.set(1, 1, 1);
-                estambreModel.position.set(x, y, z);
-                scene.add(estambreModel);
-                estambres.push(estambreModel);
-            });
-        }
-
-        cargarEstambre(62, 0.5, -34);
-        cargarEstambre(-46, 0.5, 27);
-
-       /* let gatitoManotasModel; // Declaración global
         // Carga del modelo GatitoManotas
-        loaderGLTF.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
+        const loaderGatoManotas = new GLTFLoader();
+        loaderGatoManotas.load("/Modelos/GatitoManotas-PIA.glb", function (model) {
             gatitoManotasModel = model.scene;
-            gatitoManotasModel.scale.set(0.7, 0.7, 0.7);
+            gatitoManotasModel.scale.set(0.6, 0.6, 0.6);
             console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
         });
-        */
+
+
 
         // *** COLISIONES *** //
-
         // Esta función crea un objeto de colisión
         function crearColision(x, y, z, width, height, depth) {
             const geometry = new THREE.BoxGeometry(width, height, depth);
@@ -327,7 +266,7 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
                     const boxColision = new THREE.Box3().setFromObject(colision);
 
                     if (boxGatito.intersectsBox(boxColision)) {
-                        console.log(`¡Colisión detectada para ${gatito.name}!`);
+                        // console.log(`¡Colisión detectada para ${gatito.name}!`);
 
                         // Calcula la dirección del empuje, ignorando el eje Y
                         const direction = new THREE.Vector3()
@@ -343,10 +282,10 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
             });
         }
 
-
-
         // Función para verificar colisiones y eliminar objetos
         function verificarColisiones() {
+            const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
+
             // Verificar colisiones para cada gatito
             gatitos.forEach((gatito) => {
                 const gatitoPos = gatito.position;
@@ -355,13 +294,27 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
                 for (let i = latas.length - 1; i >= 0; i--) {
                     const lata = latas[i];
                     const distancia = gatitoPos.distanceTo(lata.position);
+
                     if (distancia < 2) { // Ajusta este valor según el tamaño de tus objetos
-                        scene.remove(lata); // Eliminar del escenario
+                        scene.remove(lata); // Eliminar la lata del escenario
                         latas.splice(i, 1); // Eliminar del array
                         console.log("Lata recogida");
+
+                        playPowerUpSound();
+
+                        // Asignar inmunidad de 5 segundos al gatito
+                        gatito.inmunidad = true;
+                        gatito.tiempoInmunidad = tiempoActual;  // Registrar el momento en que se activa la inmunidad
+
+                        // Activar la función para gestionar la inmunidad (esto podría tener efectos visuales o lógicos adicionales)
+                        // gatitoInmunidad();
+
+                        // Registrar en consola que se ha activado la inmunidad
+                        console.log(`${gatito.user} ha recibido inmunidad por 5 segundos`);
                     }
                 }
 
+              
                 // Verificar colisión con manotas
                 for (let i = manotas.length - 1; i >= 0; i--) {
                     const manota = manotas[i];
@@ -370,50 +323,97 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
                         scene.remove(manota); // Eliminar del escenario
                         manotas.splice(i, 1); // Eliminar del array
                         console.log("Manota recogida");
+
+                        // Transformar el gatito al modelo GatitoManotas
+                        if (gatitoManotasModel) {
+                            scene.remove(gatito); // Eliminar el modelo actual del gatito
+                            const nuevoModelo = gatitoManotasModel.clone(); // Clonar el modelo cargado
+                            nuevoModelo.position.copy(gatitoPos); // Mantener la posición actual del gatito
+                            nuevoModelo.name = gatito.name; // Conservar el nombre del gatito para identificarlo
+                            nuevoModelo.user = gatito.user; // Conservar el nombre del gatito para identificarlo
+                            nuevoModelo.manotas = true; // Conservar el nombre del gatito para identificarlo
+                            
+                            scene.add(nuevoModelo); // Añadir el nuevo modelo al escenario
+
+                            // Reemplazar el modelo en el array de gatitos
+                            const index = gatitos.indexOf(gatito);
+                            if (index !== -1) {
+                                gatitos[index] = nuevoModelo;
+                            }
+                        } else {
+                            console.warn("El modelo GatitoManotas no está cargado aún.");
+                        }
                     }
                 }
 
-                // Verificar colisión con estambres
-                estambres.forEach(estambre => {
-                  // Calcula la distancia entre el gatito y el estambre
-                const distancia = gatitoPos.distanceTo(estambre.position);
 
-                  // Si la distancia es suficientemente pequeña, hay colisión
-                  if (distancia < 2) { // Puedes ajustar el valor de "5" según el tamaño del estambre
-                    scene.remove(estambre); // Eliminar del escenario
-                    console.log("Estambre");
-                    activarVelocidadAumentada();
-                }
+                                // Verificar colisión con otros gatitos
+                gatitos.forEach((otroGatito) => {
+                    if (gatito !== otroGatito) {
+                        const distancia = gatitoPos.distanceTo(otroGatito.position);
+
+                        // Si un gatito con "manotas" choca con otro
+                        if (distancia < 2 && gatito.manotas) {
+                            console.log(`${gatito.user} empuja a ${otroGatito.user}`);
+
+                            // Empujar al otro gatito
+                            const direccion = new THREE.Vector3().subVectors(
+                                otroGatito.position,
+                                gatito.position
+                            ).normalize();
+                            const fuerzaEmpuje = 15; // Ajusta la fuerza del empuje
+
+                            // Mover el otro gatito en la dirección del empuje
+                            otroGatito.position.add(direccion.multiplyScalar(fuerzaEmpuje));
+
+                            
+                            // Volver al modelo original si el gatito tiene manotas
+                            if (gatito.manotas) {
+                            // Eliminar el modelo actual con manotas
+                            scene.remove(gatito);
+
+                            // Cargar el modelo original del gatito
+                            const loaderGLTF = new GLTFLoader();
+                            loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                                const gatitoOriginal = gltf.scene;
+                                gatitoOriginal.scale.set(0.7, 0.7, 0.7);
+                                gatitoOriginal.position.copy(gatito.position); // Mantener la posición
+                                gatitoOriginal.rotation.y = gatito.rotation.y; // Mantener la rotación
+                                gatitoOriginal.user = gatito.user; // Mantener el nombre de usuario
+                                gatitoOriginal.name = gatito.name; // Mantener el nombre
+                                gatitoOriginal.manotas = false; // Marcar como gatito sin manotas
+
+                                scene.add(gatitoOriginal); // Añadir el modelo original al escenario
+
+                                // Reemplazar el modelo en el array de gatitos
+                                const index = gatitos.indexOf(gatito);
+                                if (index !== -1) {
+                                    gatitos[index] = gatitoOriginal; // Actualizar el gatito en el array
+                                }
+                            });
+                        }                        
+                      }
+                    }
                 });
             });
         }
 
 
-
-
-
-        // *** POWER UPS *** //
-
-        //Velocidad
-        function activarVelocidadAumentada() {
-          velocidadActual = velocidadAumentada; // Aumenta la velocidad
-
-          // Después de 5 segundos, vuelve a la velocidad normal
-            setTimeout(() => {
-                velocidadActual = velocidadNormal; // Restaura la velocidad normal
-                console.log("Velocidad restaurada.");
-            }, 5000); // 5000 ms = 5 segundos
+          // *** JUGABILIDAD VOTO *** //
+          // Función para iniciar el juego
+        function iniciarJuego() {
+              // Lógica para iniciar el juego
+            console.log("El juego ha comenzado");
+              // Aquí puedes agregar cualquier lógica adicional que inicie el juego
         }
 
 
-
-        // *** TECLADO *** //
-        
+        // *** TECLADO *** //    
         document.onkeydown = function (e) {
-        if (!currentUser || !currentUser.uid) {
-            console.error("Usuario no autenticado o currentUser.uid no definido.");
-            return;
-        }
+            if (!currentUser || !currentUser.uid) {
+                console.error("Usuario no autenticado o currentUser.uid no definido.");
+                return;
+            }
 
         // Obtiene el modelo del jugador actual en la escena
         const jugadorActual = scene.getObjectByName(currentUser.uid);
@@ -487,60 +487,60 @@ console.log(escenarioSeleccionado); // Deberías obtener "Bosque" si el usuario 
     };
 
 
-    function updateCameraPosition() {
-        if (!currentUser || !currentUser.uid) return;
+      function updateCameraPosition() {
+          if (!currentUser || !currentUser.uid) return;
 
-        const jugadorActual = scene.getObjectByName(currentUser.uid);
-        if (!jugadorActual) return;
+          const jugadorActual = scene.getObjectByName(currentUser.uid);
+          if (!jugadorActual) return;
 
-            // Define el offset relativo al jugador (cámara detrás y arriba)
-            const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
+          // Define el offset relativo al jugador (cámara detrás y arriba)
+          const offset = new THREE.Vector3(0, 5, -15); // 5 unidades arriba y 10 detrás
 
-            // Aplica la rotación del jugador al offset
-            const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
-            const offsetRotated = offset.clone().applyQuaternion(jugadorRotation);
+          // Aplica la rotación del jugador al offset
+          const jugadorRotation = new THREE.Quaternion().setFromEuler(jugadorActual.rotation);
+          const offsetRotated = offset.clone().applyQuaternion(jugadorRotation);
 
-            // Calcula la posición deseada de la cámara
-            const cameraTargetPosition = jugadorActual.position.clone().add(offsetRotated);
+          // Calcula la posición deseada de la cámara
+          const cameraTargetPosition = jugadorActual.position.clone().add(offsetRotated);
 
-            // Suaviza el movimiento de la cámara hacia la posición deseada
-            camera.position.lerp(cameraTargetPosition, 0.1);
+          // Suaviza el movimiento de la cámara hacia la posición deseada
+          camera.position.lerp(cameraTargetPosition, 0.1);
 
-            // La cámara siempre mira al jugador
-            camera.lookAt(jugadorActual.position);
-    }
+          // La cámara siempre mira al jugador
+          camera.lookAt(jugadorActual.position);
+      }
 
 
 
        // Skybox
-        const loader = new THREE.CubeTextureLoader();
-        const skyboxTextures = loader.load([
-            "/front/images/Sky.png", 
-            "/front/images/Sky.png",
-            "/front/images/Sky.png",
-            "/front/images/Sky.png",
-            "/front/images/Sky.png",
-            "/front/images/Sky.png",
-        ]);
+      const loader = new THREE.CubeTextureLoader();
+      const skyboxTextures = loader.load([
+        "/front/images/Sky.png", 
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+        "/front/images/Sky.png",
+    ]);
 
-        scene.background = skyboxTextures;
+      scene.background = skyboxTextures;
 
-        const cameraControl = new OrbitControls(camera, renderer.domElement);
+      const cameraControl = new OrbitControls(camera, renderer.domElement);
 
-        function animate() {
-            // updateMovement();
-            // // Simulación del movimiento del gatito
-            detectarColisiones();
-            verificarColisiones();
+      function animate() {
+        // updateMovement();
+        // // Simulación del movimiento del gatito
+        detectarColisiones();
+        verificarColisiones();
 
-            updateCameraPosition();
+        
 
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
-        }
-        animate();
+        updateCameraPosition();
 
-
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+      animate();
     </script>
-</body>
+  </body>
 </html>
