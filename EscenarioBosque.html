@@ -266,7 +266,7 @@
         function cargarMouse(x, y, z) {
           loaderMouse.load("/Modelos/Mouse.glb", function (model) {
             const mouseModel = model.scene;
-            mouseModel.name = "Manotas"; // Establecer nombre para identificar
+            mouseModel.name = "Raton"; // Establecer nombre para identificar
             mouseModel.scale.set(1, 1, 1);
             mouseModel.position.set(x, y, z);
             scene.add(mouseModel);
@@ -274,7 +274,7 @@
           });
         }
 
-        cargarMouse(40, 0, 20);
+        cargarMouse(45, 0, 20);
 
         // Carga del modelo GatitoManotas
         const loaderGatoManotas = new GLTFLoader();
@@ -376,7 +376,7 @@
                     const lata = latas[i];
                     const distancia = gatitoPos.distanceTo(lata.position);
 
-                    if (distancia < 2) { // Ajusta este valor según el tamaño de tus objetos
+                    if (distancia < 3) { // Ajusta este valor según el tamaño de tus objetos
                         scene.remove(lata); // Eliminar la lata del escenario
                         latas.splice(i, 1); // Eliminar del array
                         console.log("Lata recogida");
@@ -399,7 +399,7 @@
                 for (let i = manotas.length - 1; i >= 0; i--) {
                     const manota = manotas[i];
                     const distancia = gatitoPos.distanceTo(manota.position);
-                    if (distancia < 1.5) { // Ajusta este valor según el tamaño de tus objetos
+                    if (distancia < 3) { // Ajusta este valor según el tamaño de tus objetos
                         scene.remove(manota); // Eliminar del escenario
                         manotas.splice(i, 1); // Eliminar del array
                         console.log("Manota recogida");
@@ -803,6 +803,25 @@
         // generarParticulasContinuamente();
         updateCameraPosition();
 
+        // Rotar cada modelo en el eje Y
+        mouses.forEach((mouseModel) => {
+          mouseModel.rotation.y += 0.05; // Ajusta el valor para cambiar la velocidad
+        });
+
+
+        estambres.forEach((estambreModel) => {
+          estambreModel.rotation.y += 0.05; // Ajusta el valor para cambiar la velocidad
+        });
+
+        latas.forEach((latasModel) => {
+          latasModel.rotation.y += 0.05; // Ajusta el valor para cambiar la velocidad
+        });
+
+        manotas.forEach((manotasModel) => {
+          manotasModel.rotation.y += 0.05; // Ajusta el valor para cambiar la velocidad
+        });
+
+        
         renderer.render(scene, camera);
         requestAnimationFrame(animate);
       }
