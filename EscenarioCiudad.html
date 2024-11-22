@@ -359,35 +359,48 @@
                 for (let i = manotas.length - 1; i >= 0; i--) {
                     const manota = manotas[i];
                     const distancia = gatitoPos.distanceTo(manota.position);
+                    
                     if (distancia < 3) { // Ajusta este valor según el tamaño de tus objetos
-                        scene.remove(manota); // Eliminar del escenario
-                        manotas.splice(i, 1); // Eliminar del array
+                        scene.remove(manota); // Eliminar el power-up de manotas de la escena
+                        manotas.splice(i, 1); // Eliminar de la lista de manotas
                         console.log("Manota recogida");
 
+                        // Reproducir sonido de power-up (puedes personalizar esto)
                         playPowerUpSound("empuje");
 
-                        // Transformar el gatito al modelo GatitoManotas
+                        // Cambiar el modelo del gatito por GatitoManotas
                         if (gatitoManotasModel) {
                             scene.remove(gatito); // Eliminar el modelo actual del gatito
-                            const nuevoModelo = gatitoManotasModel.clone(); // Clonar el modelo cargado
-                            nuevoModelo.position.copy(gatitoPos); // Mantener la posición actual del gatito
-                            nuevoModelo.name = gatito.name; // Conservar el nombre del gatito para identificarlo
-                            nuevoModelo.user = gatito.user; // Conservar el nombre del gatito para identificarlo
-                            nuevoModelo.manotas = true; // Conservar el nombre del gatito para identificarlo
-                            nuevoModelo.puntuaje = gatito.puntuaje;
-                            
-                            scene.add(nuevoModelo); // Añadir el nuevo modelo al escenario
+                            const nuevoModelo = gatitoManotasModel.clone(); // Clonar el modelo de GatitoManotas
+                            nuevoModelo.position.copy(gatitoPos); // Mantener la posición del gatito
+                            nuevoModelo.name = gatito.name; // Mantener el nombre del gatito para identificarlo
+                            nuevoModelo.user = gatito.user; // Mantener el identificador del usuario
+                            nuevoModelo.manotas = true; // Establecer una propiedad para marcar el cambio
+                            nuevoModelo.puntuaje = gatito.puntuaje; // Mantener el puntaje si es necesario
+
+                            scene.add(nuevoModelo); // Añadir el nuevo modelo de GatitoManotas a la escena
 
                             // Reemplazar el modelo en el array de gatitos
                             const index = gatitos.indexOf(gatito);
                             if (index !== -1) {
-                                gatitos[index] = nuevoModelo;
+                                gatitos[index] = nuevoModelo; // Reemplazar el modelo viejo por el nuevo
                             }
+
+                            // Actualizar la posición y rotación del jugador en Firebase
+                            writeUserData(
+                                currentUser.uid,
+                                nuevoModelo.position.x,
+                                nuevoModelo.position.y,
+                                nuevoModelo.position.z,
+                                nuevoModelo.rotation.y,
+                                currentUser
+                            );
                         } else {
                             console.warn("El modelo GatitoManotas no está cargado aún.");
                         }
                     }
                 }
+
 
 
 
