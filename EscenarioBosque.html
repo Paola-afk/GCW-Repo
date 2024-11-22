@@ -462,7 +462,7 @@
                             iniciarJuego();      // Llama a una función que comience el juego
                             cargarModelos();
                              // Crear la partícula en la posición del gatito
-                            crearParticula(gatito.position); 
+                             crearMultiplesParticulasConSeparacion(gatito.position); 
                         }                    
                       }
                 });
@@ -616,64 +616,79 @@
 
 
 
-        // *** PARTICULAS ***//
-        // Función para crear una partícula sin TWEEN.js
-        function crearParticula(posicion) {
-            const geometria = new THREE.SphereGeometry(0.1, 8, 8); // Esfera pequeña para la partícula
-            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Color verde para la partícula
-            const particula = new THREE.Mesh(geometria, material);
+// *** PARTICULAS ***//
+// Función para crear una partícula sin TWEEN.js
+function crearParticula(posicion, color = 0x00ff00, escalaInicial = 0.1, escalaFinal = 2) {
+    const geometria = new THREE.SphereGeometry(escalaInicial, 8, 8); // Esfera pequeña para la partícula
+    const material = new THREE.MeshBasicMaterial({ color }); // Color dinámico para la partícula
+    const particula = new THREE.Mesh(geometria, material);
 
-            particula.position.copy(posicion); // Colocar la partícula en la posición dada
+    particula.position.copy(posicion); // Colocar la partícula en la posición dada
 
-            // Añadir la partícula a la escena
-            scene.add(particula);
+    // Añadir la partícula a la escena
+    scene.add(particula);
 
-            // Variables para la animación de la partícula
-            let vida = 1; // Duración de la partícula (1 segundo de vida)
-            let escalaInicial = 0.1; // Tamaño inicial de la partícula
-            let escalaFinal = 2; // Tamaño final de la partícula
+    // Variables para la animación de la partícula
+    let vida = 1; // Duración de la partícula (1 segundo de vida)
 
-            // Actualización de la partícula en cada frame
-            function actualizarParticula() {
-                // Reducir la "vida" de la partícula
-                vida -= 0.01;
+    // Actualización de la partícula en cada frame
+    function actualizarParticula() {
+        // Reducir la "vida" de la partícula
+        vida -= 0.01;
 
-                // Cambiar el tamaño de la partícula a medida que se va desintegrando
-                particula.scale.set(escalaInicial + (escalaFinal - escalaInicial) * (1 - vida), 
-                                    escalaInicial + (escalaFinal - escalaInicial) * (1 - vida), 
-                                    escalaInicial + (escalaFinal - escalaInicial) * (1 - vida));
+        // Cambiar el tamaño de la partícula a medida que se va desintegrando
+        const escalaActual = escalaInicial + (escalaFinal - escalaInicial) * (1 - vida);
+        particula.scale.set(escalaActual, escalaActual, escalaActual);
 
-                // Desaparecer la partícula después de un tiempo
-                if (vida <= 0) {
-                    scene.remove(particula); // Eliminar la partícula de la escena
-                }
-            }
-
-            // Llamar a la función de actualización de la partícula en cada frame
-            function animateParticula() {
-                actualizarParticula();
-                if (vida > 0) {
-                    requestAnimationFrame(animateParticula);
-                }
-            }
-
-            // Iniciar la animación de la partícula
-            animateParticula();
+        // Desaparecer la partícula después de un tiempo
+        if (vida <= 0) {
+            scene.remove(particula); // Eliminar la partícula de la escena
         }
+    }
+
+    // Llamar a la función de actualización de la partícula en cada frame
+    function animateParticula() {
+        actualizarParticula();
+        if (vida > 0) {
+            requestAnimationFrame(animateParticula);
+        }
+    }
+
+    // Iniciar la animación de la partícula
+    animateParticula();
+}
+
+// Crear múltiples partículas de diferentes colores y tamaños
+function crearMultiplesParticulasConSeparacion(posicionBase) {
+    // Crear partículas con diferentes colores, tamaños y mayor separación
+    const configuraciones = [
+    { color: 0x00ff00, escalaInicial: 0.1, escalaFinal: 2, offset: { x: 0, y: 0, z: 0 } },   // Verde (sin desplazamiento)
+        { color: 0xff0000, escalaInicial: 0.2, escalaFinal: 1.8, offset: { x: 3, y: 0, z: 0 } },  // Rojo (más separado en X)
+        { color: 0x0000ff, escalaInicial: 0.15, escalaFinal: 2.5, offset: { x: -2, y: 0, z: 0 } }, // Azul (más separado en -X)
+        { color: 0xffff00, escalaInicial: 0.12, escalaFinal: 2, offset: { x: 0, y: 1, z: 0 } },   // Amarillo (más separado en Y)
+        { color: 0x800080, escalaInicial: 0.1, escalaFinal: 1.5, offset: { x: 0, y: -3, z: 0 } },  // Púrpura (más separado en -Y)
+        { color: 0x00ffff, escalaInicial: 0.18, escalaFinal: 2.2, offset: { x: 0, y: 0, z: 2 } },  // Cian (más separado en Z)
+
+        { color: 0x00ff00, escalaInicial: 0.1, escalaFinal: 2, offset: { x: 1, y: 0, z: 2 } },   // Verde (sin desplazamiento)
+        { color: 0x0000ff, escalaInicial: 0.2, escalaFinal: 1.8, offset: { x: 3, y: 1, z: 0 } },  // Rojo (más separado en X)
+        { color: 0x0000ff, escalaInicial: 0.15, escalaFinal: 2.5, offset: { x: -2, y: 0, z: 1 } }, // Azul (más separado en -X)
+        { color: 0xff0000, escalaInicial: 0.12, escalaFinal: 2, offset: { x: 1, y: 1, z: 2 } },   // Amarillo (más separado en Y)
+        { color: 0x800080, escalaInicial: 0.1, escalaFinal: 1.5, offset: { x: 2, y: -3, z: 0 } },  // Púrpura (más separado en -Y)
+        { color: 0x800080, escalaInicial: 0.18, escalaFinal: 2.2, offset: { x: 0, y: 2, z: 2 } },  // Cian (más separado en Z)
+      ];
+
+    // Generar cada partícula con su configuración y posición desplazada
+    configuraciones.forEach(({ color, escalaInicial, escalaFinal, offset }) => {
+        const posicion = new THREE.Vector3(
+            posicionBase.x + offset.x,
+            posicionBase.y + offset.y,
+            posicionBase.z + offset.z
+        );
+        crearParticula(posicion, color, escalaInicial, escalaFinal);
+    });
+}
         
 
-        // Generar partículas de forma continua
-        function generarParticulasContinuamente() {
-            setInterval(() => {
-                // Crear una nueva partícula en una posición aleatoria en la escena
-                const posicionAleatoria = new THREE.Vector3(
-                    Math.random() * 10 - 5, // Posición en X entre -5 y 5
-                    Math.random() * 10 - 5, // Posición en Y entre -5 y 5
-                    Math.random() * 10 - 5  // Posición en Z entre -5 y 5
-                );
-                crearParticula(posicionAleatoria);
-            }, 100); // Crear una partícula cada 100 milisegundos
-        }
 
         // *** TECLADO *** //    
         document.onkeydown = function (e) {
