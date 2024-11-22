@@ -95,7 +95,7 @@
       let velocidadActual = velocidadNormal; // Velocidad activa
 
       let gatitosConInmunidad = new Set(); // Para manejar los gatitos con inmunidad
-      let puntuaje = null; // Referencia al gatito con el voto
+      let puntuaje = 0; // Referencia al gatito con el voto
       let tiempoInmunidad = 3000; // 3 segundos de inmunidad
 
       const animatableObjects = []; // Lista para almacenar objetos animados
@@ -137,22 +137,22 @@
           });
         }
 
-      // Recuperar el valor del "usuario" de localStorage
-      const usuarioData = localStorage.getItem("usuario");
+        // Recuperar el valor del "usuario" de localStorage
+        const usuarioData = localStorage.getItem("usuario");
 
-      // Parsear el JSON para obtener los datos como un objeto
-      const usuario = JSON.parse(usuarioData);
+        // Parsear el JSON para obtener los datos como un objeto
+        const usuario = JSON.parse(usuarioData);
 
-      // Obtener el escenario seleccionado
-      const escenarioSeleccionado = usuario.escenarioSeleccionado;
-      const nombreJugador = usuario.nombre;
+        // Obtener el escenario seleccionado
+        const escenarioSeleccionado = usuario.escenarioSeleccionado;
+        const nombreJugador = usuario.nombre;
 
-      console.log(escenarioSeleccionado); 
+        console.log('Escenario seleccionado desde localStorage:', escenarioSeleccionado); 
 
-      // Inicializa un mapa para rastrear los modelos cargados
-      const objetosCargados = new Map();
+        // Inicializa un mapa para rastrear los modelos cargados
+        const objetosCargados = new Map();
 
-      if (escenarioSeleccionado === "Ciudad") {
+        if (escenarioSeleccionado === "Ciudad") {
           // Obtener los datos de usuarios desde Firebase
           const usuariosRef = ref(db, "usuarios");
 
@@ -160,9 +160,11 @@
             const usuariosData = snapshot.val();
             if (usuariosData) {
               Object.entries(usuariosData).forEach(([key, value]) => {
-                // console.log(`${key}: x=${value.posicion.x}, y=${value.posicion.y}, z=${value.posicion.z}`);
+                // Depuración: Ver qué escenario tiene el usuario en Firebase
+                console.log(`Escenario de Firebase para el usuario ${key}: ${value.escenarioSeleccionado}`);
 
-                if (!objetosCargados.has(key)) {
+                // Solo cargar el modelo si el escenario del usuario en Firebase es "Ciudad" y no se ha cargado aún
+                if (value.escenarioSeleccionado === "Ciudad" && !objetosCargados.has(key)) {
                   // Cargar el modelo del gatito solo si no existe en el mapa
                   const loaderGLTF = new GLTFLoader();
                   loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
@@ -181,7 +183,7 @@
                     // Almacenar el modelo en el mapa
                     objetosCargados.set(key, gatito);
                   });
-                } else {
+                } else if (objetosCargados.has(key)) {
                   // Si el modelo ya existe, se actualizan su posición y rotación
                   const usuarioModelo = objetosCargados.get(key);
                   usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
@@ -192,7 +194,12 @@
               console.log("No hay datos de usuarios en Firebase.");
             }
           });
-      }
+        } else {
+          console.log("El escenario seleccionado no es Ciudad. No se cargarán modelos.");
+        }
+
+
+
 
         //Ciudad
         const loaderCity = new GLTFLoader();
@@ -506,6 +513,7 @@
                 // console.log(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
                 isTiempoFinalizado = true; // Detenemos el contador
 
+              
                 // Abrir el modal con el nombre del jugador
                 abrirModal(`Obtuviste ${puntuaje} puntos`);
               }
@@ -513,6 +521,7 @@
               // Calcular el tiempo restante
               const tiempoRestante = tiempoLimite - tiempoTranscurrido;
 
+              
               if (tiempoRestante <= 0) {
                 document.getElementById('contador').textContent = "00:00";
                 isTiempoFinalizado = true; // Detener el contador
