@@ -164,6 +164,7 @@
                     gatito.name = key;
                     gatito.puntuaje = 0;
                     gatito.manotas = false;
+                    gatito.inmunidad = false;
                     scene.add(gatito);
                     gatitos.push(gatito); // Agrega el gatito a la lista
 
@@ -356,6 +357,7 @@
                             nuevoModelo.name = gatito.name; // Conservar el nombre del gatito para identificarlo
                             nuevoModelo.user = gatito.user; // Conservar el nombre del gatito para identificarlo
                             nuevoModelo.manotas = true; // Conservar el nombre del gatito para identificarlo
+                            nuevoModelo.puntuaje = gatito.puntuaje;
                             
                             scene.add(nuevoModelo); // Añadir el nuevo modelo al escenario
 
@@ -407,78 +409,158 @@
                     if (gatito !== otroGatito) {
                         const distancia = gatitoPos.distanceTo(otroGatito.position);
 
-                         // Si el gatito  toca a otro gatito y no tiene inmunidad
-                         if (distancia < 2 && !otroGatito.inmunidad) {
-                            
-                            // Activar inmunidad para el gatito que recibió el voto durante 3 segundos
-                            // gatito.inmunidad = true;
-                            // gatito.tiempoInmunidad = tiempoActual;  // Registrar el momento en que la inmunidad se activa
-
-                            // Empujar al otro gatito
-                            const direccion = new THREE.Vector3().subVectors(
-                                otroGatito.position,
-                                gatito.position
-                            ).normalize();
-                            const fuerzaEmpuje = 15; // Ajusta la fuerza del empuje
-                            
-                            gatito.puntuaje = gatito.puntuaje + 100;     // El gatito obtiene 100 puntos
-
-
-                            // Mover el otro gatito en la dirección del empuje
-                            otroGatito.position.add(direccion.multiplyScalar(fuerzaEmpuje));
-                            // jugadorConVoto = otroGatito;  // Guardar al jugador con el voto
-                            console.log(`${gatito.user} le ha empujado a ${otroGatito.user}`);
-                            // console.log(`${otroGatito.user} tiene ahora el voto: ${otroGatito.voto}`);
-                            console.log(`${gatito.user} tiene ahora inmunidad: ${gatito.inmunidad}`);
-
-                        }
 
 
 
 
 
 
-                        // Si un gatito con "manotas" choca con otro
-                        if (distancia < 2 && gatito.manotas) {
-                            console.log(`${gatito.user} empuja a ${otroGatito.user}`);
 
-                            // Empujar al otro gatito
-                            const direccion = new THREE.Vector3().subVectors(
-                                otroGatito.position,
-                                gatito.position
-                            ).normalize();
-                            const fuerzaEmpuje = 15; // Ajusta la fuerza del empuje
 
-                            // Mover el otro gatito en la dirección del empuje
-                            otroGatito.position.add(direccion.multiplyScalar(fuerzaEmpuje));
-
-                            
-                            // Volver al modelo original si el gatito tiene manotas
+                        if (distancia < 2 && !otroGatito.inmunidad) {
                             if (gatito.manotas) {
-                            // Eliminar el modelo actual con manotas
-                            scene.remove(gatito);
+                                // Colisión con "manotas"
+                                gatito.puntuaje += 50;
+                                console.log(`${gatito.user} empuja a ${otroGatito.user} con manotas`);
 
-                            // Cargar el modelo original del gatito
-                            const loaderGLTF = new GLTFLoader();
-                            loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-                                const gatitoOriginal = gltf.scene;
-                                gatitoOriginal.scale.set(0.7, 0.7, 0.7);
-                                gatitoOriginal.position.copy(gatito.position); // Mantener la posición
-                                gatitoOriginal.rotation.y = gatito.rotation.y; // Mantener la rotación
-                                gatitoOriginal.user = gatito.user; // Mantener el nombre de usuario
-                                gatitoOriginal.name = gatito.name; // Mantener el nombre
-                                gatitoOriginal.manotas = false; // Marcar como gatito sin manotas
 
-                                scene.add(gatitoOriginal); // Añadir el modelo original al escenario
 
-                                // Reemplazar el modelo en el array de gatitos
-                                const index = gatitos.indexOf(gatito);
-                                if (index !== -1) {
-                                    gatitos[index] = gatitoOriginal; // Actualizar el gatito en el array
-                                }
-                            });
-                          }                        
+
+                                    // Volver al modelo original si el gatito tiene manotas
+                                    if (gatito.manotas) {
+                                    // Eliminar el modelo actual con manotas
+                                    scene.remove(gatito);
+
+                                    // Cargar el modelo original del gatito
+                                    const loaderGLTF = new GLTFLoader();
+                                    loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                                        const gatitoOriginal = gltf.scene;
+                                        gatitoOriginal.scale.set(0.7, 0.7, 0.7);
+                                        gatitoOriginal.position.copy(gatito.position); // Mantener la posición
+                                        gatitoOriginal.rotation.y = gatito.rotation.y; // Mantener la rotación
+                                        gatitoOriginal.user = gatito.user; // Mantener el nombre de usuario
+                                        gatitoOriginal.name = gatito.name; // Mantener el nombre
+                                        gatitoOriginal.manotas = false; // Marcar como gatito sin manotas
+                                        gatitoOriginal.puntuaje = gatito.puntuaje; // Marcar como gatito sin manotas
+                                        
+
+                                        scene.add(gatitoOriginal); // Añadir el modelo original al escenario
+
+                                        // Reemplazar el modelo en el array de gatitos
+                                        const index = gatitos.indexOf(gatito);
+                                        if (index !== -1) {
+                                            gatitos[index] = gatitoOriginal; // Actualizar el gatito en el array
+                                        }
+                                    });
+                                  }
+                            } else {
+                                // Colisión normal
+                                gatito.puntuaje += 10;
+                                console.log(`${gatito.user} empuja a ${otroGatito.user}`);
+                            }
+
+                            // Empujar al otro gatito
+                            const direccion = new THREE.Vector3().subVectors(
+                                otroGatito.position,
+                                gatito.position
+                            ).normalize();
+                            const fuerzaEmpuje = 15;
+
+                            otroGatito.position.add(direccion.multiplyScalar(fuerzaEmpuje));
+
+                            console.log(`${gatito.user} puntuaje ${gatito.puntuaje}`);
+                            console.log(`${otroGatito.user} puntuaje ${otroGatito.puntuaje}`);
                         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        //  // Si el gatito  toca a otro gatito y no tiene inmunidad
+                        // if (distancia < 2 && !otroGatito.inmunidad) {
+                        //     // Empujar al otro gatito
+                        //     const direccion = new THREE.Vector3().subVectors(
+                        //         otroGatito.position,
+                        //         gatito.position
+                        //     ).normalize();
+                        //     const fuerzaEmpuje = 15; // Ajusta la fuerza del empuje
+
+                        //     // Asignar puntos solo al gatito que realizó la acción
+                        //     gatito.puntuaje += 10; // El gatito que empujó obtiene los puntos
+
+                        //     // Mover al otro gatito en la dirección del empuje
+                        //     otroGatito.position.add(direccion.multiplyScalar(fuerzaEmpuje));
+
+                        //     console.log(`${gatito.user} le ha empujado a ${otroGatito.user}`);
+                        //     console.log(`${gatito.user} puntuajeeee ${gatito.puntuaje}`);
+                        //     console.log(`${otroGatito.user} puntuaje ${otroGatito.puntuaje}`);
+                        // }
+
+
+
+
+                        // // Si un gatito con "manotas" choca con otro
+                        // if (distancia < 2 && gatito.manotas && !otroGatito.inmunidad) {
+                        //     console.log(`${gatito.user} empuja a ${otroGatito.user}`);
+
+                        //     // Empujar al otro gatito
+                        //     const direccion = new THREE.Vector3().subVectors(
+                        //         otroGatito.position,
+                        //         gatito.position
+                        //     ).normalize();
+                        //     const fuerzaEmpuje = 15; // Ajusta la fuerza del empuje
+
+                        //     // Asignar puntos solo al gatito que realizó la acción
+                        //     gatito.puntuaje += 50; // El gatito que empujó obtiene los puntos
+
+                        //     // Mover al otro gatito en la dirección del empuje
+                        //     otroGatito.position.add(direccion.multiplyScalar(fuerzaEmpuje));
+
+                        //     console.log(`${gatito.user} le ha empujado a ${otroGatito.user}`);
+                        //     console.log(`${gatito.user} puntuajeeee ${gatito.puntuaje}`);
+                        //     console.log(`${otroGatito.user} puntuaje ${otroGatito.puntuaje}`);
+
+
+
+
+
+                            
+                          //   // Volver al modelo original si el gatito tiene manotas
+                          //   if (gatito.manotas) {
+                          //   // Eliminar el modelo actual con manotas
+                          //   scene.remove(gatito);
+
+                          //   // Cargar el modelo original del gatito
+                          //   const loaderGLTF = new GLTFLoader();
+                          //   loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                          //       const gatitoOriginal = gltf.scene;
+                          //       gatitoOriginal.scale.set(0.7, 0.7, 0.7);
+                          //       gatitoOriginal.position.copy(gatito.position); // Mantener la posición
+                          //       gatitoOriginal.rotation.y = gatito.rotation.y; // Mantener la rotación
+                          //       gatitoOriginal.user = gatito.user; // Mantener el nombre de usuario
+                          //       gatitoOriginal.name = gatito.name; // Mantener el nombre
+                          //       gatitoOriginal.manotas = false; // Marcar como gatito sin manotas
+                          //       // gatitoOriginal.puntuaje = gatito.puntuaje; // Marcar como gatito sin manotas
+                                
+
+                          //       scene.add(gatitoOriginal); // Añadir el modelo original al escenario
+
+                          //       // Reemplazar el modelo en el array de gatitos
+                          //       const index = gatitos.indexOf(gatito);
+                          //       if (index !== -1) {
+                          //           gatitos[index] = gatitoOriginal; // Actualizar el gatito en el array
+                          //       }
+                          //   });
+                          // }                        
+                        // }
                     }
                 });
             });
