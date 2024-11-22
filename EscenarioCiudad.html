@@ -10,6 +10,8 @@
 
     <div id="icon-container">
       <img src="front/UI/Points.png" alt="Esc1" class="menu-button" id="escenario-1"/>
+      <p id="contador">00:00</p>
+      <p id="puntuaje">0</p>
       <!-- <img src="front/UI/Power.png" alt="Esc2" class="menu-button" id="escenario-2"/> -->
       <a href="PauseMenu.html">
         <img src="front/UI/Pause_button.png" alt="Pause" class="menu-button" id="escenario-3"/>
@@ -73,6 +75,7 @@
       let currentUser = null;
       const latas = [];
       const manotas = [];
+      const mouses = [];
       const colisiones = [];
       const gatitos = []; // Lista para almacenar todos los gatitos
       let gatitoManotasModel; // Variable global para el modelo GatitoManotas
@@ -90,6 +93,10 @@
       let startGame = false;
 
       const tiempoActual = Date.now(); // Obtener el tiempo actual en milisegundos
+      let tiempoInicio = null;  // Variable para almacenar el tiempo de inicio
+      let tiempoLimite = 1 * 60 * 1000; // 5 minutos en milisegundos (5 * 60 * 1000)
+      let isTiempoFinalizado = false; // Flag para detener el contador
+
 
 
 
@@ -155,7 +162,7 @@
                     gatito.rotation.y = value.rotacion?.y || 0;
                     gatito.user = value.nombre;
                     gatito.name = key;
-                    //gatito.voto = false;
+                    gatito.puntuaje = 0;
                     gatito.manotas = false;
                     scene.add(gatito);
                     gatitos.push(gatito); // Agrega el gatito a la lista
@@ -176,7 +183,7 @@
           });
       }
 
-
+        //Ciudad
         const loaderCity = new GLTFLoader();
         loaderCity.load("/Modelos/Ciudad-PIA.glb", function (model) {
             const CityModel = model.scene;
@@ -185,39 +192,40 @@
             scene.add(CityModel);
         });
 
-        //Latas
-        const loaderCan = new GLTFLoader();
-        function cargarLata(x, y, z) {
-            loaderCan.load("/Modelos/Lata-PIA.glb", function (model) {
-                const canModel = model.scene;
-                canModel.name = "Lata"; // Establecer nombre para identificar
-                canModel.scale.set(1, 1, 1);
-                canModel.position.set(x, y, z);
-                scene.add(canModel);
-                latas.push(canModel);
-            });
+        function cargarModelos(){
+            //Latas
+            const loaderCan = new GLTFLoader();
+            function cargarLata(x, y, z) {
+                loaderCan.load("/Modelos/Lata-PIA.glb", function (model) {
+                    const canModel = model.scene;
+                    canModel.name = "Lata"; // Establecer nombre para identificar
+                    canModel.scale.set(1, 1, 1);
+                    canModel.position.set(x, y, z);
+                    scene.add(canModel);
+                    latas.push(canModel);
+                });
+            }
+
+            cargarLata(25, 0, 50);
+            cargarLata(15, 0, -30);
+
+            //Manotas
+            const loaderManotas = new GLTFLoader();
+            function cargarManotas(x, y, z) {
+                loaderManotas.load("/Modelos/Manotas-PIA.glb", function (model) {
+                    const manotasModel = model.scene;
+                    manotasModel.name = "Manotas"; // Establecer nombre para identificar
+                    manotasModel.scale.set(1, 1, 1);
+                    manotasModel.position.set(x, y, z);
+                    scene.add(manotasModel);
+                    manotas.push(manotasModel);
+                });
+            }
+
+            cargarManotas(-50, 2, -55);
+            cargarManotas(-19, 2, 20);
         }
 
-        cargarLata(25, 0, 50);
-        cargarLata(15, 0, -30);
-        cargarLata(62, 0.5, -34);
-        cargarLata(-46, 0.5, 27);
-
-        //Manotas
-        const loaderManotas = new GLTFLoader();
-        function cargarManotas(x, y, z) {
-            loaderManotas.load("/Modelos/Manotas-PIA.glb", function (model) {
-                const manotasModel = model.scene;
-                manotasModel.name = "Manotas"; // Establecer nombre para identificar
-                manotasModel.scale.set(1, 1, 1);
-                manotasModel.position.set(x, y, z);
-                scene.add(manotasModel);
-                manotas.push(manotasModel);
-            });
-        }
-
-        cargarManotas(-50, 2, -55);
-        cargarManotas(-19, 2, 20);
 
 
         // Carga del modelo GatitoManotas
@@ -228,6 +236,21 @@
             console.log("GatitoManotas cargado", gatitoManotasModel); // Verifica que el modelo se cargó
         });
 
+
+        //Ratón
+        const loaderMouse = new GLTFLoader();
+        function cargarMouse(x, y, z) {
+          loaderMouse.load("/Modelos/Mouse.glb", function (model) {
+            const mouseModel = model.scene;
+            mouseModel.name = "Manotas"; // Establecer nombre para identificar
+            mouseModel.scale.set(1, 1, 1);
+            mouseModel.position.set(x, y, z);
+            scene.add(mouseModel);
+            mouses.push(mouseModel);
+          });
+        }
+
+        cargarMouse(-15, 1, 40);
 
 
 
@@ -348,10 +371,72 @@
                 }
 
 
+
+                    // Verificar colisión con el ratón
+                    mouses.forEach((mouse, index) => {
+                    const distancia = gatitoPos.distanceTo(mouse.position);
+
+                    if (distancia < 3) { // Ajusta el valor según el tamaño del ratón
+                        scene.remove(mouse); // Eliminar del escenario
+                        mouses.splice(index, 1); // Eliminar del array
+                        console.log("Ratón recogido");
+                        
+                        // Asignar el voto y comenzar el juego
+                        // Solo asignar el voto al primer gatito que lo recoja
+                        // if (!primerJugador) {  // Verifica si ya se asignó el voto
+                        //     gatito.voto = true;  // Asignar voto al gatito
+                        //     startGame = true;    // Comenzar el juego
+
+                            // primerJugador = gatito; // Guardar al primer jugador con el voto
+                            // jugadorConVoto = primerJugador;
+                            // console.log(`${gatito.user} tiene el voto: ${gatito.voto}`);  // Mostrar nombre y voto del gatito
+                            iniciarJuego();      // Llama a una función que comience el juego
+                            cargarModelos();
+                             // Crear la partícula en la posición del gatito
+                            // crearParticula(gatito.position); 
+                        // }                    
+                      }
+                });
+
+
+
+
+
                 // Verificar colisión con otros gatitos
                 gatitos.forEach((otroGatito) => {
                     if (gatito !== otroGatito) {
                         const distancia = gatitoPos.distanceTo(otroGatito.position);
+
+                         // Si el gatito  toca a otro gatito y no tiene inmunidad
+                         if (distancia < 2 && !otroGatito.inmunidad) {
+                            
+                            // Activar inmunidad para el gatito que recibió el voto durante 3 segundos
+                            // gatito.inmunidad = true;
+                            // gatito.tiempoInmunidad = tiempoActual;  // Registrar el momento en que la inmunidad se activa
+
+                            // Empujar al otro gatito
+                            const direccion = new THREE.Vector3().subVectors(
+                                otroGatito.position,
+                                gatito.position
+                            ).normalize();
+                            const fuerzaEmpuje = 15; // Ajusta la fuerza del empuje
+                            
+                            gatito.puntuaje = gatito.puntuaje + 100;     // El gatito obtiene 100 puntos
+
+
+                            // Mover el otro gatito en la dirección del empuje
+                            otroGatito.position.add(direccion.multiplyScalar(fuerzaEmpuje));
+                            // jugadorConVoto = otroGatito;  // Guardar al jugador con el voto
+                            console.log(`${gatito.user} le ha empujado a ${otroGatito.user}`);
+                            // console.log(`${otroGatito.user} tiene ahora el voto: ${otroGatito.voto}`);
+                            console.log(`${gatito.user} tiene ahora inmunidad: ${gatito.inmunidad}`);
+
+                        }
+
+
+
+
+
 
                         // Si un gatito con "manotas" choca con otro
                         if (distancia < 2 && gatito.manotas) {
@@ -400,13 +485,50 @@
         }
 
 
-        // *** JUGABILIDAD VOTO *** //
+        // *** JUGABILIDAD EMPUJE *** //
         // Función para iniciar el juego
         function iniciarJuego() {
               // Lógica para iniciar el juego
+              tiempoInicio = Date.now();  // Establecer el tiempo de inicio
+
             console.log("El juego ha comenzado");
               // Aquí puedes agregar cualquier lógica adicional que inicie el juego
         }
+
+
+        // Función para verificar si han pasado 5 minutos y el último jugador con voto pierde
+        function verificarTiempo() {
+            if (tiempoInicio !== null && !isTiempoFinalizado) {
+              const tiempoTranscurrido = Date.now() - tiempoInicio;
+
+            //   if (tiempoTranscurrido >= tiempoLimite) {
+            //     // console.log(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
+            //     isTiempoFinalizado = true; // Detenemos el contador
+
+            //     // Abrir el modal con el nombre del jugador
+            //     abrirModal(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
+            //   }
+
+              // Calcular el tiempo restante
+              const tiempoRestante = tiempoLimite - tiempoTranscurrido;
+
+              if (tiempoRestante <= 0) {
+                document.getElementById('contador').textContent = "00:00";
+                isTiempoFinalizado = true; // Detener el contador
+                // abrirModal(`${jugadorConVoto.user} ha perdido el juego porque fue el último con el voto.`);
+                return; // Detener la ejecución de la función
+              }
+
+              // Calcular minutos y segundos
+              const minutos = Math.floor(tiempoRestante / 60000);
+              const segundos = Math.floor((tiempoRestante % 60000) / 1000);
+
+              // Mostrar el tiempo restante
+              const contadorElement = document.getElementById('contador');
+              contadorElement.textContent = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+            }
+          }
+
 
 
         // *** POWER UPS *** //
@@ -537,7 +659,7 @@
         detectarColisiones();
         verificarColisiones();
 
-        
+        verificarTiempo();
 
         updateCameraPosition();
 
