@@ -164,7 +164,7 @@
             if (usuariosData) {
               Object.entries(usuariosData).forEach(([key, value]) => {
                 // Depuración: Ver qué escenario tiene el usuario en Firebase
-                console.log(`Escenario de Firebase para el usuario ${key}: ${value.escenarioSeleccionado}`);
+                // console.log(`Escenario de Firebase para el usuario ${key}: ${value.escenarioSeleccionado}`);
 
                 // Solo cargar el modelo si el escenario del usuario en Firebase es "Bosque" y no se ha cargado aún
                 if (value.escenarioSeleccionado === "Bosque" && !objetosCargados.has(key)) {
