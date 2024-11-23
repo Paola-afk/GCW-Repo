@@ -41,7 +41,7 @@
       // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
       import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-      import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      import { getDatabase, ref, set, onValue, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
       // Your web app's Firebase configuration
       const firebaseConfig = {
@@ -107,7 +107,16 @@
       let tiempoLimite = 1 * 60 * 1000; // 5 minutos en milisegundos (5 * 60 * 1000)
       let isTiempoFinalizado = false; // Flag para detener el contador
 
+      // Recuperar datos del usuario desde el localStorage
+       // Recuperar datos del usuario desde el localStorage
+    const usuarioData = localStorage.getItem("usuario");
+    const usuario = usuarioData ? JSON.parse(usuarioData) : null;
 
+      if (usuario) {
+        console.log('Usuario recuperado desde localStorage:', usuario);
+    } else {
+        console.error('No se encontró información del usuario en localStorage.');
+    }
 
 
       // Autentifica el usuario
@@ -117,10 +126,34 @@
               console.log("Usuario autenticado:", currentUser.uid);
 
               console.log(currentUser);
+              // Manejar la conexión y desconexión
+            handleUserConnection(currentUser.uid);
           } else {
               console.log("No hay usuario autenticado.");
           }
       });
+
+      // Manejar conexión y desconexión del usuario
+    function handleUserConnection(userId) {
+        const connectedRef = ref(db, ".info/connected");
+        const userRef = ref(db, `usuarios/${userId}`);
+
+        onValue(connectedRef, (snapshot) => {
+            const conectado = snapshot.val();
+
+            if (conectado) {
+                console.log("Cliente conectado a Firebase.");
+
+                // Marcar al usuario como conectado
+                update(userRef, { conectado: true });
+
+                // Configurar onDisconnect para marcar al usuario como desconectado
+                onDisconnect(userRef).update({ conectado: false });
+            } else {
+                console.log("Cliente desconectado de Firebase.");
+            }
+        });
+    }
 
       // Función para actualizar solo la posición sin perder los otros datos del usuario
       function writeUserData(userId, positionX, positionY, positionZ, rotationY) {
@@ -138,11 +171,7 @@
         }
 
         // Recuperar el valor del "usuario" de localStorage
-        const usuarioData = localStorage.getItem("usuario");
-
-        // Parsear el JSON para obtener los datos como un objeto
-        const usuario = JSON.parse(usuarioData);
-
+        
         // Obtener el escenario seleccionado
         const escenarioSeleccionado = usuario.escenarioSeleccionado;
         const nombreJugador = usuario.nombre;
@@ -153,50 +182,59 @@
         const objetosCargados = new Map();
 
         if (escenarioSeleccionado === "Ciudad") {
-          // Obtener los datos de usuarios desde Firebase
-          const usuariosRef = ref(db, "usuarios");
+    // Obtener los datos de usuarios desde Firebase
+    const usuariosRef = ref(db, "usuarios");
 
-          onValue(usuariosRef, (snapshot) => {
-            const usuariosData = snapshot.val();
-            if (usuariosData) {
-              Object.entries(usuariosData).forEach(([key, value]) => {
-                // Depuración: Ver qué escenario tiene el usuario en Firebase
-                // console.log(`Escenario de Firebase para el usuario ${key}: ${value.escenarioSeleccionado}`);
+    onValue(usuariosRef, (snapshot) => {
+        const usuariosData = snapshot.val();
+        if (usuariosData) {
+            Object.entries(usuariosData).forEach(([key, value]) => {
+                // Solo cargar el modelo si el escenario del usuario en Firebase es "Ciudad"
+                if (value.escenarioSeleccionado === "Ciudad") {
+                    if (!objetosCargados.has(key)) {
+                        // Cargar el modelo del gatito si no existe en el mapa
+                        const loaderGLTF = new GLTFLoader();
+                        loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
+                            const gatito = gltf.scene;
+                            gatito.scale.set(0.7, 0.7, 0.7);
+                            gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                            gatito.rotation.y = value.rotacion?.y || 0;
+                            gatito.user = value.nombre;
+                            gatito.name = key;
+                            gatito.puntuaje = 0;
+                            gatito.manotas = false;
+                            gatito.inmunidad = false;
+                            scene.add(gatito);
+                            gatitos.push(gatito); // Agrega el gatito a la lista
 
-                // Solo cargar el modelo si el escenario del usuario en Firebase es "Ciudad" y no se ha cargado aún
-                if (value.escenarioSeleccionado === "Ciudad" && !objetosCargados.has(key)) {
-                  // Cargar el modelo del gatito solo si no existe en el mapa
-                  const loaderGLTF = new GLTFLoader();
-                  loaderGLTF.load("/Modelos/Gatito-Grande.glb", function (gltf) {
-                    const gatito = gltf.scene;
-                    gatito.scale.set(0.7, 0.7, 0.7);
-                    gatito.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                    gatito.rotation.y = value.rotacion?.y || 0;
-                    gatito.user = value.nombre;
-                    gatito.name = key;
-                    gatito.puntuaje = 0;
-                    gatito.manotas = false;
-                    gatito.inmunidad = false;
-                    scene.add(gatito);
-                    gatitos.push(gatito); // Agrega el gatito a la lista
-
-                    // Almacenar el modelo en el mapa
-                    objetosCargados.set(key, gatito);
-                  });
-                } else if (objetosCargados.has(key)) {
-                  // Si el modelo ya existe, se actualizan su posición y rotación
-                  const usuarioModelo = objetosCargados.get(key);
-                  usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
-                  usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
+                            // Almacenar el modelo en el mapa
+                            objetosCargados.set(key, gatito);
+                        });
+                    } else {
+                        // Si el modelo ya existe, actualizamos posición y rotación
+                        const usuarioModelo = objetosCargados.get(key);
+                        usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
+                        usuarioModelo.rotation.y = value.rotacion?.y || 0;
+                    }
                 }
-              });
-            } else {
-              console.log("No hay datos de usuarios en Firebase.");
-            }
-          });
+
+                // Manejar la desconexión del usuario
+                if (!value.conectado && objetosCargados.has(key)) {
+                    // Si el usuario ya no está conectado, eliminar su modelo de la escena
+                    const modeloDesconectado = objetosCargados.get(key);
+                    scene.remove(modeloDesconectado); // Remover de la escena
+                    objetosCargados.delete(key); // Remover del mapa
+                    console.log(`Usuario ${key} eliminado de la escena por desconexión.`);
+                }
+            });
         } else {
-          console.log("El escenario seleccionado no es Ciudad. No se cargarán modelos.");
+            console.log("No hay datos de usuarios en Firebase.");
         }
+    });
+} else {
+    console.log("El escenario seleccionado no es Ciudad. No se cargarán modelos.");
+}
+
 
 
 
