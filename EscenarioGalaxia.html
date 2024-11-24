@@ -82,6 +82,11 @@
 
 
       // *** VARIABLES GLOBALES *** //
+
+      let enemigoIA; // Variable para almacenar el modelo del enemigo
+      const velocidadEnemigo = 0.3; // Velocidad de movimiento del enemigo
+      
+
       let currentUser = null;
       const latas = [];
       const manotas = [];
@@ -244,6 +249,17 @@
             cargarManotas(-19, 2, 15);
         }
 
+
+        function cargarEnemigoIA() {
+    const loaderEnemigo = new GLTFLoader();
+    loaderEnemigo.load("/Modelos/Alien.glb", function (model) {
+        enemigoIA = model.scene;
+        enemigoIA.name = "enemigoIA";
+        enemigoIA.scale.set(0.7, 0.7, 0.7); // Ajusta la escala según necesites
+        enemigoIA.position.set(0, 0, 0); // Posición inicial
+        scene.add(enemigoIA);
+    });
+}
 
         //Ratón
         const loaderMouse = new GLTFLoader();
@@ -432,7 +448,7 @@
         function iniciarJuego() {
               // Lógica para iniciar el juego
               tiempoInicio = Date.now();  // Establecer el tiempo de inicio
-
+              cargarEnemigoIA(); // Cargar el enemigo al iniciar el juego
             console.log("El juego ha comenzado");
               // Aquí puedes agregar cualquier lógica adicional que inicie el juego
         }
@@ -443,6 +459,75 @@
             const puntajeElemento = document.getElementById("puntuaje");
             puntajeElemento.textContent = `${puntuaje}`;
         }
+
+
+        function actualizarEnemigoIA() {
+    if (!enemigoIA || !startGame) return;
+
+    let jugadorMasCercano = null;
+    let distanciaMinima = Infinity;
+
+    // Encontrar el jugador más cercano
+    gatitos.forEach((gatito) => {
+        if (!gatito.inmunidad) {
+            const distancia = new THREE.Vector2(
+                enemigoIA.position.x - gatito.position.x,
+                enemigoIA.position.z - gatito.position.z
+            ).length();
+            
+            if (distancia < distanciaMinima) {
+                distanciaMinima = distancia;
+                jugadorMasCercano = gatito;
+            }
+        }
+    });
+
+    // Si encontramos un jugador para perseguir
+    if (jugadorMasCercano) {
+        // Calcular dirección hacia el jugador (solo en X y Z)
+        const direccion = new THREE.Vector3(
+            jugadorMasCercano.position.x - enemigoIA.position.x,
+            0, // Mantenemos Y en 0
+            jugadorMasCercano.position.z - enemigoIA.position.z
+        );
+        direccion.normalize();
+
+        // Mover el enemigo
+        enemigoIA.position.x += direccion.x * velocidadEnemigo;
+        enemigoIA.position.z += direccion.z * velocidadEnemigo;
+
+        // Rotar el enemigo hacia el jugador
+        const angulo = Math.atan2(direccion.x, direccion.z);
+        enemigoIA.rotation.y = angulo;
+
+        // Verificar colisión con el jugador
+        if (distanciaMinima < 2) { // Ajusta este valor según el tamaño de tus modelos
+            // Si el jugador no tiene inmunidad, pierde puntos
+            if (!jugadorMasCercano.inmunidad) {
+                jugadorMasCercano.puntuaje = Math.max(0, jugadorMasCercano.puntuaje - 20);
+                
+                if (jugadorMasCercano.user === nombreJugador) {
+                    actualizarPuntaje(jugadorMasCercano.puntuaje);
+                }
+
+                // Empujar al jugador lejos del enemigo (solo en X y Z)
+                const empuje = new THREE.Vector3(
+                    direccion.x * 5,
+                    0, // No aplicamos empuje vertical
+                    direccion.z * 5
+                );
+                
+                // Mantener la altura Y original del jugador
+                const alturaOriginal = jugadorMasCercano.position.y;
+                jugadorMasCercano.position.add(empuje);
+                jugadorMasCercano.position.y = alturaOriginal;
+
+                // Crear efecto de partículas al golpear
+                crearMultiplesParticulasConSeparacion(jugadorMasCercano.position);
+            }
+        }
+    }
+}
 
 
         // Función para verificar si han pasado 5 minutos y el último jugador con voto pierde
@@ -694,6 +779,11 @@ function crearMultiplesParticulasConSeparacion(posicionBase) {
         verificarColisiones();
 
         verificarTiempo();
+
+
+        if (startGame && enemigoIA) {
+        actualizarEnemigoIA(); // Actualizar la IA del enemigo
+    }
 
         // Rotar cada modelo en el eje Y
         mouses.forEach((mouseModel) => {
