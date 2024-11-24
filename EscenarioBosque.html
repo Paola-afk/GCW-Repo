@@ -40,7 +40,7 @@
       // Import the functions you need from the SDKs you need
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
       import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js";
-      import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+      import { getDatabase, ref, set, onValue, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
       // Your web app's Firebase configuration
       const firebaseConfig = {
@@ -115,15 +115,39 @@
 
       // Autentifica el usuario
       onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            console.log("Usuario autenticado:", currentUser.uid);
+          if (user) {
+              currentUser = user;
+              console.log("Usuario autenticado:", currentUser.uid);
 
-            console.log(currentUser);
-        } else {
-            console.log("No hay usuario autenticado.");
-        }
+              console.log(currentUser);
+              // Manejar la conexión y desconexión
+            handleUserConnection(currentUser.uid);
+          } else {
+              console.log("No hay usuario autenticado.");
+          }
       });
+
+      // Manejar conexión y desconexión del usuario
+    function handleUserConnection(userId) {
+        const connectedRef = ref(db, ".info/connected");
+        const userRef = ref(db, `usuarios/${userId}`);
+
+        onValue(connectedRef, (snapshot) => {
+            const conectado = snapshot.val();
+
+            if (conectado) {
+                console.log("Cliente conectado a Firebase.");
+
+                // Marcar al usuario como conectado
+                update(userRef, { conectado: true });
+
+                // Configurar onDisconnect para marcar al usuario como desconectado
+                onDisconnect(userRef).update({ conectado: false });
+            } else {
+                console.log("Cliente desconectado de Firebase.");
+            }
+        });
+    }
 
       // Función para actualizar solo la posición sin perder los otros datos del usuario
       function writeUserData(userId, positionX, positionY, positionZ, rotationY) {
@@ -192,6 +216,15 @@
                   usuarioModelo.position.set(value.posicion.x, value.posicion.y, value.posicion.z);
                   usuarioModelo.rotation.y = value.rotacion?.y || 0; // Actualizar la rotación en Y
                 }
+
+                // Manejar la desconexión del usuario
+                if (!value.conectado && objetosCargados.has(key)) {
+                            // Si el usuario ya no está conectado, eliminar su modelo de la escena
+                            const modeloDesconectado = objetosCargados.get(key);
+                            scene.remove(modeloDesconectado); // Remover de la escena
+                            objetosCargados.delete(key); // Remover del mapa
+                            console.log(`Usuario ${key} eliminado de la escena por desconexión.`);
+                        }
               });
             } else {
               console.log("No hay datos de usuarios en Firebase.");

@@ -48,7 +48,7 @@
             FB.api(
                 "/404505349416260/feed", 
                 "GET", 
-                { access_token: "EAAcH3cqj1yMBOy910o91wgifmaJ7KlPgQN0ZBHBbalCNsbgVKzaZAf2GTb6O9srVImuLDFDLj94m745cnpsU7XWUxsmuQRDhcjekjr16FZAsC3bDLX8tgwqmSWVHhZC1dslw8MGscrSJN9Dx0UmHlJluScb7irkNtJlR2E7qZC5ZBfJNNs8GBnLOkyE98fvWgOHFyCSPJQd1cyIIn2N9aFDWzgYaZCWSvAt" },
+                { access_token: "EAA2osrISxCYBO39KhexPL1dnyQp1qrqLI9ene9womVkGBQN0LqZC5v8iSNaYImQhpbQ5BJtDIAI0rqq1xRlZCMBgcM5ZB9052x7MLWBSD2EiBPc402dZAFx3gWq7lRejg7ROVtfuFu6W6Y1dqsIz9kl8IYtDLdJXdMZAcZCZAnButapNCnYlZAw60OYiIZBYriZCcQseABrgIpRCxA0OvlLZCI6r3l2dim7IbmipgZDZD" },
                 function(response) {
                     if (response && !response.error) {
                         console.log("Comentarios obtenidos:", response.data);
@@ -82,15 +82,16 @@
                     "POST", 
                     {
                         message: message,
-                        access_token: "EAAcH3cqj1yMBOy910o91wgifmaJ7KlPgQN0ZBHBbalCNsbgVKzaZAf2GTb6O9srVImuLDFDLj94m745cnpsU7XWUxsmuQRDhcjekjr16FZAsC3bDLX8tgwqmSWVHhZC1dslw8MGscrSJN9Dx0UmHlJluScb7irkNtJlR2E7qZC5ZBfJNNs8GBnLOkyE98fvWgOHFyCSPJQd1cyIIn2N9aFDWzgYaZCWSvAt"
+                        access_token: "EAA2osrISxCYBO39KhexPL1dnyQp1qrqLI9ene9womVkGBQN0LqZC5v8iSNaYImQhpbQ5BJtDIAI0rqq1xRlZCMBgcM5ZB9052x7MLWBSD2EiBPc402dZAFx3gWq7lRejg7ROVtfuFu6W6Y1dqsIz9kl8IYtDLdJXdMZAcZCZAnButapNCnYlZAw60OYiIZBYriZCcQseABrgIpRCxA0OvlLZCI6r3l2dim7IbmipgZDZD"
                     },
                     function(response) {
                         if (response && !response.error) {
-                            console.log('Comentario enviado:', response);
-                            // Limpiar el campo de comentario
-                            document.getElementById('comment').value = '';
+                            console.log('Comentario enviado exitosamente:', response);
+                            alert("¡Comentario enviado exitosamente!");
+                            document.getElementById('comment').value = ''; // Limpiar campo
                         } else {
-                            console.log('Error al enviar el comentario:', response.error);
+                            console.error('Error al enviar comentario:', response.error);
+                            alert(`Error al enviar comentario: ${response.error.message}`);
                         }
                     }
                 );
