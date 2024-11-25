@@ -84,7 +84,7 @@
       // *** VARIABLES GLOBALES *** //
 
       let enemigoIA; // Variable para almacenar el modelo del enemigo
-      const velocidadEnemigo = 0.3; // Velocidad de movimiento del enemigo
+      const velocidadEnemigo = 0.1; // Velocidad de movimiento del enemigo
       
 
       let currentUser = null;
@@ -466,9 +466,17 @@
 
     let jugadorMasCercano = null;
     let distanciaMinima = Infinity;
+    const tiempoActual = Date.now();
 
     // Encontrar el jugador más cercano
     gatitos.forEach((gatito) => {
+        // Verificar si la inmunidad ha expirado
+        if (gatito.inmunidad && (tiempoActual - gatito.tiempoInmunidad > tiempoInmunidad)) {
+            gatito.inmunidad = false; // Quitar la inmunidad
+            console.log(`${gatito.user} ha perdido la inmunidad`);
+        }
+
+        // Si no tiene inmunidad, considerar como objetivo
         if (!gatito.inmunidad) {
             const distancia = new THREE.Vector2(
                 enemigoIA.position.x - gatito.position.x,
